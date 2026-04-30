@@ -1,0 +1,14 @@
+{
+  "name": "delta240-kurczok-runner",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "build": "node scripts/build.mjs",
+    "deploy": "wrangler pages deploy dist --project-name delta240-com"
+  },
+  "devDependencies": {
+    "wrangler": "^4.14.1"
+  }
+}
