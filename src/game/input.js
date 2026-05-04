@@ -167,6 +167,7 @@ export function createInputController(options = {}) {
 
   function handlePointerDown(event) {
     event.preventDefault?.();
+    if (activePointerId !== null) return;
     activePointerId = pointerId(event);
     setAimFromEvent(event);
     canvas?.setPointerCapture?.(event.pointerId);

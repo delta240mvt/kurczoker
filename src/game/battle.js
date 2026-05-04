@@ -1,4 +1,5 @@
 import { ABILITY_IDS, ACTOR_KINDS, ACTOR_TEAMS, ARTIFACT_IDS, BATTLE_PHASES, CANVAS, TUNING } from "./constants.js";
+import { getAbilityById } from "./abilities.js";
 import { circleHitsRect, clamp, rectsOverlap, resolveExplosion, stepProjectile } from "./physics.js";
 
 const DEFAULT_WIDTH = CANVAS.WIDTH;
@@ -47,6 +48,10 @@ function summonTtlMs(ability) {
   }
 
   return ability.ttl ?? DEFAULT_SUMMON_TTL;
+}
+
+function selectedAbility(input) {
+  return input.ability ?? getAbilityById(input.selectedAbilityId ?? ABILITY_IDS.EGG_BOMB) ?? { id: ABILITY_IDS.EGG_BOMB };
 }
 
 function shieldBlocksProjectile(battle, actors, projectile, impact) {
@@ -274,7 +279,7 @@ export function updateBattle(battle, input = {}, delta = 16) {
 
   if (next.phase === BATTLE_PHASES.PLAYER_TURN) {
     if (input.firePressed) {
-      return firePlayerAbility(next, input.ability ?? { id: input.selectedAbilityId ?? ABILITY_IDS.EGG_BOMB }, input.aim);
+      return firePlayerAbility(next, selectedAbility(input), input.aim);
     }
 
     const remaining = Math.max(0, (next.turnTimeRemainingMs ?? next.turnDurationMs) - delta);

@@ -95,6 +95,28 @@ test("input updates aim and queues action during normal pointer gestures", () =>
   assert.equal(input.consumeAction(), false);
 });
 
+test("input keeps the first active pointer from being hijacked by another pointer", () => {
+  const target = createEventTarget();
+  const canvas = createCanvas();
+  const input = createInputController({ target, canvas });
+
+  canvas.listeners.get("pointerdown")(pointerEvent({ pointerId: 1, clientX: 480, clientY: 270 }));
+  assert.deepEqual(input.snapshot.aim, { x: 480, y: 270 });
+
+  canvas.listeners.get("pointerdown")(pointerEvent({ pointerId: 2, clientX: 700, clientY: 300 }));
+  canvas.listeners.get("pointermove")(pointerEvent({ pointerId: 2, clientX: 720, clientY: 320 }));
+  canvas.listeners.get("pointerup")(pointerEvent({ pointerId: 2, clientX: 740, clientY: 340 }));
+
+  assert.deepEqual(input.snapshot.aim, { x: 480, y: 270 });
+  assert.equal(input.consumeAction(), false);
+
+  canvas.listeners.get("pointerup")(pointerEvent({ pointerId: 1, clientX: 120, clientY: 80 }));
+
+  assert.deepEqual(input.snapshot.aim, { x: 120, y: 80 });
+  assert.equal(input.consumeAction(), true);
+  assert.equal(input.consumeAction(), false);
+});
+
 test("input queues keyboard action once per key press", () => {
   const target = createEventTarget();
   const canvas = createCanvas();

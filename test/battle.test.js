@@ -78,6 +78,37 @@ test("firePlayerAbility allows only one fired action per player turn", () => {
   assert.equal(second.projectiles.length, 1);
 });
 
+test("updateBattle resolves egg bomb stats from selectedAbilityId", () => {
+  const ability = getAbilityById(ABILITY_IDS.EGG_BOMB);
+  const battle = createBattleState({ actors: [player(), enemy()] });
+
+  const fired = updateBattle(
+    battle,
+    { firePressed: true, selectedAbilityId: ABILITY_IDS.EGG_BOMB, aim: { x: 1, y: 0 } },
+    16
+  );
+
+  assert.equal(fired.projectiles.length, 1);
+  assert.equal(fired.projectiles[0].damage, ability.damage);
+  assert.equal(fired.projectiles[0].explosionRadius, ability.radius);
+});
+
+test("updateBattle resolves guard chick stats from selectedAbilityId", () => {
+  const ability = getAbilityById(ABILITY_IDS.GUARD_CHICK);
+  const battle = createBattleState({ actors: [player(), enemy()] });
+
+  const fired = updateBattle(
+    battle,
+    { firePressed: true, selectedAbilityId: ABILITY_IDS.GUARD_CHICK, aim: { x: 1, y: 0 } },
+    16
+  );
+  const summon = fired.actors.find((actor) => actor.kind === "summon");
+
+  assert.equal(fired.phase, BATTLE_PHASES.ENEMY_TURN);
+  assert.equal(summon.health, ability.health ?? 1);
+  assert.equal(summon.ttl, ability.summonTtl * 1000);
+});
+
 test("updateBattle resolves projectile explosions against enemies", () => {
   const battle = firePlayerAbility(
     createBattleState({ actors: [player(), enemy({ x: 55 })], groundY: 100, gravity: 0 }),

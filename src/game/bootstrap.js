@@ -234,6 +234,7 @@ export function mountKurczokerGame(root = globalThis.document) {
   }
 
   function restart() {
+    input?.consumeAction?.();
     startFreshRun();
   }
 
@@ -279,7 +280,7 @@ export function mountKurczokerGame(root = globalThis.document) {
         };
         if (actionPressed && previousPhase === BATTLE_PHASES.PLAYER_TURN) playEffect(audio, "shoot");
         state = stateAfterBattle(state, audio);
-      } else if ([SCENES.MAP, SCENES.REWARD].includes(state.scene)) {
+      } else if ([SCENES.MAP, SCENES.REWARD, SCENES.GAME_OVER, SCENES.RUN_COMPLETE].includes(state.scene)) {
         if (input.consumeAction()) startOrAdvance(input.snapshot.aim);
       }
     }
