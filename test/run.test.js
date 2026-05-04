@@ -1,0 +1,120 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+
+import { ABILITY_IDS, ARTIFACT_IDS, NODE_TYPES, SCENES, TUNING } from "../src/game/constants.js";
+import { getNodeById } from "../src/game/map.js";
+import {
+  applyRunReward,
+  completeCurrentNode,
+  markRunDefeated,
+  markRunComplete,
+  selectMapNode,
+  startRun
+} from "../src/game/run.js";
+
+function firstNodeOfType(state, type) {
+  return state.map.nodes.find((node) => node.type === type && node.id !== "start");
+}
+
+test("selectMapNode moves to an offered battle node and starts battle scene", () => {
+  const state = startRun(8);
+  const nodeId = state.run.offeredNodeIds[0];
+  const node = getNodeById(state.map, nodeId);
+  const next = selectMapNode(state, nodeId);
+
+  assert.equal(next.run.currentNodeId, nodeId);
+  assert.equal(next.scene, SCENES.BATTLE);
+  assert.equal(next.battle.nodeId, nodeId);
+  assert.equal(next.battle.encounterId, node.payload.encounterId);
+});
+
+test("completeCurrentNode completes battle and offers reward choices", () => {
+  const selected = selectMapNode(startRun(8), startRun(8).run.offeredNodeIds[0]);
+  const next = completeCurrentNode(selected);
+
+  assert.equal(next.scene, SCENES.REWARD);
+  assert.equal(next.battle, null);
+  assert.ok(next.run.completedNodeIds.includes(selected.run.currentNodeId));
+  assert.ok(next.rewardChoices.length >= 1);
+});
+
+test("applyRunReward adds reward and returns to map with next offered nodes", () => {
+  const selected = selectMapNode(startRun(8), startRun(8).run.offeredNodeIds[0]);
+  const rewarded = completeCurrentNode(selected);
+  const next = applyRunReward(rewarded, {
+    id: ARTIFACT_IDS.SHELL_SHIELD,
+    type: "artifact",
+    label: "Shell Shield",
+    value: 1
+  });
+
+  assert.equal(next.scene, SCENES.MAP);
+  assert.deepEqual(next.rewardChoices, []);
+  assert.ok(next.run.artifacts.includes(ARTIFACT_IDS.SHELL_SHIELD));
+  assert.ok(next.run.offeredNodeIds.length > 0);
+});
+
+test("applyRunReward supports ability, heal, and gold reward types", () => {
+  const state = startRun(8);
+  const damaged = { ...state, run: { ...state.run, health: 1 } };
+  const withAbility = applyRunReward(damaged, {
+    id: ABILITY_IDS.CREST_JUMP,
+    type: "ability",
+    label: "Crest Jump",
+    value: 0
+  });
+  const healed = applyRunReward(withAbility, {
+    id: "heal-small",
+    type: "heal",
+    label: "Heal",
+    value: 2
+  });
+  const paid = applyRunReward(healed, {
+    id: "gold-small",
+    type: "gold",
+    label: "Gold",
+    value: 9
+  });
+
+  assert.ok(paid.run.abilities.includes(ABILITY_IDS.CREST_JUMP));
+  assert.equal(paid.run.health, TUNING.RUN_HEALTH);
+  assert.equal(paid.run.gold, 9);
+});
+
+test("boss completion marks the run complete", () => {
+  const state = startRun(8);
+  const boss = firstNodeOfType(state, NODE_TYPES.BOSS);
+  const atBoss = {
+    ...state,
+    scene: SCENES.BATTLE,
+    battle: { nodeId: boss.id, encounterId: boss.payload.encounterId },
+    run: {
+      ...state.run,
+      currentNodeId: boss.id,
+      offeredNodeIds: [boss.id],
+      completedNodeIds: state.map.nodes
+        .filter((node) => node.id !== boss.id)
+        .map((node) => node.id)
+    }
+  };
+  const next = completeCurrentNode(atBoss);
+
+  assert.equal(next.scene, SCENES.RUN_COMPLETE);
+  assert.equal(next.run.completed, true);
+  assert.ok(next.run.completedNodeIds.includes("boss"));
+});
+
+test("markRunDefeated moves to game over and lowers health to zero", () => {
+  const next = markRunDefeated(startRun(4));
+
+  assert.equal(next.scene, SCENES.GAME_OVER);
+  assert.equal(next.run.defeated, true);
+  assert.equal(next.run.health, 0);
+});
+
+test("markRunComplete can complete the current run directly", () => {
+  const next = markRunComplete(startRun(4));
+
+  assert.equal(next.scene, SCENES.RUN_COMPLETE);
+  assert.equal(next.run.completed, true);
+});
