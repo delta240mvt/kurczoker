@@ -55,6 +55,9 @@ function updateActorsForWorld(battle, input, delta) {
       if (next.kind === ACTOR_KINDS.PLAYER && battle.phase === BATTLE_PHASES.PLAYER_TURN) {
         const speed = battle.playerSpeed ?? TUNING.PLAYER_SPEED;
         next.vx = (input.moveX ?? 0) * speed;
+        if (input.jump && Math.abs(next.vy ?? 0) < 0.001) {
+          next.vy = TUNING.JUMP_VELOCITY;
+        }
       }
 
       next.x += (next.vx ?? 0) * delta;
@@ -219,6 +222,38 @@ export function firePlayerAbility(battle, ability = {}, aim = { x: 1, y: 0 }) {
       actors: [...battle.actors, summon],
       actionFired: true,
       phase: BATTLE_PHASES.ENEMY_TURN
+    };
+  }
+
+  if (ability.kind === "movement" || ability.id === ABILITY_IDS.CREST_JUMP) {
+    return {
+      ...battle,
+      actors: battle.actors.map((actor) => {
+        if (actor.id !== player.id) return actor;
+        return {
+          ...actor,
+          vx: (actor.vx ?? 0) + (aim?.x >= 0 ? 0.34 : -0.34),
+          vy: ability.impulse ?? TUNING.JUMP_VELOCITY
+        };
+      }),
+      actionFired: true,
+      phase: BATTLE_PHASES.ENEMY_TURN
+    };
+  }
+
+  if (ability.kind === "buff" || ability.id === ABILITY_IDS.MANA_GRAIN) {
+    return {
+      ...battle,
+      actors: battle.actors.map((actor) => {
+        if (actor.id !== player.id) return actor;
+        return {
+          ...actor,
+          health: clamp((actor.health ?? 0) + 1, 0, actor.maxHealth ?? actor.health ?? 0)
+        };
+      }),
+      actionFired: true,
+      phase: BATTLE_PHASES.ENEMY_TURN,
+      buffs: [...(battle.buffs ?? []), { id: ABILITY_IDS.MANA_GRAIN, turns: 1 }]
     };
   }
 

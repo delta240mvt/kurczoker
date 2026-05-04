@@ -136,6 +136,33 @@ test("guard chick summons expire by ttl during battle updates", () => {
   assert.equal(next.actors.some((actor) => actor.kind === "summon"), false);
 });
 
+test("crest jump and mana grain resolve as movement and buff actions", () => {
+  const wounded = player({ health: 8, maxHealth: 10 });
+  const battle = createBattleState({ actors: [wounded, enemy()] });
+
+  const jumped = firePlayerAbility(
+    battle,
+    { id: ABILITY_IDS.CREST_JUMP, kind: "movement", impulse: -0.5 },
+    { x: 1, y: -1 }
+  );
+  const jumpPlayer = jumped.actors.find((actor) => actor.id === "player");
+
+  assert.equal(jumped.phase, BATTLE_PHASES.ENEMY_TURN);
+  assert.equal(jumped.projectiles.length, 0);
+  assert.equal(jumpPlayer.vy, -0.5);
+  assert.ok(jumpPlayer.vx > 0);
+
+  const healed = firePlayerAbility(
+    createBattleState({ actors: [wounded, enemy()] }),
+    { id: ABILITY_IDS.MANA_GRAIN, kind: "buff" }
+  );
+  const healedPlayer = healed.actors.find((actor) => actor.id === "player");
+
+  assert.equal(healed.projectiles.length, 0);
+  assert.equal(healedPlayer.health, 9);
+  assert.deepEqual(healed.buffs, [{ id: ABILITY_IDS.MANA_GRAIN, turns: 1 }]);
+});
+
 test("shell shield artifact absorbs one enemy hit per battle", () => {
   const battle = createBattleState({
     actors: [player(), enemy()],

@@ -45,6 +45,40 @@ function ensureCanvasSize(canvas) {
   if (!canvas.height) canvas.height = CANVAS.HEIGHT;
 }
 
+function pointInRect(point, rect) {
+  return point.x >= rect.x && point.x <= rect.x + rect.width && point.y >= rect.y && point.y <= rect.y + rect.height;
+}
+
+function mapNodeHitboxes(state) {
+  const nodes = state.map?.nodes ?? [];
+  if (!nodes.length) return [];
+  const columns = Math.max(1, Math.max(...nodes.map((node) => node.depth ?? 0)) + 1);
+  const rowsByDepth = new Map();
+  nodes.forEach((node) => {
+    const depth = node.depth ?? 0;
+    rowsByDepth.set(depth, [...(rowsByDepth.get(depth) ?? []), node]);
+  });
+  return nodes.map((node) => {
+    const depth = node.depth ?? 0;
+    const row = rowsByDepth.get(depth) ?? [node];
+    const index = row.findIndex((entry) => entry.id === node.id);
+    const x = 104 + depth * ((CANVAS.WIDTH - 208) / Math.max(1, columns - 1));
+    const y = 142 + index * 92 + (3 - row.length) * 24;
+    return { id: node.id, x: x - 34, y: y - 34, width: 68, height: 68 };
+  });
+}
+
+function rewardHitboxes(state) {
+  return (state.rewardChoices ?? []).slice(0, 3).map((reward, index) => ({
+    id: reward.id,
+    reward,
+    x: 70 + index * 285,
+    y: 145,
+    width: 230,
+    height: 210
+  }));
+}
+
 function createEncounter(node, run) {
   const boss = node.type === NODE_TYPES.BOSS;
   const elite = node.type === NODE_TYPES.ELITE;
@@ -89,12 +123,21 @@ function canvasPointToAim(canvas, point) {
   };
 }
 
-function chooseNextMapNode(state) {
-  return state.run.offeredNodeIds[0] ?? null;
+function chooseNextMapNode(state, point) {
+  if (point) {
+    const offered = new Set(state.run.offeredNodeIds);
+    const hit = mapNodeHitboxes(state).find((box) => offered.has(box.id) && pointInRect(point, box));
+    if (hit) return hit.id;
+  }
+  return state.run.offeredNodeIds.length === 1 ? state.run.offeredNodeIds[0] : null;
 }
 
-function chooseReward(state) {
-  return state.rewardChoices?.[0] ?? null;
+function chooseReward(state, point) {
+  if (point) {
+    const hit = rewardHitboxes(state).find((box) => pointInRect(point, box));
+    if (hit) return hit.reward;
+  }
+  return state.rewardChoices?.length === 1 ? state.rewardChoices[0] : null;
 }
 
 function stateAfterBattle(state, audio) {
@@ -134,10 +177,13 @@ export function mountKurczokerGame(root = globalThis.document) {
   let running = true;
   let lastTime = typeof performance !== "undefined" ? performance.now() : 0;
 
-  function startOrAdvance() {
+  function startOrAdvance(point = input?.snapshot?.aim) {
     if (state.scene === SCENES.MAP) {
-      const nodeId = chooseNextMapNode(state);
-      if (!nodeId) return;
+      const nodeId = chooseNextMapNode(state, point);
+      if (!nodeId) {
+        state = setUiMessage(state, "Wybierz dostepny wezel na mapie.");
+        return;
+      }
       const node = getNodeById(state.map, nodeId);
       state = selectMapNode(state, nodeId);
       if (state.scene === SCENES.BATTLE) {
@@ -151,7 +197,11 @@ export function mountKurczokerGame(root = globalThis.document) {
     }
 
     if (state.scene === SCENES.REWARD) {
-      const reward = chooseReward(state);
+      const reward = chooseReward(state, point);
+      if (!reward) {
+        state = setUiMessage(state, "Wybierz jedna nagrode.");
+        return;
+      }
       state = applyRunReward(state, reward);
       playEffect(audio, "treasure");
       return;
@@ -186,7 +236,7 @@ export function mountKurczokerGame(root = globalThis.document) {
     lastTime = now;
 
     if (running) {
-      if (state.scene === SCENES.BATTLE) {
+    if (state.scene === SCENES.BATTLE) {
         const ability = getAbilityById(input.snapshot.selectedAbilityId) ?? getAbilityById(ABILITY_IDS.EGG_BOMB);
         const battleInput = {
           ...input.snapshot,
@@ -203,6 +253,8 @@ export function mountKurczokerGame(root = globalThis.document) {
         };
         if (input.snapshot.firePressed && previousPhase === BATTLE_PHASES.PLAYER_TURN) playEffect(audio, "shoot");
         state = stateAfterBattle(state, audio);
+      } else if (input.snapshot.firePressed && [SCENES.MAP, SCENES.REWARD].includes(state.scene)) {
+        startOrAdvance(input.snapshot.aim);
       }
     }
 
