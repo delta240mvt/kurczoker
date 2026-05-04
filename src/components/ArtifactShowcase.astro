@@ -1,0 +1,40 @@
+---
+import LandingSection from "./LandingSection.astro";
+
+const artifacts = [
+  {
+    name: "Korona Grzebienia",
+    type: "Artifact",
+    text: "Stretches the player turn just enough for one bold angle."
+  },
+  {
+    name: "Buty Kurnikowego Wiatru",
+    type: "Artifact",
+    text: "Adds lift and pace for awkward platforms and last-second escapes."
+  },
+  {
+    name: "Zgnile Jajo Chaosu",
+    type: "Artifact",
+    text: "Makes explosions nastier, with the kind of downside that starts stories."
+  },
+  {
+    name: "Pisklak Straznik",
+    type: "Summon",
+    text: "Drops a temporary helper into battle for a brief, scrappy intervention."
+  }
+];
+---
+
+<LandingSection eyebrow="Artifacts" title="Odd relics, simple choices, visible impact" tone="warm">
+  <div class="artifact-grid">
+    {
+      artifacts.map((artifact) => (
+        <article class="artifact-card">
+          <span class="artifact-card__type">{artifact.type}</span>
+          <h3>{artifact.name}</h3>
+          <p>{artifact.text}</p>
+        </article>
+      ))
+    }
+  </div>
+</LandingSection>

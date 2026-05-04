@@ -1,0 +1,54 @@
+---
+const hudItems = [
+  { label: "HP", value: "3 / 3", attr: "data-hud-health" },
+  { label: "Node", value: "Start", attr: "data-hud-node" },
+  { label: "Ability", value: "Jajobomba", attr: "data-hud-ability" }
+];
+---
+
+<section class="hero" data-kurczoker-game>
+  <div class="hero__content">
+    <p class="hero__eyebrow">Browser roguelite prototype</p>
+    <h1>KURCZOKER</h1>
+    <p class="hero__subtitle">
+      Feathered fantasy, explosive eggs, crooked artifacts, and a boss waiting at the end of a short run.
+    </p>
+  </div>
+
+  <div class="game-shell" aria-label="KURCZOKER playable game">
+    <div class="game-shell__topline">
+      <div class="hud" aria-label="Run status">
+        {
+          hudItems.map((item) => (
+            <div class="hud__item">
+              <span class="hud__label">{item.label}</span>
+              <strong class="hud__value" {...{ [item.attr]: true }}>{item.value}</strong>
+            </div>
+          ))
+        }
+      </div>
+      <div class="game-actions">
+        <button class="icon-button icon-button--wide" type="button" data-game-start>
+          Start
+        </button>
+        <button class="icon-button" type="button" aria-label="Toggle sound" data-game-mute>
+          <span aria-hidden="true">♪</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="canvas-frame">
+      <canvas
+        data-game-canvas
+        width="960"
+        height="540"
+        aria-label="KURCZOKER game canvas"
+      ></canvas>
+      <div class="canvas-frame__status" data-game-message>Ready at the coop gate.</div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import "../game/bootstrap.js";
+</script>
