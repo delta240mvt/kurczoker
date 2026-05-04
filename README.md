@@ -27,7 +27,7 @@ Astro owns the production build. `npm run build` writes the static output to `di
 6. Continue through the map until the boss is defeated or the run is lost.
 7. Restart creates a fresh run state.
 
-The current implementation is being split into modules under `src/game/` so state, map, run, battle, abilities, physics, input, rendering, audio, and bootstrap code can be tested independently.
+The implementation is split into modules under `src/game/` so state, map, run, battle, abilities, physics, input, rendering, audio, and bootstrap code can be tested independently.
 
 ## Controls
 
@@ -36,7 +36,7 @@ The current implementation is being split into modules under `src/game/` so stat
 | Move | `A` / `D` or `ArrowLeft` / `ArrowRight` |
 | Jump | `W`, `Space`, or `ArrowUp` |
 | Aim | Mouse, pointer drag, or touch drag |
-| Fire selected ability | Pointer release / primary action |
+| Fire selected ability | `Space`, `Enter`, pointer press, or touch press |
 | Start or restart | Start / restart control |
 | Mute toggle | Mute control |
 
@@ -50,9 +50,7 @@ Run all available tests:
 npm test
 ```
 
-The tests use `node --test` and focus on pure game behavior where possible. `test/game.test.js` currently covers the audio controller contract: muted default, lazy Web Audio creation, known effect scheduling, and muting behavior.
-
-Wave 1 does not require full browser integration verification. Later integration waves should run the full test suite, the Astro production build, and a manual browser smoke pass.
+The tests use `node --test` and focus on pure game behavior where possible: state, map generation, run transitions, physics, battle state, abilities, audio, and a full run progression check.
 
 ## Build And Deploy
 

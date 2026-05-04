@@ -1,6 +1,11 @@
-import { CANVAS, SCENES } from "./constants.js";
+import { ABILITY_IDS, BATTLE_PHASES, CANVAS, NODE_TYPES, SCENES } from "./constants.js";
+import { createEnemy, createPlayer } from "./actors.js";
+import { getAbilityById } from "./abilities.js";
+import { createAudioController, playEffect, setMuted } from "./audio.js";
+import { createBattleState, resolveEnemyTurn, updateBattle } from "./battle.js";
+import { getNodeById } from "./map.js";
 import { resetRun, setUiMessage, toggleMute } from "./state.js";
-import { startRun } from "./run.js";
+import { applyRunReward, completeCurrentNode, markRunDefeated, selectMapNode, startRun } from "./run.js";
 import { createInputController } from "./input.js";
 import { drawGame } from "./renderer.js";
 
@@ -24,13 +29,13 @@ function setText(element, text) {
 function updateHud(elements, state, input) {
   const run = state.run ?? {};
   const ui = state.ui ?? {};
-  setText(elements.health, `HP ${run.health ?? 0}/${run.maxHealth ?? 0}`);
-  setText(elements.node, `Wezel ${run.currentNodeId ?? "start"}`);
-  setText(elements.ability, `Akcja ${input?.selectedAbilityId ?? ui.selectedAbilityId ?? "egg-bomb"}`);
+  setText(elements.health, `${run.health ?? 0} / ${run.maxHealth ?? 0}`);
+  setText(elements.node, run.currentNodeId ?? "start");
+  setText(elements.ability, input?.selectedAbilityId ?? ui.selectedAbilityId ?? "egg-bomb");
   setText(elements.scene, formatScene(state.scene));
   setText(elements.message, ui.message ?? "");
   if (elements.mute) {
-    elements.mute.textContent = ui.muted ? "Audio off" : "Audio on";
+    elements.mute.textContent = ui.muted ? "♪" : "♫";
     elements.mute.setAttribute("aria-pressed", String(!ui.muted));
   }
 }
@@ -40,73 +45,68 @@ function ensureCanvasSize(canvas) {
   if (!canvas.height) canvas.height = CANVAS.HEIGHT;
 }
 
-function createFrameState(state, input, elapsed) {
-  if (state.scene !== SCENES.BATTLE) return state;
+function createEncounter(node, run) {
+  const boss = node.type === NODE_TYPES.BOSS;
+  const elite = node.type === NODE_TYPES.ELITE;
+  const enemyType = boss ? "boss" : elite ? "elite" : "grunt";
+  const enemies = boss
+    ? [createEnemy("boss", { id: "boss-jajokrol", x: 690, health: 7, maxHealth: 7, damage: 1 })]
+    : [
+        createEnemy(enemyType, {
+          id: `${enemyType}-1`,
+          x: elite ? 690 : 710,
+          health: elite ? 4 : 2,
+          maxHealth: elite ? 4 : 2,
+          damage: elite ? 2 : 1
+        }),
+        ...(elite ? [createEnemy("grunt", { id: "grunt-helper", x: 790, health: 2, maxHealth: 2 })] : [])
+      ];
 
-  const battle = state.battle ?? {};
-  const actors = battle.actors?.map((actor) => {
-    if (actor.kind !== "player" && actor.id !== "player") return actor;
-    const nextX = Math.max(32, Math.min(CANVAS.WIDTH - 80, (actor.x ?? 160) + input.moveX * 2.2));
-    const jumpOffset = input.jump ? Math.sin(elapsed / 110) * 10 - 10 : 0;
-    return { ...actor, x: nextX, y: Math.min(CANVAS.GROUND_Y - (actor.height ?? 56), (actor.y ?? 360) + jumpOffset) };
-  });
-
-  return {
-    ...state,
-    battle: {
-      ...battle,
-      actors,
-      turnRemainingMs: Math.max(0, (battle.turnRemainingMs ?? 8000) - 16)
-    },
-    ui: {
-      ...state.ui,
-      selectedAbilityId: input.selectedAbilityId
-    }
-  };
-}
-
-function createSampleBattle() {
-  return {
-    encounterId: "sample",
-    phase: "player-turn",
-    turnRemainingMs: 8000,
+  return createBattleState({
+    encounterId: node.payload.encounterId,
+    type: node.type,
     actors: [
-      {
-        id: "player",
-        kind: "player",
-        team: "player",
-        x: 170,
-        y: CANVAS.GROUND_Y - 58,
-        vx: 0,
-        vy: 0,
-        width: 42,
-        height: 58,
-        health: 3,
-        maxHealth: 3,
-        ttl: 0
-      },
-      {
-        id: "enemy-grunt",
-        kind: "enemy",
-        team: "enemy",
-        x: 700,
-        y: CANVAS.GROUND_Y - 48,
-        vx: 0,
-        vy: 0,
-        width: 46,
-        height: 48,
-        health: 2,
-        maxHealth: 2,
-        ttl: 0
-      }
+      createPlayer({ health: run.health, maxHealth: run.maxHealth, y: CANVAS.GROUND_Y - 54 }),
+      ...enemies
     ],
     platforms: [
       { id: "ledge-left", x: 92, y: 330, width: 190, height: 20 },
       { id: "ledge-right", x: 620, y: 300, width: 180, height: 20 }
     ],
     hazards: [{ id: "spikes", type: "spikes", x: 435, y: CANVAS.GROUND_Y - 18, width: 112, height: 18, damage: 1 }],
-    projectiles: []
+    artifacts: run.artifacts
+  });
+}
+
+function canvasPointToAim(canvas, point) {
+  const rect = canvas.getBoundingClientRect?.();
+  const playerOrigin = { x: 190, y: CANVAS.GROUND_Y - 40 };
+  if (!point.x && !point.y) return { x: 1, y: -0.28 };
+  if (!rect) return { x: 1, y: -0.35 };
+  return {
+    x: point.x - playerOrigin.x,
+    y: point.y - playerOrigin.y
   };
+}
+
+function chooseNextMapNode(state) {
+  return state.run.offeredNodeIds[0] ?? null;
+}
+
+function chooseReward(state) {
+  return state.rewardChoices?.[0] ?? null;
+}
+
+function stateAfterBattle(state, audio) {
+  if (state.battle?.phase === BATTLE_PHASES.WON) {
+    playEffect(audio, state.battle.type === NODE_TYPES.BOSS ? "victory" : "treasure");
+    return completeCurrentNode(state);
+  }
+  if (state.battle?.phase === BATTLE_PHASES.LOST) {
+    playEffect(audio, "defeat");
+    return markRunDefeated(state);
+  }
+  return state;
 }
 
 export function mountKurczokerGame(root = globalThis.document) {
@@ -129,17 +129,37 @@ export function mountKurczokerGame(root = globalThis.document) {
   };
 
   let state = setUiMessage(startRun(1), "Gotowy do wyprawy.");
+  let audio = createAudioController();
   let animationId = 0;
   let running = true;
   let lastTime = typeof performance !== "undefined" ? performance.now() : 0;
 
-  function startBattleShell() {
-    state = {
-      ...state,
-      scene: SCENES.BATTLE,
-      battle: createSampleBattle(),
-      ui: { ...state.ui, message: "Celuj mysza lub dotykiem. Spacja strzela." }
-    };
+  function startOrAdvance() {
+    if (state.scene === SCENES.MAP) {
+      const nodeId = chooseNextMapNode(state);
+      if (!nodeId) return;
+      const node = getNodeById(state.map, nodeId);
+      state = selectMapNode(state, nodeId);
+      if (state.scene === SCENES.BATTLE) {
+        state = {
+          ...state,
+          battle: createEncounter(node, state.run),
+          ui: { ...state.ui, message: "Celuj, ruszaj sie i odpal jedna akcje." }
+        };
+      }
+      return;
+    }
+
+    if (state.scene === SCENES.REWARD) {
+      const reward = chooseReward(state);
+      state = applyRunReward(state, reward);
+      playEffect(audio, "treasure");
+      return;
+    }
+
+    if ([SCENES.GAME_OVER, SCENES.RUN_COMPLETE].includes(state.scene)) {
+      restart();
+    }
   }
 
   function restart() {
@@ -152,10 +172,11 @@ export function mountKurczokerGame(root = globalThis.document) {
     root,
     canvas,
     selectedAbilityId: state.ui.selectedAbilityId,
-    onStart: startBattleShell,
+    onStart: startOrAdvance,
     onRestart: restart,
     onMute: () => {
       state = toggleMute(state);
+      audio = setMuted(audio, state.ui.muted);
       updateHud(elements, state, input.snapshot);
     }
   });
@@ -165,10 +186,23 @@ export function mountKurczokerGame(root = globalThis.document) {
     lastTime = now;
 
     if (running) {
-      state = createFrameState(state, input.snapshot, now);
-      if (input.snapshot.firePressed && state.scene === SCENES.MAP) startBattleShell();
-      if (state.battle?.turnRemainingMs === 0) {
-        state = { ...state, scene: SCENES.REWARD, ui: { ...state.ui, message: "Walka testowa zakonczona." } };
+      if (state.scene === SCENES.BATTLE) {
+        const ability = getAbilityById(input.snapshot.selectedAbilityId) ?? getAbilityById(ABILITY_IDS.EGG_BOMB);
+        const battleInput = {
+          ...input.snapshot,
+          ability,
+          aim: canvasPointToAim(canvas, input.snapshot.aim)
+        };
+        const previousPhase = state.battle?.phase;
+        let battle = updateBattle(state.battle, battleInput, delta);
+        if (battle.phase === BATTLE_PHASES.ENEMY_TURN) battle = resolveEnemyTurn(battle);
+        state = {
+          ...state,
+          battle,
+          ui: { ...state.ui, selectedAbilityId: input.snapshot.selectedAbilityId }
+        };
+        if (input.snapshot.firePressed && previousPhase === BATTLE_PHASES.PLAYER_TURN) playEffect(audio, "shoot");
+        state = stateAfterBattle(state, audio);
       }
     }
 
@@ -189,7 +223,7 @@ export function mountKurczokerGame(root = globalThis.document) {
     get input() {
       return input.snapshot;
     },
-    start: startBattleShell,
+    start: startOrAdvance,
     restart,
     destroy() {
       running = false;

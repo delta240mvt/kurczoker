@@ -1,4 +1,5 @@
 import { ARTIFACT_IDS, NODE_TYPES, SCENES } from "./constants.js";
+import { applyReward as applyAbilityReward, getRewardChoices } from "./abilities.js";
 import { getAvailableNodes, getNodeById } from "./map.js";
 import { createInitialGameState, setUiMessage } from "./state.js";
 
@@ -71,7 +72,7 @@ export function completeCurrentNode(state) {
     scene: SCENES.REWARD,
     battle: null,
     run,
-    rewardChoices: createRewardChoices(node),
+    rewardChoices: createRewardChoices(node, state.run, state.seed),
     ui: {
       ...state.ui,
       message: "Wybierz nagrode."
@@ -137,7 +138,7 @@ export function markRunComplete(state) {
   };
 }
 
-function createRewardChoices(node) {
+function createRewardChoices(node, run, seed) {
   const tier = node.payload.rewardTier ?? 1;
 
   if (node.type === NODE_TYPES.SHOP) {
@@ -152,28 +153,17 @@ function createRewardChoices(node) {
   }
 
   if (node.type === NODE_TYPES.TREASURE) {
-    return [
-      {
-        id: ARTIFACT_IDS.SHELL_SHIELD,
-        type: "artifact",
-        label: "Shell Shield",
-        value: tier
-      }
-    ];
+    return getRewardChoices(seed + tier, run).slice(0, 3);
   }
 
+  const choices = getRewardChoices(seed + tier + run.completedNodeIds.length, run).slice(0, 2);
   return [
+    ...choices,
     {
       id: "heal-small",
       type: "heal",
       label: "Rosol bojowy",
       value: tier
-    },
-    {
-      id: "gold-small",
-      type: "gold",
-      label: "Ziarna zwyciestwa",
-      value: 4 + tier
     }
   ];
 }
@@ -183,18 +173,8 @@ function applyRewardToRun(run, reward) {
     return run;
   }
 
-  if (reward.type === "artifact") {
-    return {
-      ...run,
-      artifacts: run.artifacts.includes(reward.id) ? run.artifacts : [...run.artifacts, reward.id]
-    };
-  }
-
-  if (reward.type === "ability") {
-    return {
-      ...run,
-      abilities: run.abilities.includes(reward.id) ? run.abilities : [...run.abilities, reward.id]
-    };
+  if (["artifact", "ability", "summon"].includes(reward.type)) {
+    return applyAbilityReward(run, reward);
   }
 
   if (reward.type === "heal") {
