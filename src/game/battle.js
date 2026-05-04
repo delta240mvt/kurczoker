@@ -51,7 +51,7 @@ function summonTtlMs(ability) {
 }
 
 function selectedAbility(input) {
-  return input.ability ?? getAbilityById(input.selectedAbilityId ?? ABILITY_IDS.EGG_BOMB) ?? { id: ABILITY_IDS.EGG_BOMB };
+  return input.ability ?? getAbilityById(input.selectedAbilityId ?? ABILITY_IDS.EGG_BOMB) ?? getAbilityById(ABILITY_IDS.EGG_BOMB);
 }
 
 function shieldBlocksProjectile(battle, actors, projectile, impact) {
@@ -182,12 +182,7 @@ function updateProjectilePhase(battle, delta) {
 
     if (!nextProjectile.active || hitActor) {
       resolvedTeam = projectile.team;
-      if (shieldBlocksProjectile(battle, actors, projectile, nextProjectile)) {
-        battle = {
-          ...battle,
-          usedArtifacts: [...(battle.usedArtifacts ?? []), ARTIFACT_IDS.SHELL_SHIELD]
-        };
-      } else if (projectile.blockedBySummon && hitActor?.kind === ACTOR_KINDS.SUMMON) {
+      if (projectile.blockedBySummon && hitActor?.kind === ACTOR_KINDS.SUMMON) {
         actors = actors.map((actor) => {
           if (actor.id !== hitActor.id) return actor;
           return {
@@ -195,6 +190,11 @@ function updateProjectilePhase(battle, delta) {
             health: clamp((actor.health ?? 0) - (projectile.damage ?? DEFAULT_ENEMY_DAMAGE), 0, actor.maxHealth ?? actor.health ?? 0)
           };
         });
+      } else if (shieldBlocksProjectile(battle, actors, projectile, nextProjectile)) {
+        battle = {
+          ...battle,
+          usedArtifacts: [...(battle.usedArtifacts ?? []), ARTIFACT_IDS.SHELL_SHIELD]
+        };
       } else {
         const damageReduction = projectile.team === ACTOR_TEAMS.ENEMY ? battle.damageReduction ?? 0 : 0;
         const baseDamage = projectile.damage ?? DEFAULT_PLAYER_DAMAGE;

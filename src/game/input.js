@@ -23,6 +23,8 @@ const ABILITY_KEYS = new Map([
   ["Digit4", ABILITY_IDS.MANA_GRAIN]
 ]);
 
+const JUMP_KEYS = new Set(["ArrowUp", "KeyW"]);
+
 function noop() {}
 
 function getDocumentTarget() {
@@ -43,9 +45,23 @@ function eventPoint(event) {
   };
 }
 
-function updateMove(snapshot, pressed) {
-  const left = pressed.has("left");
-  const right = pressed.has("right");
+function hasPressedDirection(pressedKeys, direction) {
+  for (const code of pressedKeys) {
+    if (MOVEMENT_KEYS.get(code) === direction) return true;
+  }
+  return false;
+}
+
+function hasPressedJump(pressedKeys) {
+  for (const code of pressedKeys) {
+    if (JUMP_KEYS.has(code)) return true;
+  }
+  return false;
+}
+
+function updateMove(snapshot, pressedKeys) {
+  const left = hasPressedDirection(pressedKeys, "left");
+  const right = hasPressedDirection(pressedKeys, "right");
   snapshot.moveX = left === right ? 0 : left ? -1 : 1;
 }
 
@@ -56,7 +72,7 @@ export function createInputController(options = {}) {
   const onStart = options.onStart ?? noop;
   const onRestart = options.onRestart ?? onStart;
   const onMute = options.onMute ?? noop;
-  const pressed = new Set();
+  const pressedKeys = new Set();
   const cleanups = [];
   let activePointerId = null;
 
@@ -114,20 +130,21 @@ export function createInputController(options = {}) {
   }
 
   function resetTouchMovement() {
-    snapshot.moveX = pressed.has("left") === pressed.has("right") ? 0 : pressed.has("left") ? -1 : 1;
-    snapshot.jump = false;
+    updateMove(snapshot, pressedKeys);
+    snapshot.jump = hasPressedJump(pressedKeys);
   }
 
   function handleKeyDown(event) {
     const movement = MOVEMENT_KEYS.get(event.code);
     if (movement) {
       event.preventDefault?.();
-      pressed.add(movement);
-      updateMove(snapshot, pressed);
+      pressedKeys.add(event.code);
+      updateMove(snapshot, pressedKeys);
     }
 
-    if (event.code === "ArrowUp" || event.code === "KeyW") {
+    if (JUMP_KEYS.has(event.code)) {
       event.preventDefault?.();
+      pressedKeys.add(event.code);
       snapshot.jump = true;
     }
 
@@ -150,13 +167,14 @@ export function createInputController(options = {}) {
     const movement = MOVEMENT_KEYS.get(event.code);
     if (movement) {
       event.preventDefault?.();
-      pressed.delete(movement);
-      updateMove(snapshot, pressed);
+      pressedKeys.delete(event.code);
+      updateMove(snapshot, pressedKeys);
     }
 
-    if (event.code === "ArrowUp" || event.code === "KeyW") {
+    if (JUMP_KEYS.has(event.code)) {
       event.preventDefault?.();
-      snapshot.jump = false;
+      pressedKeys.delete(event.code);
+      snapshot.jump = hasPressedJump(pressedKeys);
     }
 
     if (event.code === "Space" || event.code === "Enter") {
@@ -243,7 +261,7 @@ export function createInputController(options = {}) {
     },
     destroy() {
       while (cleanups.length) cleanups.pop()();
-      pressed.clear();
+      pressedKeys.clear();
       activePointerId = null;
     }
   };

@@ -93,6 +93,41 @@ test("updateBattle resolves egg bomb stats from selectedAbilityId", () => {
   assert.equal(fired.projectiles[0].explosionRadius, ability.radius);
 });
 
+test("updateBattle falls back to full egg bomb stats for stale selectedAbilityId", () => {
+  const ability = getAbilityById(ABILITY_IDS.EGG_BOMB);
+  const battle = createBattleState({ actors: [player(), enemy()] });
+
+  const fired = updateBattle(
+    battle,
+    { firePressed: true, selectedAbilityId: "stale-ability", aim: { x: 1, y: 0 } },
+    16
+  );
+
+  assert.equal(fired.projectiles.length, 1);
+  assert.equal(fired.projectiles[0].damage, ability.damage);
+  assert.equal(fired.projectiles[0].explosionRadius, ability.radius);
+});
+
+test("updateBattle uses explicit ability input over selectedAbilityId", () => {
+  const battle = createBattleState({ actors: [player(), enemy()] });
+
+  const fired = updateBattle(
+    battle,
+    {
+      firePressed: true,
+      selectedAbilityId: ABILITY_IDS.GUARD_CHICK,
+      ability: { id: "custom-shell", kind: "projectile", damage: 7, radius: 13, speed: 0 },
+      aim: { x: 1, y: 0 }
+    },
+    16
+  );
+
+  assert.equal(fired.projectiles.length, 1);
+  assert.equal(fired.projectiles[0].damage, 7);
+  assert.equal(fired.projectiles[0].explosionRadius, 13);
+  assert.equal(fired.actors.some((actor) => actor.kind === "summon"), false);
+});
+
 test("updateBattle resolves guard chick stats from selectedAbilityId", () => {
   const ability = getAbilityById(ABILITY_IDS.GUARD_CHICK);
   const battle = createBattleState({ actors: [player(), enemy()] });
@@ -253,6 +288,44 @@ test("guard chick blocks the next enemy projectile", () => {
 
   assert.equal(blockedPlayer.health, 10);
   assert.equal(summon.health, 0);
+});
+
+test("guard chick blocks before shell shield when both overlap enemy projectile", () => {
+  const battle = createBattleState({
+    actors: [
+      player({ x: 10 }),
+      { id: "summon-1", kind: "summon", team: "player", x: 16, y: 70, vx: 0, vy: 0, width: 10, height: 10, health: 1, maxHealth: 1, ttl: 1000 },
+      enemy({ x: 60 })
+    ],
+    artifacts: [ARTIFACT_IDS.SHELL_SHIELD],
+    phase: BATTLE_PHASES.PROJECTILE,
+    gravity: 0,
+    projectiles: [
+      {
+        id: "enemy-projectile-1",
+        team: "enemy",
+        targetId: "summon-1",
+        blockedBySummon: true,
+        x: 21,
+        y: 75,
+        vx: 0,
+        vy: 0,
+        radius: 4,
+        explosionRadius: 8,
+        damage: 1,
+        knockback: 0,
+        active: true
+      }
+    ]
+  });
+
+  const resolved = updateBattle(battle, {}, 0);
+  const blockedPlayer = resolved.actors.find((actor) => actor.id === "player");
+  const summon = resolved.actors.find((actor) => actor.id === "summon-1");
+
+  assert.equal(blockedPlayer.health, 10);
+  assert.equal(summon.health, 0);
+  assert.equal(resolved.usedArtifacts.includes(ARTIFACT_IDS.SHELL_SHIELD), false);
 });
 
 test("crest jump and mana grain resolve as movement and buff actions", () => {

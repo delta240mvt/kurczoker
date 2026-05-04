@@ -129,6 +129,64 @@ test("input queues keyboard action once per key press", () => {
   assert.equal(input.consumeAction(), false);
 });
 
+test("input keeps movement active when releasing one held alias", () => {
+  const target = createEventTarget();
+  const canvas = createCanvas();
+  const input = createInputController({ target, canvas });
+
+  target.listeners.get("keydown")({ code: "ArrowLeft", preventDefault() {} });
+  target.listeners.get("keydown")({ code: "KeyA", preventDefault() {} });
+  assert.equal(input.snapshot.moveX, -1);
+
+  target.listeners.get("keyup")({ code: "ArrowLeft", preventDefault() {} });
+  assert.equal(input.snapshot.moveX, -1);
+
+  target.listeners.get("keyup")({ code: "KeyA", preventDefault() {} });
+  assert.equal(input.snapshot.moveX, 0);
+});
+
+test("input keeps right movement active when releasing one held alias", () => {
+  const target = createEventTarget();
+  const canvas = createCanvas();
+  const input = createInputController({ target, canvas });
+
+  target.listeners.get("keydown")({ code: "ArrowRight", preventDefault() {} });
+  target.listeners.get("keydown")({ code: "KeyD", preventDefault() {} });
+  assert.equal(input.snapshot.moveX, 1);
+
+  target.listeners.get("keyup")({ code: "ArrowRight", preventDefault() {} });
+  assert.equal(input.snapshot.moveX, 1);
+
+  target.listeners.get("keyup")({ code: "KeyD", preventDefault() {} });
+  assert.equal(input.snapshot.moveX, 0);
+
+  target.listeners.get("keydown")({ code: "ArrowRight", preventDefault() {} });
+  target.listeners.get("keydown")({ code: "KeyD", preventDefault() {} });
+  assert.equal(input.snapshot.moveX, 1);
+
+  target.listeners.get("keyup")({ code: "KeyD", preventDefault() {} });
+  assert.equal(input.snapshot.moveX, 1);
+
+  target.listeners.get("keyup")({ code: "ArrowRight", preventDefault() {} });
+  assert.equal(input.snapshot.moveX, 0);
+});
+
+test("input keeps jump active when releasing one held alias", () => {
+  const target = createEventTarget();
+  const canvas = createCanvas();
+  const input = createInputController({ target, canvas });
+
+  target.listeners.get("keydown")({ code: "ArrowUp", preventDefault() {} });
+  target.listeners.get("keydown")({ code: "KeyW", preventDefault() {} });
+  assert.equal(input.snapshot.jump, true);
+
+  target.listeners.get("keyup")({ code: "ArrowUp", preventDefault() {} });
+  assert.equal(input.snapshot.jump, true);
+
+  target.listeners.get("keyup")({ code: "KeyW", preventDefault() {} });
+  assert.equal(input.snapshot.jump, false);
+});
+
 test("input supports keyboard aim and touch movement controls", () => {
   const target = createEventTarget();
   const canvas = createCanvas();
