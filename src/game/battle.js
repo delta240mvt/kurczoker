@@ -33,6 +33,22 @@ function actorBounds(actor) {
   return { x: actor.x, y: actor.y, width: actor.width, height: actor.height };
 }
 
+function abilityDamageBonus(battle, ability) {
+  if (ability.id === ABILITY_IDS.EGG_BOMB) {
+    return battle.eggBombDamageBonus ?? 0;
+  }
+
+  return 0;
+}
+
+function summonTtlMs(ability) {
+  if (Number.isFinite(ability.summonTtl)) {
+    return ability.summonTtl * 1000;
+  }
+
+  return ability.ttl ?? DEFAULT_SUMMON_TTL;
+}
+
 function shieldBlocksProjectile(battle, actors, projectile, impact) {
   if (projectile.team !== ACTOR_TEAMS.ENEMY || (battle.usedArtifacts ?? []).includes(ARTIFACT_IDS.SHELL_SHIELD)) {
     return false;
@@ -175,11 +191,12 @@ function updateProjectilePhase(battle, delta) {
           };
         });
       } else {
+        const damageReduction = projectile.team === ACTOR_TEAMS.ENEMY ? battle.damageReduction ?? 0 : 0;
         actors = resolveExplosion(actors, {
           x: nextProjectile.x,
           y: nextProjectile.y,
           radius: projectile.explosionRadius ?? projectile.radius ?? 0,
-          damage: projectile.damage ?? DEFAULT_PLAYER_DAMAGE,
+          damage: Math.max(0, (projectile.damage ?? DEFAULT_PLAYER_DAMAGE) - damageReduction),
           knockback: projectile.knockback ?? 0
         });
       }
@@ -225,7 +242,9 @@ export function createBattleState(config = {}) {
     gravity: config.gravity ?? TUNING.GRAVITY,
     groundY: config.groundY ?? CANVAS.GROUND_Y,
     width: config.width ?? DEFAULT_WIDTH,
-    playerSpeed: config.playerSpeed ?? TUNING.PLAYER_SPEED
+    playerSpeed: config.playerSpeed ?? TUNING.PLAYER_SPEED,
+    eggBombDamageBonus: config.eggBombDamageBonus ?? 0,
+    damageReduction: config.damageReduction ?? 0
   });
 }
 
@@ -292,7 +311,7 @@ export function firePlayerAbility(battle, ability = {}, aim = { x: 1, y: 0 }) {
       height: 10,
       health: ability.health ?? 1,
       maxHealth: ability.health ?? 1,
-      ttl: ability.ttl ?? DEFAULT_SUMMON_TTL
+      ttl: summonTtlMs(ability)
     };
 
     return {
@@ -338,7 +357,7 @@ export function firePlayerAbility(battle, ability = {}, aim = { x: 1, y: 0 }) {
   const length = Math.hypot(aim?.x ?? 1, aim?.y ?? 0) || 1;
   const speed = ability.speed ?? TUNING.PROJECTILE_SPEED;
   const manaBuff = (battle.buffs ?? []).find((buff) => buff.id === ABILITY_IDS.MANA_GRAIN);
-  const damageBonus = manaBuff ? 1 : 0;
+  const damageBonus = (manaBuff ? 1 : 0) + abilityDamageBonus(battle, ability);
   const radiusBonus = manaBuff ? 10 : 0;
   const projectile = {
     id: `projectile-${battle.turnNumber}`,

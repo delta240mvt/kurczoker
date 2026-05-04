@@ -166,10 +166,11 @@ function createRewardChoices(node, run, seed) {
   }
 
   if (node.type === NODE_TYPES.TREASURE) {
-    return getRewardChoices(seed + tier, run).slice(0, 3);
+    return getRewardChoices(seed + tier, run);
   }
 
-  const choices = getRewardChoices(seed + tier + run.completedNodeIds.length, run).slice(0, 2);
+  const choiceCount = 2 + (run.stats?.rewardChoiceBonus ?? 0);
+  const choices = getRewardChoices(seed + tier + run.completedNodeIds.length, run).slice(0, choiceCount);
   return [
     ...choices,
     {

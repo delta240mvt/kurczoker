@@ -20,6 +20,8 @@ function createEventTarget() {
 function createCanvas() {
   return {
     ...createEventTarget(),
+    width: 960,
+    height: 540,
     getBoundingClientRect() {
       return { left: 0, top: 0, width: 960, height: 540 };
     },
@@ -49,6 +51,9 @@ test("input queues pointer actions only on completed release events", () => {
   assert.equal(input.consumeAction(), false);
 
   canvas.listeners.get("pointerdown")(pointerEvent());
+  canvas.listeners.get("pointermove")(pointerEvent({ clientX: 240, clientY: 135 }));
+  assert.deepEqual(input.snapshot.aim, { x: 240, y: 135 });
+
   canvas.listeners.get("pointerup")(pointerEvent());
 
   assert.equal(input.consumeAction(), true);
@@ -63,6 +68,56 @@ test("input queues keyboard action once per key press", () => {
   target.listeners.get("keydown")({ code: "Space", repeat: false, preventDefault() {} });
   target.listeners.get("keydown")({ code: "Space", repeat: true, preventDefault() {} });
 
+  assert.equal(input.consumeAction(), true);
+  assert.equal(input.consumeAction(), false);
+});
+
+test("input supports keyboard aim and touch movement controls", () => {
+  const target = createEventTarget();
+  const canvas = createCanvas();
+  const input = createInputController({ target, canvas });
+
+  target.listeners.get("keydown")({ code: "KeyQ", preventDefault() {} });
+  assert.deepEqual(input.snapshot.aim, { x: 70, y: 260 });
+
+  target.listeners.get("keydown")({ code: "ArrowLeft", preventDefault() {} });
+  assert.equal(input.snapshot.moveX, -1);
+
+  target.listeners.get("keydown")({ code: "KeyD", preventDefault() {} });
+  assert.equal(input.snapshot.moveX, 0);
+
+  target.listeners.get("keyup")({ code: "ArrowLeft", preventDefault() {} });
+  assert.equal(input.snapshot.moveX, 1);
+
+  target.listeners.get("keyup")({ code: "KeyD", preventDefault() {} });
+  assert.equal(input.snapshot.moveX, 0);
+
+  target.listeners.get("keydown")({ code: "KeyA", preventDefault() {} });
+  assert.equal(input.snapshot.moveX, -1);
+
+  target.listeners.get("keyup")({ code: "KeyA", preventDefault() {} });
+  target.listeners.get("keydown")({ code: "ArrowRight", preventDefault() {} });
+  assert.equal(input.snapshot.moveX, 1);
+  target.listeners.get("keyup")({ code: "ArrowRight", preventDefault() {} });
+
+  canvas.listeners.get("touchstart")({
+    touches: [{ clientX: 100, clientY: 500 }],
+    preventDefault() {}
+  });
+  assert.equal(input.snapshot.moveX, -1);
+
+  canvas.listeners.get("touchmove")({
+    touches: [{ clientX: 500, clientY: 120 }],
+    preventDefault() {}
+  });
+  assert.equal(input.snapshot.jump, true);
+
+  canvas.listeners.get("touchend")({
+    changedTouches: [{ clientX: 500, clientY: 120 }],
+    preventDefault() {}
+  });
+  assert.equal(input.snapshot.moveX, 0);
+  assert.equal(input.snapshot.jump, false);
   assert.equal(input.consumeAction(), true);
   assert.equal(input.consumeAction(), false);
 });

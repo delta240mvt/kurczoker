@@ -7,6 +7,15 @@ const MOVEMENT_KEYS = new Map([
   ["KeyD", "right"]
 ]);
 
+const AIM_KEYS = new Map([
+  ["ArrowUp", { x: 650, y: 245 }],
+  ["KeyW", { x: 650, y: 245 }],
+  ["ArrowDown", { x: 650, y: 450 }],
+  ["KeyS", { x: 650, y: 450 }],
+  ["KeyQ", { x: 70, y: 260 }],
+  ["KeyE", { x: 790, y: 260 }]
+]);
+
 const ABILITY_KEYS = new Map([
   ["Digit1", ABILITY_IDS.EGG_BOMB],
   ["Digit2", ABILITY_IDS.CREST_JUMP],
@@ -53,7 +62,7 @@ export function createInputController(options = {}) {
   const snapshot = {
     moveX: 0,
     jump: false,
-    aim: { x: 0, y: 0 },
+    aim: { x: 640, y: 280 },
     firePressed: false,
     actionQueued: false,
     selectedAbilityId: options.selectedAbilityId ?? ABILITY_IDS.EGG_BOMB
@@ -73,7 +82,7 @@ export function createInputController(options = {}) {
     if (!canvas?.getBoundingClientRect) {
       const point = eventPoint(event);
       snapshot.aim = { x: point.clientX, y: point.clientY };
-      return;
+      return snapshot.aim;
     }
 
     const rect = canvas.getBoundingClientRect();
@@ -84,6 +93,20 @@ export function createInputController(options = {}) {
       x: (point.clientX - rect.left) * scaleX,
       y: (point.clientY - rect.top) * scaleY
     };
+    return snapshot.aim;
+  }
+
+  function updateTouchMovement(point) {
+    if (!canvas) return;
+    if (point.y > canvas.height * 0.7) {
+      snapshot.moveX = point.x < canvas.width / 2 ? -1 : 1;
+    }
+    snapshot.jump = point.y < canvas.height * 0.36;
+  }
+
+  function resetTouchMovement() {
+    snapshot.moveX = pressed.has("left") === pressed.has("right") ? 0 : pressed.has("left") ? -1 : 1;
+    snapshot.jump = false;
   }
 
   function handleKeyDown(event) {
@@ -97,6 +120,11 @@ export function createInputController(options = {}) {
     if (event.code === "ArrowUp" || event.code === "KeyW") {
       event.preventDefault?.();
       snapshot.jump = true;
+    }
+
+    const keyboardAim = AIM_KEYS.get(event.code);
+    if (keyboardAim) {
+      snapshot.aim = keyboardAim;
     }
 
     if (event.code === "Space" || event.code === "Enter") {
@@ -151,23 +179,25 @@ export function createInputController(options = {}) {
 
   function handleTouchStart(event) {
     event.preventDefault?.();
-    setAimFromEvent(event);
+    updateTouchMovement(setAimFromEvent(event));
   }
 
   function handleTouchMove(event) {
     event.preventDefault?.();
-    setAimFromEvent(event);
+    updateTouchMovement(setAimFromEvent(event));
   }
 
   function handleTouchEnd(event) {
     event.preventDefault?.();
     setAimFromEvent(event);
+    resetTouchMovement();
     queueAction();
   }
 
   function handleTouchCancel(event) {
     event.preventDefault?.();
     setAimFromEvent(event);
+    resetTouchMovement();
   }
 
   listen(target, "keydown", handleKeyDown);

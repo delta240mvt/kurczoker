@@ -1,4 +1,4 @@
-import { ABILITY_IDS, BATTLE_PHASES, CANVAS, NODE_TYPES, SCENES } from "./constants.js";
+import { ABILITY_IDS, ARTIFACT_IDS, BATTLE_PHASES, CANVAS, NODE_TYPES, SCENES, TUNING } from "./constants.js";
 import { createEnemy, createPlayer } from "./actors.js";
 import { getAbilityById } from "./abilities.js";
 import { createAudioController, playEffect, setMuted } from "./audio.js";
@@ -31,13 +31,18 @@ function updateHud(elements, state, input) {
   const ui = state.ui ?? {};
   setText(elements.health, `${run.health ?? 0} / ${run.maxHealth ?? 0}`);
   setText(elements.node, run.currentNodeId ?? "start");
-  setText(elements.ability, input?.selectedAbilityId ?? ui.selectedAbilityId ?? "egg-bomb");
+  setText(elements.ability, input?.selectedAbilityId ?? ui.selectedAbilityId ?? ABILITY_IDS.EGG_BOMB);
   setText(elements.scene, formatScene(state.scene));
   setText(elements.message, ui.message ?? "");
   if (elements.mute) {
     elements.mute.textContent = ui.muted ? "♪" : "♫";
     elements.mute.setAttribute("aria-pressed", String(!ui.muted));
   }
+}
+
+export function ownedAbilityId(state, selectedAbilityId) {
+  const owned = state.run?.abilities?.length ? state.run.abilities : [ABILITY_IDS.EGG_BOMB];
+  return owned.includes(selectedAbilityId) ? selectedAbilityId : owned[0] ?? ABILITY_IDS.EGG_BOMB;
 }
 
 function ensureCanvasSize(canvas) {
@@ -68,18 +73,25 @@ function mapNodeHitboxes(state) {
   });
 }
 
-function rewardHitboxes(state) {
-  return (state.rewardChoices ?? []).slice(0, 3).map((reward, index) => ({
+export function rewardHitboxes(state) {
+  const rewards = state.rewardChoices ?? [];
+  const count = Math.max(1, rewards.length);
+  const width = count > 3 ? 190 : 230;
+  const gap = count > 3 ? 36 : 55;
+  const totalWidth = count * width + (count - 1) * gap;
+  const startX = (CANVAS.WIDTH - totalWidth) / 2;
+
+  return rewards.map((reward, index) => ({
     id: reward.id,
     reward,
-    x: 70 + index * 285,
+    x: startX + index * (width + gap),
     y: 145,
-    width: 230,
+    width,
     height: 210
   }));
 }
 
-function createEncounter(node, run) {
+export function createEncounter(node, run) {
   const boss = node.type === NODE_TYPES.BOSS;
   const elite = node.type === NODE_TYPES.ELITE;
   const enemyType = boss ? "boss" : elite ? "elite" : "grunt";
@@ -108,7 +120,10 @@ function createEncounter(node, run) {
       { id: "ledge-right", x: 620, y: 300, width: 180, height: 20 }
     ],
     hazards: [{ id: "spikes", type: "spikes", x: 435, y: CANVAS.GROUND_Y - 18, width: 112, height: 18, damage: 1 }],
-    artifacts: run.artifacts
+    artifacts: run.artifacts,
+    playerSpeed: TUNING.PLAYER_SPEED + (run.stats?.moveSpeedBonus ?? 0),
+    eggBombDamageBonus: run.stats?.eggBombDamageBonus ?? 0,
+    damageReduction: (run.artifacts ?? []).includes(ARTIFACT_IDS.SHELL_SHIELD) ? 0 : run.stats?.damageReduction ?? 0
   });
 }
 
@@ -177,6 +192,12 @@ export function mountKurczokerGame(root = globalThis.document) {
   let running = true;
   let lastTime = typeof performance !== "undefined" ? performance.now() : 0;
 
+  function startFreshRun() {
+    state = setUiMessage(resetRun(state), "Nowa wyprawa gotowa.");
+    running = true;
+    lastTime = typeof performance !== "undefined" ? performance.now() : 0;
+  }
+
   function startOrAdvance(point = input?.snapshot?.aim) {
     if (state.scene === SCENES.MAP) {
       const nodeId = chooseNextMapNode(state, point);
@@ -213,9 +234,7 @@ export function mountKurczokerGame(root = globalThis.document) {
   }
 
   function restart() {
-    state = setUiMessage(resetRun(state), "Nowa wyprawa gotowa.");
-    running = true;
-    lastTime = typeof performance !== "undefined" ? performance.now() : 0;
+    startFreshRun();
   }
 
   const input = createInputController({
@@ -236,6 +255,12 @@ export function mountKurczokerGame(root = globalThis.document) {
     lastTime = now;
 
     if (running) {
+      input.snapshot.selectedAbilityId = ownedAbilityId(state, input.snapshot.selectedAbilityId);
+      state = {
+        ...state,
+        ui: { ...state.ui, selectedAbilityId: input.snapshot.selectedAbilityId }
+      };
+
       if (state.scene === SCENES.BATTLE) {
         const ability = getAbilityById(input.snapshot.selectedAbilityId) ?? getAbilityById(ABILITY_IDS.EGG_BOMB);
         const canAct = state.battle?.phase === BATTLE_PHASES.PLAYER_TURN;
@@ -250,8 +275,7 @@ export function mountKurczokerGame(root = globalThis.document) {
         const battle = updateBattle(state.battle, battleInput, delta);
         state = {
           ...state,
-          battle,
-          ui: { ...state.ui, selectedAbilityId: input.snapshot.selectedAbilityId }
+          battle
         };
         if (actionPressed && previousPhase === BATTLE_PHASES.PLAYER_TURN) playEffect(audio, "shoot");
         state = stateAfterBattle(state, audio);

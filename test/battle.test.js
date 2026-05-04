@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { ABILITY_IDS, ARTIFACT_IDS, BATTLE_PHASES } from "../src/game/constants.js";
+import { ABILITY_IDS, ARTIFACT_IDS, BATTLE_PHASES, TUNING } from "../src/game/constants.js";
+import { getAbilityById } from "../src/game/abilities.js";
 import {
   applyDamageToActor,
   createBattleState,
@@ -44,10 +45,12 @@ const enemy = (overrides = {}) => ({
 
 test("createBattleState starts a player turn with cloned actors and timer", () => {
   const sourcePlayer = player();
-  const battle = createBattleState({ actors: [sourcePlayer], turnDurationMs: 5000 });
+  const battle = createBattleState({ actors: [sourcePlayer] });
 
   assert.equal(battle.phase, BATTLE_PHASES.PLAYER_TURN);
-  assert.equal(battle.turnTimeRemainingMs, 5000);
+  assert.equal(battle.turnTimeRemainingMs, TUNING.PLAYER_TURN_MS);
+  assert.equal(battle.gravity, TUNING.GRAVITY);
+  assert.equal(battle.playerSpeed, TUNING.PLAYER_SPEED);
   assert.equal(battle.actionFired, false);
   assert.notEqual(battle.actors[0], sourcePlayer);
 });
@@ -159,7 +162,7 @@ test("updateBattle applies movement constraints, platform landing, and hazard da
 test("guard chick summons expire by ttl during battle updates", () => {
   const battle = firePlayerAbility(
     createBattleState({ actors: [player(), enemy()] }),
-    { id: ABILITY_IDS.GUARD_CHICK, kind: "summon", ttl: 25, health: 2 }
+    { ...getAbilityById(ABILITY_IDS.GUARD_CHICK), summonTtl: 0.025, health: 2 }
   );
 
   assert.equal(battle.actors.some((actor) => actor.kind === "summon"), true);
@@ -167,6 +170,38 @@ test("guard chick summons expire by ttl during battle updates", () => {
   const next = updateBattle(battle, {}, 30);
 
   assert.equal(next.actors.some((actor) => actor.kind === "summon"), false);
+});
+
+test("battle tuning applies artifact stats to default rules", () => {
+  const faster = updateBattle(
+    createBattleState({
+      actors: [player({ x: 20 }), enemy()],
+      playerSpeed: TUNING.PLAYER_SPEED + 0.06
+    }),
+    { moveX: 1 },
+    100
+  );
+  const movedPlayer = faster.actors.find((actor) => actor.id === "player");
+  assert.equal(movedPlayer.x, 20 + (TUNING.PLAYER_SPEED + 0.06) * 100);
+
+  const empowered = firePlayerAbility(
+    createBattleState({ actors: [player(), enemy()], eggBombDamageBonus: 1 }),
+    getAbilityById(ABILITY_IDS.EGG_BOMB),
+    { x: 1, y: 0 }
+  );
+  assert.equal(empowered.projectiles[0].damage, getAbilityById(ABILITY_IDS.EGG_BOMB).damage + 1);
+
+  const reduced = updateBattle(
+    {
+      ...createBattleState({ actors: [player({ x: 10 }), enemy({ x: 24 })], damageReduction: 1, gravity: 0 }),
+      phase: BATTLE_PHASES.ENEMY_TURN
+    },
+    {},
+    16
+  );
+  const resolved = updateBattle(reduced, {}, 30);
+  const reducedPlayer = resolved.actors.find((actor) => actor.id === "player");
+  assert.equal(reducedPlayer.health, 10);
 });
 
 test("guard chick blocks the next enemy projectile", () => {

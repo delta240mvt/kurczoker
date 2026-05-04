@@ -1,19 +1,19 @@
-import { CANVAS, SCENES } from "./constants.js";
+import { ABILITY_IDS, ACTOR_KINDS, ACTOR_TEAMS, BATTLE_PHASES, CANVAS, NODE_TYPES, SCENES, TUNING } from "./constants.js";
 import { getAbilityById } from "./abilities.js";
 
 const SAMPLE_NODES = [
-  { id: "start", type: "start", label: "Start", depth: 0, nextNodeIds: ["battle-1"], payload: {} },
-  { id: "battle-1", type: "battle", label: "Zasadzka", depth: 1, nextNodeIds: ["treasure-1"], payload: {} },
-  { id: "treasure-1", type: "treasure", label: "Skarb", depth: 2, nextNodeIds: ["boss"], payload: {} },
-  { id: "boss", type: "boss", label: "Krol Kur", depth: 3, nextNodeIds: [], payload: {} }
+  { id: NODE_TYPES.START, type: NODE_TYPES.START, label: "Start", depth: 0, nextNodeIds: ["battle-1"], payload: {} },
+  { id: "battle-1", type: NODE_TYPES.BATTLE, label: "Zasadzka", depth: 1, nextNodeIds: ["treasure-1"], payload: {} },
+  { id: "treasure-1", type: NODE_TYPES.TREASURE, label: "Skarb", depth: 2, nextNodeIds: [NODE_TYPES.BOSS], payload: {} },
+  { id: NODE_TYPES.BOSS, type: NODE_TYPES.BOSS, label: "Krol Kur", depth: 3, nextNodeIds: [], payload: {} }
 ];
 
 const SAMPLE_BATTLE = {
   actors: [
     {
       id: "player",
-      kind: "player",
-      team: "player",
+      kind: ACTOR_KINDS.PLAYER,
+      team: ACTOR_TEAMS.PLAYER,
       x: 170,
       y: CANVAS.GROUND_Y - 58,
       width: 42,
@@ -23,8 +23,8 @@ const SAMPLE_BATTLE = {
     },
     {
       id: "enemy-1",
-      kind: "enemy",
-      team: "enemy",
+      kind: ACTOR_KINDS.ENEMY,
+      team: ACTOR_TEAMS.ENEMY,
       x: 700,
       y: CANVAS.GROUND_Y - 48,
       width: 46,
@@ -39,8 +39,8 @@ const SAMPLE_BATTLE = {
   ],
   hazards: [{ id: "spikes", type: "spikes", x: 435, y: CANVAS.GROUND_Y - 18, width: 112, height: 18, damage: 1 }],
   projectiles: [],
-  phase: "player-turn",
-  turnRemainingMs: 8000
+  phase: BATTLE_PHASES.PLAYER_TURN,
+  turnRemainingMs: TUNING.PLAYER_TURN_MS
 };
 
 function getCanvas(ctx) {
@@ -83,10 +83,10 @@ function drawPanel(ctx, x, y, width, height, fill = "rgba(255,255,255,0.88)") {
 }
 
 function nodeColor(type) {
-  if (type === "boss") return "#dc2626";
-  if (type === "treasure" || type === "shop") return "#eab308";
-  if (type === "elite") return "#7c3aed";
-  if (type === "start") return "#16a34a";
+  if (type === NODE_TYPES.BOSS) return "#dc2626";
+  if (type === NODE_TYPES.TREASURE || type === NODE_TYPES.SHOP) return "#eab308";
+  if (type === NODE_TYPES.ELITE) return "#7c3aed";
+  if (type === NODE_TYPES.START) return "#16a34a";
   return "#2563eb";
 }
 
@@ -95,7 +95,7 @@ function drawActor(ctx, actor) {
   const y = actor.y ?? 0;
   const width = actor.width ?? 38;
   const height = actor.height ?? 48;
-  const isPlayer = actor.team === "player" || actor.kind === "player";
+  const isPlayer = actor.team === ACTOR_TEAMS.PLAYER || actor.kind === ACTOR_KINDS.PLAYER;
 
   ctx.fillStyle = isPlayer ? "#facc15" : "#ef4444";
   ctx.fillRect(x, y + height * 0.22, width, height * 0.7);
@@ -135,7 +135,7 @@ export function drawMap(ctx, state = {}) {
   fillBackground(ctx, "#eef6ff", "#bbf7d0");
   const canvas = getCanvas(ctx);
   const nodes = state.map?.nodes?.length ? state.map.nodes : SAMPLE_NODES;
-  const currentNodeId = state.run?.currentNodeId ?? "start";
+  const currentNodeId = state.run?.currentNodeId ?? NODE_TYPES.START;
   const offered = new Set(state.run?.offeredNodeIds ?? []);
   const completed = new Set(state.run?.completedNodeIds ?? []);
 
@@ -226,7 +226,7 @@ export function drawBattle(ctx, state = {}) {
   }
 
   const seconds = Math.max(0, Math.ceil((battle.turnTimeRemainingMs ?? battle.turnRemainingMs ?? 0) / 1000));
-  writeText(ctx, `Tura: ${battle.phase ?? "player-turn"}  ${seconds}s`, 32, 48, {
+  writeText(ctx, `Tura: ${battle.phase ?? BATTLE_PHASES.PLAYER_TURN}  ${seconds}s`, 32, 48, {
     font: "bold 24px Arial, sans-serif"
   });
 }
@@ -236,18 +236,24 @@ export function drawReward(ctx, state = {}) {
   const choices = state.rewardChoices?.length
     ? state.rewardChoices
     : [
-        { id: "guard-chick", type: "ability", label: "Pisklak Straznik", value: 1 },
+        { id: ABILITY_IDS.GUARD_CHICK, type: "ability", label: "Pisklak Straznik", value: 1 },
         { id: "gold", type: "gold", label: "Ziarno zlota", value: 15 },
         { id: "heal", type: "heal", label: "Rosol odwagi", value: 1 }
       ];
 
   writeText(ctx, "Wybierz nagrode", 32, 52, { font: "bold 30px Arial, sans-serif" });
-  choices.slice(0, 3).forEach((reward, index) => {
-    const x = 70 + index * 285;
-    drawPanel(ctx, x, 145, 230, 210, "#fff7ed");
-    writeText(ctx, reward.label ?? reward.id, x + 20, 205, { font: "bold 19px Arial, sans-serif" });
+  const count = Math.max(1, choices.length);
+  const cardWidth = count > 3 ? 190 : 230;
+  const gap = count > 3 ? 36 : 55;
+  const totalWidth = count * cardWidth + (count - 1) * gap;
+  const startX = (CANVAS.WIDTH - totalWidth) / 2;
+
+  choices.forEach((reward, index) => {
+    const x = startX + index * (cardWidth + gap);
+    drawPanel(ctx, x, 145, cardWidth, 210, "#fff7ed");
+    writeText(ctx, reward.label ?? reward.id, x + 20, 205, { font: "bold 18px Arial, sans-serif" });
     writeText(ctx, reward.type ?? "reward", x + 20, 245, { color: "#475569" });
-    writeText(ctx, `+${reward.value ?? 1}`, x + 20, 292, { font: "bold 34px Arial, sans-serif", color: "#b45309" });
+    writeText(ctx, `+${reward.value ?? 1}`, x + 20, 292, { font: "bold 32px Arial, sans-serif", color: "#b45309" });
   });
 }
 
@@ -255,13 +261,13 @@ export function drawHud(ctx, state = {}) {
   const canvas = getCanvas(ctx);
   const run = state.run ?? {};
   const ui = state.ui ?? {};
-  const ability = getAbilityById(ui.selectedAbilityId ?? run.abilities?.[0] ?? "egg-bomb");
+  const ability = getAbilityById(ui.selectedAbilityId ?? run.abilities?.[0] ?? ABILITY_IDS.EGG_BOMB);
 
   drawPanel(ctx, 18, canvas.height - 78, canvas.width - 36, 54, "rgba(248,250,252,0.92)");
   writeText(ctx, `HP ${run.health ?? 3}/${run.maxHealth ?? 3}`, 38, canvas.height - 44, {
     font: "bold 18px Arial, sans-serif"
   });
-  writeText(ctx, `Wezel: ${run.currentNodeId ?? "start"}`, 170, canvas.height - 44, {
+  writeText(ctx, `Wezel: ${run.currentNodeId ?? NODE_TYPES.START}`, 170, canvas.height - 44, {
     color: "#334155"
   });
   writeText(ctx, `Akcja: ${ability.label ?? ability.id}`, 350, canvas.height - 44, { color: "#334155" });

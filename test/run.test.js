@@ -38,6 +38,20 @@ test("completeCurrentNode completes battle and offers reward choices", () => {
   assert.ok(next.rewardChoices.length >= 1);
 });
 
+test("reward choice bonus increases playable reward choices", () => {
+  const selected = selectMapNode(startRun(8), startRun(8).run.offeredNodeIds[0]);
+  const boosted = {
+    ...selected,
+    run: {
+      ...selected.run,
+      stats: { rewardChoiceBonus: 1 }
+    }
+  };
+  const next = completeCurrentNode(boosted);
+
+  assert.equal(next.rewardChoices.length, 4);
+});
+
 test("applyRunReward adds reward and returns to map with next offered nodes", () => {
   const selected = selectMapNode(startRun(8), startRun(8).run.offeredNodeIds[0]);
   const rewarded = completeCurrentNode(selected);
