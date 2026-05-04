@@ -225,7 +225,7 @@ export function drawBattle(ctx, state = {}) {
     ctx.fill();
   }
 
-  const seconds = Math.max(0, Math.ceil((battle.turnRemainingMs ?? 0) / 1000));
+  const seconds = Math.max(0, Math.ceil((battle.turnTimeRemainingMs ?? battle.turnRemainingMs ?? 0) / 1000));
   writeText(ctx, `Tura: ${battle.phase ?? "player-turn"}  ${seconds}s`, 32, 48, {
     font: "bold 24px Arial, sans-serif"
   });

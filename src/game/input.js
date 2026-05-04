@@ -55,8 +55,13 @@ export function createInputController(options = {}) {
     jump: false,
     aim: { x: 0, y: 0 },
     firePressed: false,
+    actionQueued: false,
     selectedAbilityId: options.selectedAbilityId ?? ABILITY_IDS.EGG_BOMB
   };
+
+  function queueAction() {
+    snapshot.actionQueued = true;
+  }
 
   function listen(element, type, handler, listenerOptions) {
     if (!element?.addEventListener) return;
@@ -97,6 +102,7 @@ export function createInputController(options = {}) {
     if (event.code === "Space" || event.code === "Enter") {
       event.preventDefault?.();
       snapshot.firePressed = true;
+      if (!event.repeat) queueAction();
     }
 
     const abilityId = ABILITY_KEYS.get(event.code);
@@ -125,7 +131,6 @@ export function createInputController(options = {}) {
   function handlePointerDown(event) {
     event.preventDefault?.();
     setAimFromEvent(event);
-    snapshot.firePressed = true;
     canvas?.setPointerCapture?.(event.pointerId);
   }
 
@@ -135,14 +140,18 @@ export function createInputController(options = {}) {
 
   function handlePointerUp(event) {
     setAimFromEvent(event);
-    snapshot.firePressed = false;
+    queueAction();
+    canvas?.releasePointerCapture?.(event.pointerId);
+  }
+
+  function handlePointerCancel(event) {
+    setAimFromEvent(event);
     canvas?.releasePointerCapture?.(event.pointerId);
   }
 
   function handleTouchStart(event) {
     event.preventDefault?.();
     setAimFromEvent(event);
-    snapshot.firePressed = true;
   }
 
   function handleTouchMove(event) {
@@ -153,7 +162,12 @@ export function createInputController(options = {}) {
   function handleTouchEnd(event) {
     event.preventDefault?.();
     setAimFromEvent(event);
-    snapshot.firePressed = false;
+    queueAction();
+  }
+
+  function handleTouchCancel(event) {
+    event.preventDefault?.();
+    setAimFromEvent(event);
   }
 
   listen(target, "keydown", handleKeyDown);
@@ -161,11 +175,11 @@ export function createInputController(options = {}) {
   listen(canvas, "pointerdown", handlePointerDown);
   listen(canvas, "pointermove", handlePointerMove);
   listen(canvas, "pointerup", handlePointerUp);
-  listen(canvas, "pointercancel", handlePointerUp);
+  listen(canvas, "pointercancel", handlePointerCancel);
   listen(canvas, "touchstart", handleTouchStart, { passive: false });
   listen(canvas, "touchmove", handleTouchMove, { passive: false });
   listen(canvas, "touchend", handleTouchEnd, { passive: false });
-  listen(canvas, "touchcancel", handleTouchEnd, { passive: false });
+  listen(canvas, "touchcancel", handleTouchCancel, { passive: false });
 
   const startButton = options.startButton ?? getButton(root, ["[data-game-start]", "[data-kurczoker-start]"]);
   const restartButton = options.restartButton ?? getButton(root, ["[data-game-restart]", "[data-kurczoker-restart]"]);
@@ -177,6 +191,11 @@ export function createInputController(options = {}) {
 
   return {
     snapshot,
+    consumeAction() {
+      const queued = snapshot.actionQueued;
+      snapshot.actionQueued = false;
+      return queued;
+    },
     destroy() {
       while (cleanups.length) cleanups.pop()();
       pressed.clear();

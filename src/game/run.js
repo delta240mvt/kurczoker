@@ -51,6 +51,10 @@ export function selectMapNode(state, nodeId) {
 }
 
 export function completeCurrentNode(state) {
+  if (state.run.defeated || state.run.completed) {
+    return setUiMessage(state, "Ta wyprawa jest zakonczona. Uruchom restart.");
+  }
+
   const node = getNodeById(state.map, state.run.currentNodeId);
 
   if (!node) {
@@ -87,6 +91,10 @@ export function completeCurrentNode(state) {
 export function applyRunReward(state, reward) {
   if (!state.run) {
     return applyRewardToRun(state, reward);
+  }
+
+  if (state.run.defeated || state.run.completed) {
+    return setUiMessage(state, "Ta wyprawa jest zakonczona. Uruchom restart.");
   }
 
   const run = applyRewardToRun(state.run, reward);

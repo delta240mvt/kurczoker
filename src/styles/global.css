@@ -352,8 +352,10 @@ button {
   }
 
   .hero h1 {
-    font-size: clamp(3.2rem, 18vw, 5rem);
+    max-width: 100%;
+    font-size: clamp(2.6rem, 15vw, 5rem);
     text-shadow: 0 4px 0 var(--amber), 0 7px 0 var(--outline);
+    overflow-wrap: anywhere;
   }
 
   .game-shell__topline {
@@ -373,8 +375,18 @@ button {
     width: 100%;
   }
 
+  .canvas-frame {
+    aspect-ratio: auto;
+  }
+
+  .canvas-frame canvas {
+    aspect-ratio: 16 / 9;
+    height: auto;
+  }
+
   .canvas-frame__status {
     position: static;
+    display: block;
     border-width: 2px 0 0;
     border-radius: 0;
   }

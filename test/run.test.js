@@ -129,6 +129,21 @@ test("defeated runs cannot select new map nodes", () => {
   assert.equal(next.run.defeated, true);
 });
 
+test("terminal runs ignore completion and reward lifecycle actions", () => {
+  const defeated = markRunDefeated(startRun(4));
+  const completed = markRunComplete(startRun(5));
+
+  const afterDefeatedComplete = completeCurrentNode(defeated);
+  const afterDefeatedReward = applyRunReward(defeated, { id: "heal-small", type: "heal", label: "Heal", value: 1 });
+  const afterCompletedReward = applyRunReward(completed, { id: "gold-small", type: "gold", label: "Gold", value: 5 });
+
+  assert.equal(afterDefeatedComplete.scene, SCENES.GAME_OVER);
+  assert.equal(afterDefeatedReward.scene, SCENES.GAME_OVER);
+  assert.equal(afterDefeatedReward.run.health, 0);
+  assert.equal(afterCompletedReward.scene, SCENES.RUN_COMPLETE);
+  assert.equal(afterCompletedReward.run.completed, true);
+});
+
 test("markRunComplete can complete the current run directly", () => {
   const next = markRunComplete(startRun(4));
 

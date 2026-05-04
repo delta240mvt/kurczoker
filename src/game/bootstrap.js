@@ -2,7 +2,7 @@ import { ABILITY_IDS, BATTLE_PHASES, CANVAS, NODE_TYPES, SCENES } from "./consta
 import { createEnemy, createPlayer } from "./actors.js";
 import { getAbilityById } from "./abilities.js";
 import { createAudioController, playEffect, setMuted } from "./audio.js";
-import { createBattleState, resolveEnemyTurn, updateBattle } from "./battle.js";
+import { createBattleState, updateBattle } from "./battle.js";
 import { getNodeById } from "./map.js";
 import { resetRun, setUiMessage, toggleMute } from "./state.js";
 import { applyRunReward, completeCurrentNode, markRunDefeated, selectMapNode, startRun } from "./run.js";
@@ -236,11 +236,14 @@ export function mountKurczokerGame(root = globalThis.document) {
     lastTime = now;
 
     if (running) {
-    if (state.scene === SCENES.BATTLE) {
+      if (state.scene === SCENES.BATTLE) {
         const ability = getAbilityById(input.snapshot.selectedAbilityId) ?? getAbilityById(ABILITY_IDS.EGG_BOMB);
+        const canAct = state.battle?.phase === BATTLE_PHASES.PLAYER_TURN;
+        const actionPressed = canAct ? input.consumeAction() : false;
         const battleInput = {
           ...input.snapshot,
           ability,
+          firePressed: actionPressed,
           aim: canvasPointToAim(canvas, input.snapshot.aim)
         };
         const previousPhase = state.battle?.phase;
@@ -250,10 +253,10 @@ export function mountKurczokerGame(root = globalThis.document) {
           battle,
           ui: { ...state.ui, selectedAbilityId: input.snapshot.selectedAbilityId }
         };
-        if (input.snapshot.firePressed && previousPhase === BATTLE_PHASES.PLAYER_TURN) playEffect(audio, "shoot");
+        if (actionPressed && previousPhase === BATTLE_PHASES.PLAYER_TURN) playEffect(audio, "shoot");
         state = stateAfterBattle(state, audio);
-      } else if (input.snapshot.firePressed && [SCENES.MAP, SCENES.REWARD].includes(state.scene)) {
-        startOrAdvance(input.snapshot.aim);
+      } else if ([SCENES.MAP, SCENES.REWARD].includes(state.scene)) {
+        if (input.consumeAction()) startOrAdvance(input.snapshot.aim);
       }
     }
 

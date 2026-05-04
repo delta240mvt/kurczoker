@@ -95,22 +95,45 @@ test("resolveEnemyTurn deterministically damages the player and starts next play
   const battle = createBattleState({ actors: [player(), enemy()], turnDurationMs: 7000, phase: BATTLE_PHASES.ENEMY_TURN });
 
   const resolved = resolveEnemyTurn(battle);
-  const damagedPlayer = resolved.actors.find((actor) => actor.id === "player");
 
-  assert.equal(damagedPlayer.health, 9);
-  assert.equal(resolved.phase, BATTLE_PHASES.PLAYER_TURN);
-  assert.equal(resolved.turnTimeRemainingMs, 7000);
-  assert.equal(resolved.actionFired, false);
-  assert.equal(resolved.turnNumber, 2);
+  assert.equal(resolved.phase, BATTLE_PHASES.PROJECTILE);
+  assert.equal(resolved.projectiles.length, 1);
+  assert.equal(resolved.projectiles[0].team, "enemy");
 });
 
 test("updateBattle resolves enemy turn without external orchestration", () => {
-  const battle = createBattleState({ actors: [player(), enemy()], phase: BATTLE_PHASES.ENEMY_TURN });
+  const battle = createBattleState({
+    actors: [player({ x: 10 }), enemy({ x: 24 })],
+    phase: BATTLE_PHASES.ENEMY_TURN,
+    gravity: 0
+  });
 
-  const resolved = updateBattle(battle, {}, 100);
+  const fired = updateBattle(battle, {}, 16);
+  const resolved = updateBattle(fired, {}, 30);
   const damagedPlayer = resolved.actors.find((actor) => actor.id === "player");
 
   assert.equal(resolved.phase, BATTLE_PHASES.PLAYER_TURN);
+  assert.equal(damagedPlayer.health, 9);
+});
+
+test("enemy projectile reaches the player in default encounters", () => {
+  let battle = createBattleState({
+    actors: [player(), enemy()],
+    phase: BATTLE_PHASES.ENEMY_TURN,
+    platforms: [
+      { id: "ledge-left", x: 92, y: 330, width: 190, height: 20 },
+      { id: "ledge-right", x: 620, y: 300, width: 180, height: 20 }
+    ]
+  });
+
+  battle = updateBattle(battle, {}, 16);
+  for (let i = 0; i < 40 && battle.phase === BATTLE_PHASES.PROJECTILE; i += 1) {
+    battle = updateBattle(battle, {}, 34);
+  }
+
+  const damagedPlayer = battle.actors.find((actor) => actor.id === "player");
+
+  assert.equal(battle.phase, BATTLE_PHASES.PLAYER_TURN);
   assert.equal(damagedPlayer.health, 9);
 });
 
@@ -146,6 +169,26 @@ test("guard chick summons expire by ttl during battle updates", () => {
   assert.equal(next.actors.some((actor) => actor.kind === "summon"), false);
 });
 
+test("guard chick blocks the next enemy projectile", () => {
+  const battle = createBattleState({
+    actors: [
+      player({ x: 10 }),
+      { id: "summon-1", kind: "summon", team: "player", x: 20, y: 70, vx: 0, vy: 0, width: 10, height: 10, health: 1, maxHealth: 1, ttl: 1000 },
+      enemy({ x: 35 })
+    ],
+    phase: BATTLE_PHASES.ENEMY_TURN,
+    gravity: 0
+  });
+
+  const fired = updateBattle(battle, {}, 16);
+  const resolved = updateBattle(fired, {}, 35);
+  const blockedPlayer = resolved.actors.find((actor) => actor.id === "player");
+  const summon = resolved.actors.find((actor) => actor.id === "summon-1");
+
+  assert.equal(blockedPlayer.health, 10);
+  assert.equal(summon.health, 0);
+});
+
 test("crest jump and mana grain resolve as movement and buff actions", () => {
   const wounded = player({ health: 8, maxHealth: 10 });
   const battle = createBattleState({ actors: [wounded, enemy()] });
@@ -162,27 +205,40 @@ test("crest jump and mana grain resolve as movement and buff actions", () => {
   assert.equal(jumpPlayer.vy, -0.5);
   assert.ok(jumpPlayer.vx > 0);
 
-  const healed = firePlayerAbility(
-    createBattleState({ actors: [wounded, enemy()] }),
-    { id: ABILITY_IDS.MANA_GRAIN, kind: "buff" }
-  );
+  const healed = firePlayerAbility(createBattleState({ actors: [wounded, enemy()] }), {
+    id: ABILITY_IDS.MANA_GRAIN,
+    kind: "buff"
+  });
   const healedPlayer = healed.actors.find((actor) => actor.id === "player");
 
   assert.equal(healed.projectiles.length, 0);
   assert.equal(healedPlayer.health, 9);
   assert.deepEqual(healed.buffs, [{ id: ABILITY_IDS.MANA_GRAIN, turns: 1 }]);
+
+  const empowered = firePlayerAbility(
+    { ...healed, phase: BATTLE_PHASES.PLAYER_TURN, actionFired: false },
+    { id: ABILITY_IDS.EGG_BOMB, kind: "projectile", damage: 2, radius: 18 },
+    { x: 1, y: 0 }
+  );
+
+  assert.equal(empowered.projectiles[0].damage, 3);
+  assert.equal(empowered.projectiles[0].explosionRadius, 28);
+  assert.deepEqual(empowered.buffs, []);
 });
 
 test("shell shield artifact absorbs one enemy hit per battle", () => {
   const battle = createBattleState({
-    actors: [player(), enemy()],
+    actors: [player({ x: 10 }), enemy({ x: 24 })],
     artifacts: [ARTIFACT_IDS.SHELL_SHIELD],
-    phase: BATTLE_PHASES.ENEMY_TURN
+    phase: BATTLE_PHASES.ENEMY_TURN,
+    gravity: 0
   });
 
-  const shielded = resolveEnemyTurn(battle);
+  const fired = resolveEnemyTurn(battle);
+  const shielded = updateBattle(fired, {}, 30);
   const firstPlayer = shielded.actors.find((actor) => actor.id === "player");
-  const damaged = resolveEnemyTurn({ ...shielded, phase: BATTLE_PHASES.ENEMY_TURN });
+  const firedAgain = resolveEnemyTurn({ ...shielded, phase: BATTLE_PHASES.ENEMY_TURN });
+  const damaged = updateBattle(firedAgain, {}, 30);
   const secondPlayer = damaged.actors.find((actor) => actor.id === "player");
 
   assert.equal(firstPlayer.health, 10);

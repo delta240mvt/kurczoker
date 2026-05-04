@@ -1,5 +1,5 @@
 import { ABILITY_IDS, ACTOR_KINDS, ACTOR_TEAMS, ARTIFACT_IDS, BATTLE_PHASES, CANVAS, TUNING } from "./constants.js";
-import { clamp, rectsOverlap, resolveExplosion, stepProjectile } from "./physics.js";
+import { circleHitsRect, clamp, rectsOverlap, resolveExplosion, stepProjectile } from "./physics.js";
 
 const DEFAULT_WIDTH = CANVAS.WIDTH;
 const DEFAULT_PLAYER_DAMAGE = 1;
@@ -22,8 +22,52 @@ function firstLivingEnemy(actors) {
   return actors.find((actor) => actor.team === ACTOR_TEAMS.ENEMY && living(actor));
 }
 
+function firstLivingTargetForEnemy(actors) {
+  return (
+    actors.find((actor) => actor.kind === ACTOR_KINDS.SUMMON && actor.team === ACTOR_TEAMS.PLAYER && living(actor)) ??
+    playerActor(actors)
+  );
+}
+
 function actorBounds(actor) {
   return { x: actor.x, y: actor.y, width: actor.width, height: actor.height };
+}
+
+function shieldBlocksProjectile(battle, actors, projectile, impact) {
+  if (projectile.team !== ACTOR_TEAMS.ENEMY || (battle.usedArtifacts ?? []).includes(ARTIFACT_IDS.SHELL_SHIELD)) {
+    return false;
+  }
+
+  const player = playerActor(actors);
+  if (!player || !(battle.artifacts ?? []).includes(ARTIFACT_IDS.SHELL_SHIELD)) {
+    return false;
+  }
+
+  return circleHitsRect(
+    { x: impact.x, y: impact.y, radius: projectile.explosionRadius ?? projectile.radius ?? 0 },
+    actorBounds(player)
+  );
+}
+
+function enemyProjectileVelocity(enemy, target, battle) {
+  const start = {
+    x: enemy.x + enemy.width / 2,
+    y: enemy.y + enemy.height / 2
+  };
+  const end = {
+    x: target.x + target.width / 2,
+    y: target.y + target.height / 2
+  };
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const gravity = battle.gravity ?? TUNING.GRAVITY;
+  const flightTime = clamp(Math.abs(dx) / 0.9, 80, 950);
+
+  return {
+    start,
+    vx: dx / flightTime,
+    vy: (dy - 0.5 * gravity * flightTime * flightTime) / flightTime
+  };
 }
 
 function withTerminalPhase(battle) {
@@ -90,40 +134,70 @@ function updateActorsForWorld(battle, input, delta) {
 }
 
 function updateProjectilePhase(battle, delta) {
-  const world = {
-    gravity: battle.gravity ?? TUNING.GRAVITY,
-    groundY: battle.groundY ?? CANVAS.GROUND_Y,
-    platforms: battle.platforms,
-    hazards: battle.hazards
-  };
   let actors = battle.actors;
   const projectiles = [];
+  let resolvedTeam = null;
 
   for (const projectile of battle.projectiles) {
+    const world = {
+      gravity: battle.gravity ?? TUNING.GRAVITY,
+      groundY: battle.groundY ?? CANVAS.GROUND_Y,
+      platforms: projectile.ignorePlatforms ? [] : battle.platforms,
+      hazards: battle.hazards
+    };
     const nextProjectile = stepProjectile(projectile, delta, world);
-    const hitActor = actors.find(
-      (actor) =>
-        actor.team !== projectile.team &&
-        living(actor) &&
-        rectsOverlap(actorBounds(actor), {
-          x: nextProjectile.x - (nextProjectile.explosionRadius ?? nextProjectile.radius ?? 0),
-          y: nextProjectile.y - (nextProjectile.explosionRadius ?? nextProjectile.radius ?? 0),
-          width: (nextProjectile.explosionRadius ?? nextProjectile.radius ?? 0) * 2,
-          height: (nextProjectile.explosionRadius ?? nextProjectile.radius ?? 0) * 2
-        })
-    );
+    const projectileArea = {
+      x: nextProjectile.x - (nextProjectile.explosionRadius ?? nextProjectile.radius ?? 0),
+      y: nextProjectile.y - (nextProjectile.explosionRadius ?? nextProjectile.radius ?? 0),
+      width: (nextProjectile.explosionRadius ?? nextProjectile.radius ?? 0) * 2,
+      height: (nextProjectile.explosionRadius ?? nextProjectile.radius ?? 0) * 2
+    };
+    const preferredTarget = projectile.targetId
+      ? actors.find((actor) => actor.id === projectile.targetId && living(actor) && rectsOverlap(actorBounds(actor), projectileArea))
+      : null;
+    const hitActor =
+      preferredTarget ??
+      actors.find((actor) => actor.team !== projectile.team && living(actor) && rectsOverlap(actorBounds(actor), projectileArea));
 
     if (!nextProjectile.active || hitActor) {
-      actors = resolveExplosion(actors, {
-        x: nextProjectile.x,
-        y: nextProjectile.y,
-        radius: projectile.explosionRadius ?? projectile.radius ?? 0,
-        damage: projectile.damage ?? DEFAULT_PLAYER_DAMAGE,
-        knockback: projectile.knockback ?? 0
-      });
+      resolvedTeam = projectile.team;
+      if (shieldBlocksProjectile(battle, actors, projectile, nextProjectile)) {
+        battle = {
+          ...battle,
+          usedArtifacts: [...(battle.usedArtifacts ?? []), ARTIFACT_IDS.SHELL_SHIELD]
+        };
+      } else if (projectile.blockedBySummon && hitActor?.kind === ACTOR_KINDS.SUMMON) {
+        actors = actors.map((actor) => {
+          if (actor.id !== hitActor.id) return actor;
+          return {
+            ...actor,
+            health: clamp((actor.health ?? 0) - (projectile.damage ?? DEFAULT_ENEMY_DAMAGE), 0, actor.maxHealth ?? actor.health ?? 0)
+          };
+        });
+      } else {
+        actors = resolveExplosion(actors, {
+          x: nextProjectile.x,
+          y: nextProjectile.y,
+          radius: projectile.explosionRadius ?? projectile.radius ?? 0,
+          damage: projectile.damage ?? DEFAULT_PLAYER_DAMAGE,
+          knockback: projectile.knockback ?? 0
+        });
+      }
     } else {
       projectiles.push(nextProjectile);
     }
+  }
+
+  if (projectiles.length === 0 && resolvedTeam === ACTOR_TEAMS.ENEMY) {
+    return withTerminalPhase({
+      ...battle,
+      actors,
+      projectiles,
+      phase: BATTLE_PHASES.PLAYER_TURN,
+      turnTimeRemainingMs: battle.turnDurationMs,
+      actionFired: false,
+      turnNumber: battle.turnNumber + 1
+    });
   }
 
   return {
@@ -263,6 +337,9 @@ export function firePlayerAbility(battle, ability = {}, aim = { x: 1, y: 0 }) {
 
   const length = Math.hypot(aim?.x ?? 1, aim?.y ?? 0) || 1;
   const speed = ability.speed ?? TUNING.PROJECTILE_SPEED;
+  const manaBuff = (battle.buffs ?? []).find((buff) => buff.id === ABILITY_IDS.MANA_GRAIN);
+  const damageBonus = manaBuff ? 1 : 0;
+  const radiusBonus = manaBuff ? 10 : 0;
   const projectile = {
     id: `projectile-${battle.turnNumber}`,
     team: ACTOR_TEAMS.PLAYER,
@@ -271,14 +348,15 @@ export function firePlayerAbility(battle, ability = {}, aim = { x: 1, y: 0 }) {
     vx: ((aim?.x ?? 1) / length) * speed,
     vy: ((aim?.y ?? 0) / length) * speed,
     radius: 4,
-    explosionRadius: ability.radius ?? 18,
-    damage: ability.damage ?? DEFAULT_PLAYER_DAMAGE,
+    explosionRadius: (ability.radius ?? 18) + radiusBonus,
+    damage: (ability.damage ?? DEFAULT_PLAYER_DAMAGE) + damageBonus,
     knockback: ability.knockback ?? 1,
     active: true
   };
 
   return {
     ...battle,
+    buffs: (battle.buffs ?? []).filter((buff) => buff.id !== ABILITY_IDS.MANA_GRAIN),
     actionFired: true,
     phase: BATTLE_PHASES.PROJECTILE,
     projectiles: [...(battle.projectiles ?? []), projectile]
@@ -287,25 +365,36 @@ export function firePlayerAbility(battle, ability = {}, aim = { x: 1, y: 0 }) {
 
 export function resolveEnemyTurn(battle) {
   const enemy = firstLivingEnemy(battle.actors);
-  const player = playerActor(battle.actors);
+  const target = firstLivingTargetForEnemy(battle.actors);
 
-  if (!enemy || !player || !living(player)) {
+  if (!enemy || !target || !living(target)) {
     return withTerminalPhase(battle);
   }
 
-  let next = applyDamageToActor(battle, player.id, enemy.damage ?? DEFAULT_ENEMY_DAMAGE, { sourceTeam: ACTOR_TEAMS.ENEMY });
-  next = withTerminalPhase(next);
-
-  if ([BATTLE_PHASES.WON, BATTLE_PHASES.LOST].includes(next.phase)) {
-    return next;
-  }
-
+  const velocity = enemyProjectileVelocity(enemy, target, battle);
   return {
-    ...next,
-    phase: BATTLE_PHASES.PLAYER_TURN,
-    turnTimeRemainingMs: next.turnDurationMs,
-    actionFired: false,
-    turnNumber: next.turnNumber + 1
+    ...battle,
+    phase: BATTLE_PHASES.PROJECTILE,
+    actionFired: true,
+    projectiles: [
+      ...(battle.projectiles ?? []),
+      {
+        id: `enemy-projectile-${battle.turnNumber}`,
+        team: ACTOR_TEAMS.ENEMY,
+        targetId: target.id,
+        blockedBySummon: target.kind === ACTOR_KINDS.SUMMON,
+        x: velocity.start.x,
+        y: velocity.start.y,
+        vx: velocity.vx,
+        vy: velocity.vy,
+        radius: 4,
+        ignorePlatforms: true,
+        explosionRadius: target.kind === ACTOR_KINDS.SUMMON ? 6 : 22,
+        damage: enemy.damage ?? DEFAULT_ENEMY_DAMAGE,
+        knockback: 0.7,
+        active: true
+      }
+    ]
   };
 }
 
