@@ -40,6 +40,15 @@ function pointerEvent(overrides = {}) {
   };
 }
 
+function touchEvent(overrides = {}) {
+  return {
+    touches: [],
+    changedTouches: [],
+    preventDefault() {},
+    ...overrides
+  };
+}
+
 test("input queues pointer actions only on completed release events", () => {
   const target = createEventTarget();
   const canvas = createCanvas();
@@ -113,6 +122,142 @@ test("input keeps the first active pointer from being hijacked by another pointe
   canvas.listeners.get("pointerup")(pointerEvent({ pointerId: 1, clientX: 120, clientY: 80 }));
 
   assert.deepEqual(input.snapshot.aim, { x: 120, y: 80 });
+  assert.equal(input.consumeAction(), true);
+  assert.equal(input.consumeAction(), false);
+});
+
+test("input keeps the first active touch from being hijacked by another touch", () => {
+  const target = createEventTarget();
+  const canvas = createCanvas();
+  const input = createInputController({ target, canvas });
+
+  canvas.listeners.get("touchstart")(touchEvent({
+    touches: [{ identifier: 1, clientX: 100, clientY: 500 }],
+    changedTouches: [{ identifier: 1, clientX: 100, clientY: 500 }]
+  }));
+  assert.deepEqual(input.snapshot.aim, { x: 100, y: 500 });
+  assert.equal(input.snapshot.moveX, -1);
+  assert.equal(input.snapshot.jump, false);
+
+  canvas.listeners.get("touchstart")(touchEvent({
+    touches: [
+      { identifier: 1, clientX: 100, clientY: 500 },
+      { identifier: 2, clientX: 800, clientY: 80 }
+    ],
+    changedTouches: [{ identifier: 2, clientX: 800, clientY: 80 }]
+  }));
+  canvas.listeners.get("touchmove")(touchEvent({
+    touches: [
+      { identifier: 1, clientX: 100, clientY: 500 },
+      { identifier: 2, clientX: 820, clientY: 90 }
+    ],
+    changedTouches: [{ identifier: 2, clientX: 820, clientY: 90 }]
+  }));
+  canvas.listeners.get("touchend")(touchEvent({
+    touches: [{ identifier: 1, clientX: 100, clientY: 500 }],
+    changedTouches: [{ identifier: 2, clientX: 820, clientY: 90 }]
+  }));
+
+  assert.deepEqual(input.snapshot.aim, { x: 100, y: 500 });
+  assert.equal(input.snapshot.moveX, -1);
+  assert.equal(input.snapshot.jump, false);
+  assert.equal(input.consumeAction(), false);
+
+  canvas.listeners.get("touchmove")(touchEvent({
+    touches: [{ identifier: 1, clientX: 120, clientY: 80 }],
+    changedTouches: [{ identifier: 1, clientX: 120, clientY: 80 }]
+  }));
+  assert.deepEqual(input.snapshot.aim, { x: 120, y: 80 });
+  assert.equal(input.snapshot.jump, true);
+
+  canvas.listeners.get("touchend")(touchEvent({
+    changedTouches: [{ identifier: 1, clientX: 120, clientY: 80 }]
+  }));
+
+  assert.deepEqual(input.snapshot.aim, { x: 120, y: 80 });
+  assert.equal(input.snapshot.moveX, 0);
+  assert.equal(input.snapshot.jump, false);
+  assert.equal(input.consumeAction(), true);
+  assert.equal(input.consumeAction(), false);
+});
+
+test("input ignores stray secondary touchend while active touch remains down", () => {
+  const target = createEventTarget();
+  const canvas = createCanvas();
+  const input = createInputController({ target, canvas });
+
+  canvas.listeners.get("touchstart")(touchEvent({
+    touches: [{ identifier: 1, clientX: 100, clientY: 500 }],
+    changedTouches: [{ identifier: 1, clientX: 100, clientY: 500 }]
+  }));
+
+  canvas.listeners.get("touchend")(touchEvent({
+    touches: [{ identifier: 1, clientX: 100, clientY: 500 }],
+    changedTouches: [{ identifier: 2, clientX: 800, clientY: 80 }]
+  }));
+
+  assert.deepEqual(input.snapshot.aim, { x: 100, y: 500 });
+  assert.equal(input.snapshot.moveX, -1);
+  assert.equal(input.consumeAction(), false);
+});
+
+test("input resets touch movement on active touchcancel without queueing action", () => {
+  const target = createEventTarget();
+  const canvas = createCanvas();
+  const input = createInputController({ target, canvas });
+
+  canvas.listeners.get("touchstart")(touchEvent({
+    touches: [{ identifier: 1, clientX: 100, clientY: 500 }],
+    changedTouches: [{ identifier: 1, clientX: 100, clientY: 500 }]
+  }));
+  canvas.listeners.get("touchmove")(touchEvent({
+    touches: [{ identifier: 1, clientX: 120, clientY: 80 }],
+    changedTouches: [{ identifier: 1, clientX: 120, clientY: 80 }]
+  }));
+
+  assert.equal(input.snapshot.moveX, -1);
+  assert.equal(input.snapshot.jump, true);
+
+  canvas.listeners.get("touchcancel")(touchEvent({
+    changedTouches: [{ identifier: 1, clientX: 120, clientY: 80 }]
+  }));
+
+  assert.deepEqual(input.snapshot.aim, { x: 120, y: 80 });
+  assert.equal(input.snapshot.moveX, 0);
+  assert.equal(input.snapshot.jump, false);
+  assert.equal(input.consumeAction(), false);
+});
+
+test("input ignores secondary touchcancel while active touch remains down", () => {
+  const target = createEventTarget();
+  const canvas = createCanvas();
+  const input = createInputController({ target, canvas });
+
+  canvas.listeners.get("touchstart")(touchEvent({
+    touches: [{ identifier: 1, clientX: 100, clientY: 500 }],
+    changedTouches: [{ identifier: 1, clientX: 100, clientY: 500 }]
+  }));
+  canvas.listeners.get("touchmove")(touchEvent({
+    touches: [{ identifier: 1, clientX: 120, clientY: 80 }],
+    changedTouches: [{ identifier: 1, clientX: 120, clientY: 80 }]
+  }));
+
+  canvas.listeners.get("touchcancel")(touchEvent({
+    touches: [{ identifier: 1, clientX: 120, clientY: 80 }],
+    changedTouches: [{ identifier: 2, clientX: 800, clientY: 80 }]
+  }));
+
+  assert.deepEqual(input.snapshot.aim, { x: 120, y: 80 });
+  assert.equal(input.snapshot.moveX, -1);
+  assert.equal(input.snapshot.jump, true);
+  assert.equal(input.consumeAction(), false);
+
+  canvas.listeners.get("touchend")(touchEvent({
+    changedTouches: [{ identifier: 1, clientX: 120, clientY: 80 }]
+  }));
+
+  assert.equal(input.snapshot.moveX, 0);
+  assert.equal(input.snapshot.jump, false);
   assert.equal(input.consumeAction(), true);
   assert.equal(input.consumeAction(), false);
 });

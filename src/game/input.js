@@ -37,8 +37,8 @@ function getButton(root, selectors) {
   return selectors.map((selector) => root.querySelector(selector)).find(Boolean) ?? null;
 }
 
-function eventPoint(event) {
-  const source = event.touches?.[0] ?? event.changedTouches?.[0] ?? event;
+function eventPoint(event, source = null) {
+  source ??= event.touches?.[0] ?? event.changedTouches?.[0] ?? event;
   return {
     clientX: source.clientX ?? 0,
     clientY: source.clientY ?? 0
@@ -75,6 +75,7 @@ export function createInputController(options = {}) {
   const pressedKeys = new Set();
   const cleanups = [];
   let activePointerId = null;
+  let activeTouchId = null;
 
   const snapshot = {
     moveX: 0,
@@ -93,8 +94,34 @@ export function createInputController(options = {}) {
     return event.pointerId ?? "default";
   }
 
+  function touchId(touch) {
+    return touch?.identifier ?? "default";
+  }
+
   function isActivePointer(event) {
     return activePointerId !== null && activePointerId === pointerId(event);
+  }
+
+  function findTouchById(touchList, id) {
+    if (!touchList) return null;
+    for (const touch of touchList) {
+      if (touchId(touch) === id) return touch;
+    }
+    return null;
+  }
+
+  function activeTouch(event) {
+    if (activeTouchId === null) return null;
+    return findTouchById(event.changedTouches, activeTouchId) ?? findTouchById(event.touches, activeTouchId);
+  }
+
+  function activeChangedTouch(event) {
+    if (activeTouchId === null) return null;
+    return findTouchById(event.changedTouches, activeTouchId);
+  }
+
+  function firstChangedTouch(event) {
+    return event.changedTouches?.[0] ?? event.touches?.[0] ?? null;
   }
 
   function listen(element, type, handler, listenerOptions) {
@@ -103,15 +130,15 @@ export function createInputController(options = {}) {
     cleanups.push(() => element.removeEventListener(type, handler, listenerOptions));
   }
 
-  function setAimFromEvent(event) {
+  function setAimFromEvent(event, source = null) {
     if (!canvas?.getBoundingClientRect) {
-      const point = eventPoint(event);
+      const point = eventPoint(event, source);
       snapshot.aim = { x: point.clientX, y: point.clientY };
       return snapshot.aim;
     }
 
     const rect = canvas.getBoundingClientRect();
-    const point = eventPoint(event);
+    const point = eventPoint(event, source);
     const scaleX = canvas.width / Math.max(1, rect.width);
     const scaleY = canvas.height / Math.max(1, rect.height);
     snapshot.aim = {
@@ -212,25 +239,37 @@ export function createInputController(options = {}) {
 
   function handleTouchStart(event) {
     event.preventDefault?.();
-    updateTouchMovement(setAimFromEvent(event));
+    if (activeTouchId !== null) return;
+    const touch = firstChangedTouch(event);
+    if (!touch) return;
+    activeTouchId = touchId(touch);
+    updateTouchMovement(setAimFromEvent(event, touch));
   }
 
   function handleTouchMove(event) {
     event.preventDefault?.();
-    updateTouchMovement(setAimFromEvent(event));
+    const touch = activeTouch(event);
+    if (!touch) return;
+    updateTouchMovement(setAimFromEvent(event, touch));
   }
 
   function handleTouchEnd(event) {
     event.preventDefault?.();
-    setAimFromEvent(event);
+    const touch = activeChangedTouch(event);
+    if (!touch) return;
+    setAimFromEvent(event, touch);
     resetTouchMovement();
+    activeTouchId = null;
     queueAction();
   }
 
   function handleTouchCancel(event) {
     event.preventDefault?.();
-    setAimFromEvent(event);
+    const touch = activeChangedTouch(event);
+    if (!touch) return;
+    setAimFromEvent(event, touch);
     resetTouchMovement();
+    activeTouchId = null;
   }
 
   listen(target, "keydown", handleKeyDown);
@@ -263,6 +302,7 @@ export function createInputController(options = {}) {
       while (cleanups.length) cleanups.pop()();
       pressedKeys.clear();
       activePointerId = null;
+      activeTouchId = null;
     }
   };
 }
