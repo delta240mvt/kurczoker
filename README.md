@@ -1,260 +1,114 @@
-<div align="center">
+# KURCZOKER
 
-<pre>
-  ██╗  ██╗██╗   ██╗██████╗  ██████╗███████╗ ██████╗ ██╗  ██╗███████╗██████╗
-  ██║ ██╔╝██║   ██║██╔══██╗██╔════╝╚══███╔╝██╔═══██╗██║ ██╔╝██╔════╝██╔══██╗
-  █████╔╝ ██║   ██║██████╔╝██║       ███╔╝ ██║   ██║█████╔╝ █████╗  ██████╔╝
-  ██╔═██╗ ██║   ██║██╔══██╗██║      ███╔╝  ██║   ██║██╔═██╗ ██╔══╝  ██╔══██╗
-  ██║  ██╗╚██████╔╝██║  ██║╚██████╗███████╗╚██████╔╝██║  ██╗███████╗██║  ██║
-  ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝ ╚═════╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
-                         of might and magic 3
-</pre>
+KURCZOKER is a static browser game and landing page built with Astro, vanilla JavaScript modules, Canvas 2D, CSS, and Node's built-in test runner.
 
-**KURCZOKER** is a tiny browser runner game about escaping a pixel chicken, collecting points, and trying not to end at `Game Over`.
+The game direction is a small roguelite loop: choose a route on the map, enter active-turn battles, collect rewards, improve the run, and push toward the boss. The project has no login, no backend, no database, and no required external runtime API.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-4a8d83.svg?style=flat-square)](LICENSE)
-[![Runtime: Browser](https://img.shields.io/badge/Runtime-Browser-1a73e8.svg?style=flat-square)](#runtime-shape)
-[![Stack: Vanilla JS](https://img.shields.io/badge/Stack-Vanilla%20JS-f59e0b.svg?style=flat-square)](#tech-stack)
-[![Tests: node --test](https://img.shields.io/badge/Tests-node%20--test-202124.svg?style=flat-square)](#usage)
-[![Deploy: Cloudflare Pages](https://img.shields.io/badge/Deploy-Cloudflare%20Pages-f97316.svg?style=flat-square)](#configuration)
-</div>
+## Commands
 
----
+| Action | Command |
+| --- | --- |
+| Install dependencies | `npm install` |
+| Start local dev server | `npm run dev` |
+| Run tests | `npm test` |
+| Build static site | `npm run build` |
+| Preview built site | `npm run preview` |
+| Deploy `dist/` to Cloudflare Pages | `npm run deploy` |
 
-KURCZOKER is a small static web game built with plain HTML, CSS, and JavaScript. The player jumps with keyboard or pointer input, collects blue points, and is chased by a pixel-style kurczok. The score is shown in Polish as `Wynik`, and collected points flash the `KURCZOK!` message.
+Astro owns the production build. `npm run build` writes the static output to `dist/`, and `npm run deploy` publishes that folder with Wrangler Pages.
 
-```text
-  KURCZOKER RUNNER
-  ┌─────────────────────────────────────────────────────────────────┐
-  │                                                                 │
-  │   browser canvas · pixel runner · Polish UI · zero framework    │
-  │                                                                 │
-  │  ┌─────────────────────────────────────────────────────────┐   │
-  │  │  Wynik: 7                                               │   │
-  │  │                                                         │   │
-  │  │      ████                                               │   │
-  │  │      █  █        ◆                         kurczok →    │   │
-  │  │  ────────────────────────────────────────────────────   │   │
-  │  │                                                         │   │
-  │  │  Space / ArrowUp / W / pointerdown = jump               │   │
-  │  └─────────────────────────────────────────────────────────┘   │
-  │                                                                 │
-  └─────────────────────────────────────────────────────────────────┘
-```
+## Gameplay Loop
 
----
+1. Start a run with the default `egg-bomb` ability.
+2. Pick an available node on the route map.
+3. Resolve the node: battle, elite, treasure, shop-style reward, or boss.
+4. In battle, take the player turn, aim, fire an ability, then survive the enemy response.
+5. Choose rewards such as artifacts, abilities, healing, or gold.
+6. Continue through the map until the boss is defeated or the run is lost.
+7. Restart creates a fresh run state.
 
-## Runtime Shape
+The current implementation is being split into modules under `src/game/` so state, map, run, battle, abilities, physics, input, rendering, audio, and bootstrap code can be tested independently.
 
-Current runtime truth:
+## Controls
 
-- `index.html` is the entry point and loads the game directly in the browser.
-- `src/game.js` contains the game state helpers, drawing code, input handling, and animation loop.
-- `src/styles.css` contains the page, canvas, and game-over overlay styles.
-- `scripts/build.mjs` creates a static `dist/` directory for deployment.
-- `test/game.test.js` covers the score and game-over state helpers with Node's built-in test runner.
+| Action | Input |
+| --- | --- |
+| Move | `A` / `D` or `ArrowLeft` / `ArrowRight` |
+| Jump | `W`, `Space`, or `ArrowUp` |
+| Aim | Mouse, pointer drag, or touch drag |
+| Fire selected ability | Pointer release / primary action |
+| Start or restart | Start / restart control |
+| Mute toggle | Mute control |
 
-Current source-of-truth files:
+Audio is muted by default. Web Audio is created only after an interaction, such as unmuting from the UI.
 
-- [`index.html`](index.html)
-- [`src/game.js`](src/game.js)
-- [`src/styles.css`](src/styles.css)
-- [`scripts/build.mjs`](scripts/build.mjs)
-- [`test/game.test.js`](test/game.test.js)
+## Tests
 
-## Installation
-
-### Fastest: Static Browser Run
-
-Open `index.html` in a browser. The game has no runtime dependencies and does not need a dev server for local play.
-
-### Local Node Setup
-
-Node.js is only required for tests, build, and deployment scripts.
+Run all available tests:
 
 ```bash
-npm install
 npm test
+```
+
+The tests use `node --test` and focus on pure game behavior where possible. `test/game.test.js` currently covers the audio controller contract: muted default, lazy Web Audio creation, known effect scheduling, and muting behavior.
+
+Wave 1 does not require full browser integration verification. Later integration waves should run the full test suite, the Astro production build, and a manual browser smoke pass.
+
+## Build And Deploy
+
+Build the static Astro site:
+
+```bash
 npm run build
 ```
 
----
+Preview the built output:
 
-## Get Started
-
-| Step | What Happens |
-|------|-------------|
-| 1. Install | `npm install` installs development tooling from `package.json` |
-| 2. Play | Open `index.html` in a browser |
-| 3. Test | `npm test` runs `node --test` |
-| 4. Build | `npm run build` copies the static app into `dist/` |
-| 5. Deploy | `npm run deploy` deploys `dist/` with Wrangler Pages |
-
----
-
-## How It Works
-
-KURCZOKER runs a simple animation loop on an HTML canvas:
-
-1. The runner starts near the left side of the canvas.
-2. The kurczok chaser moves in from behind.
-3. A point appears ahead of the player and moves left.
-4. Collecting a point increments the score, flashes `KURCZOK!`, resets the point, and pushes the chaser back.
-5. Colliding with the chaser stops the loop and shows the `Game Over` overlay.
-
-### Controls
-
-| Action | Input |
-|--------|-------|
-| Jump | `Space` |
-| Jump | `ArrowUp` |
-| Jump | `W` |
-| Jump | pointer / mouse / touch press |
-
-### Game State Helpers
-
-| Function | Purpose |
-|----------|---------|
-| `createGameState()` | Creates the initial score state |
-| `collectPoint(state)` | Returns the next state after collecting a point |
-| `finishGame(state)` | Returns the final game-over title and score text |
-
----
-
-## Usage
-
-### Commands
-
-| Action | Command |
-|--------|---------|
-| Run tests | `npm test` |
-| Build static output | `npm run build` |
-| Deploy built output | `npm run deploy` |
-
-The production build writes these files:
-
-```text
-dist/
-├── index.html
-└── src/
-    ├── game.js
-    └── styles.css
+```bash
+npm run preview
 ```
 
----
+Deploy to Cloudflare Pages:
 
-## Configuration
-
-There is no application-level configuration file. Current deploy settings live in `package.json`:
-
-```json
-{
-  "deploy": "wrangler pages deploy dist --project-name delta240-com"
-}
+```bash
+npm run deploy
 ```
 
-Wrangler may require Cloudflare authentication in the local environment before deploy:
+Wrangler may require local Cloudflare authentication before deployment:
 
 ```bash
 npx wrangler login
 ```
 
----
+## Runtime Shape
 
-## Features
+- Astro is the app shell and static build system.
+- Game code lives in vanilla JavaScript modules under `src/game/`.
+- Canvas 2D handles rendering.
+- Web Audio handles short optional effects and remains muted until the player enables it.
+- There is no server-side gameplay state.
+- There are no accounts, login flows, analytics, cookies, or database calls in this codebase.
 
-| Feature | Status |
-|---------|:------:|
-| Static browser game | YES |
-| Canvas rendering | YES |
-| Keyboard controls | YES |
-| Pointer / touch jump input | YES |
-| Score counter | YES |
-| Collectible point loop | YES |
-| Chasing kurczok obstacle | YES |
-| Game-over overlay | YES |
-| Node test coverage for state helpers | YES |
-| Static build output | YES |
+## Current Audio Effects
 
----
+`src/game/audio.js` exposes:
 
-## Privacy
+- `createAudioController(options)`
+- `setMuted(audio, muted)`
+- `playEffect(audio, effectId)`
 
-KURCZOKER is a static front-end game. It does not include analytics, cookies, account login, database storage, or external API calls in the current codebase.
+Supported effect ids:
 
----
-
-## Tech Stack
-
-| Component | Technology | Why |
-|-----------|------------|-----|
-| Markup | HTML | Minimal static entry point |
-| Game runtime | Vanilla JavaScript | No framework needed for a small canvas game |
-| Rendering | Canvas 2D API | Simple frame-by-frame drawing |
-| Styling | CSS | Lightweight responsive layout and overlay styles |
-| Tests | `node:test` | Built-in Node.js test runner |
-| Build | Node.js script | Copies the static app into `dist/` |
-| Deploy | Wrangler Pages | Publishes the static `dist/` folder |
-
----
-
-## Roadmap
-
-- [x] Static HTML entry point
-- [x] Canvas runner loop
-- [x] Keyboard and pointer jump controls
-- [x] Score collection logic
-- [x] Game-over state
-- [x] Node tests for state helpers
-- [x] Static build script
-- [ ] Restart control after game over
-- [ ] Better mobile canvas scaling
-- [ ] Sound effects
-- [ ] High-score storage
-- [ ] Deployment project-name cleanup if the Cloudflare Pages project changes from `delta240-com`
-
----
-
-## FAQ
-
-**Q: Do I need a framework to run KURCZOKER?**
-
-No. The game runs directly in the browser from `index.html`.
-
-**Q: Why is Node.js in the project?**
-
-Node.js is used for tests, the static build script, and Wrangler deployment tooling.
-
-**Q: How do I start the game locally?**
-
-Open `index.html` in a browser. No server is required for the current code.
-
-**Q: How do I jump?**
-
-Use `Space`, `ArrowUp`, `W`, or press / tap the game area.
-
-**Q: What gets deployed?**
-
-`npm run build` creates `dist/`, and `npm run deploy` publishes that folder through Wrangler Pages.
-
----
+- `shoot`
+- `hit`
+- `treasure`
+- `defeat`
+- `victory`
 
 ## Contributing
 
-This is a small public game repo. Keep changes focused, test state helper behavior with `npm test`, and avoid committing generated output such as `dist/`.
-
----
+Keep changes scoped to the relevant module, avoid reverting other agents' work, and run the narrowest useful tests before handing off. Do not commit generated output such as `dist/`.
 
 ## License
 
-MIT - see [`LICENSE`](LICENSE) for details.
-
----
-
-<div align="center">
-
-**KURCZOKER** - of might and magic 3
-
-*Built with plain browser APIs. Jump, score, escape the kurczok.*
-
-</div>
+MIT - see [`LICENSE`](LICENSE).

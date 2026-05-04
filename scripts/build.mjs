@@ -1,7 +1,16 @@
-import { cp, mkdir, rm } from "node:fs/promises";
+import { spawn } from "node:child_process";
 
-await rm("dist", { recursive: true, force: true });
-await mkdir("dist/src", { recursive: true });
-await cp("index.html", "dist/index.html");
-await cp("src/game.js", "dist/src/game.js");
-await cp("src/styles.css", "dist/src/styles.css");
+const command = process.platform === "win32" ? "npx.cmd" : "npx";
+const child = spawn(command, ["astro", "build"], {
+  stdio: "inherit",
+  shell: false
+});
+
+child.on("exit", (code, signal) => {
+  if (signal) {
+    process.kill(process.pid, signal);
+    return;
+  }
+
+  process.exit(code ?? 1);
+});
