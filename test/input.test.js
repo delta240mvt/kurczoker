@@ -48,6 +48,9 @@ test("input queues pointer actions only on completed release events", () => {
   canvas.listeners.get("pointerdown")(pointerEvent());
   canvas.listeners.get("pointercancel")(pointerEvent());
 
+  assert.deepEqual(input.snapshot.aim, { x: 480, y: 270 });
+  canvas.listeners.get("pointerup")(pointerEvent({ clientX: 120, clientY: 80 }));
+  assert.deepEqual(input.snapshot.aim, { x: 480, y: 270 });
   assert.equal(input.consumeAction(), false);
 
   canvas.listeners.get("pointerdown")(pointerEvent());
@@ -56,6 +59,38 @@ test("input queues pointer actions only on completed release events", () => {
 
   canvas.listeners.get("pointerup")(pointerEvent());
 
+  assert.equal(input.consumeAction(), true);
+  assert.equal(input.consumeAction(), false);
+});
+
+test("input ignores stray pointer move and release events", () => {
+  const target = createEventTarget();
+  const canvas = createCanvas();
+  const input = createInputController({ target, canvas });
+
+  assert.deepEqual(input.snapshot.aim, { x: 640, y: 280 });
+
+  canvas.listeners.get("pointermove")(pointerEvent({ clientX: 240, clientY: 135 }));
+  assert.deepEqual(input.snapshot.aim, { x: 640, y: 280 });
+
+  canvas.listeners.get("pointerup")(pointerEvent({ clientX: 120, clientY: 80 }));
+  assert.deepEqual(input.snapshot.aim, { x: 640, y: 280 });
+  assert.equal(input.consumeAction(), false);
+});
+
+test("input updates aim and queues action during normal pointer gestures", () => {
+  const target = createEventTarget();
+  const canvas = createCanvas();
+  const input = createInputController({ target, canvas });
+
+  canvas.listeners.get("pointerdown")(pointerEvent({ clientX: 480, clientY: 270 }));
+  assert.deepEqual(input.snapshot.aim, { x: 480, y: 270 });
+
+  canvas.listeners.get("pointermove")(pointerEvent({ clientX: 240, clientY: 135 }));
+  assert.deepEqual(input.snapshot.aim, { x: 240, y: 135 });
+
+  canvas.listeners.get("pointerup")(pointerEvent({ clientX: 120, clientY: 80 }));
+  assert.deepEqual(input.snapshot.aim, { x: 120, y: 80 });
   assert.equal(input.consumeAction(), true);
   assert.equal(input.consumeAction(), false);
 });

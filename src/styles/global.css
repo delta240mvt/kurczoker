@@ -189,11 +189,8 @@ button {
 }
 
 .canvas-frame__status {
-  position: absolute;
-  left: 0.75rem;
-  right: 0.75rem;
-  bottom: 0.75rem;
   min-height: 2.1rem;
+  margin-top: 0.75rem;
   padding: 0.55rem 0.7rem;
   border: 2px solid var(--outline);
   border-radius: 6px;
@@ -409,10 +406,7 @@ button {
   }
 
   .canvas-frame__status {
-    position: static;
     display: block;
-    border-width: 2px 0 0;
-    border-radius: 0;
   }
 
   .landing-section {

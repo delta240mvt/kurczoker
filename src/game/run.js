@@ -1,4 +1,4 @@
-import { ARTIFACT_IDS, NODE_TYPES, SCENES } from "./constants.js";
+import { ACTOR_KINDS, ARTIFACT_IDS, NODE_TYPES, SCENES } from "./constants.js";
 import { applyReward as applyAbilityReward, getRewardChoices } from "./abilities.js";
 import { getAvailableNodes, getNodeById } from "./map.js";
 import { createInitialGameState, setUiMessage } from "./state.js";
@@ -61,9 +61,10 @@ export function completeCurrentNode(state) {
     return state;
   }
 
+  const runAfterBattle = persistBattleHealth(state.run, state.battle);
   const completedNodeIds = Array.from(new Set([...state.run.completedNodeIds, node.id]));
   const run = {
-    ...state.run,
+    ...runAfterBattle,
     completedNodeIds
   };
 
@@ -80,7 +81,7 @@ export function completeCurrentNode(state) {
     scene: SCENES.REWARD,
     battle: null,
     run,
-    rewardChoices: createRewardChoices(node, state.run, state.seed),
+    rewardChoices: createRewardChoices(node, runAfterBattle, state.seed),
     ui: {
       ...state.ui,
       message: "Wybierz nagrode."
@@ -206,4 +207,17 @@ function applyRewardToRun(run, reward) {
   }
 
   return run;
+}
+
+function persistBattleHealth(run, battle) {
+  const player = battle?.actors?.find((actor) => actor.kind === ACTOR_KINDS.PLAYER || actor.id === "player");
+
+  if (!player || !Number.isFinite(player.health)) {
+    return run;
+  }
+
+  return {
+    ...run,
+    health: Math.min(run.maxHealth, Math.max(0, player.health))
+  };
 }

@@ -192,11 +192,16 @@ function updateProjectilePhase(battle, delta) {
         });
       } else {
         const damageReduction = projectile.team === ACTOR_TEAMS.ENEMY ? battle.damageReduction ?? 0 : 0;
+        const baseDamage = projectile.damage ?? DEFAULT_PLAYER_DAMAGE;
+        const damage =
+          projectile.team === ACTOR_TEAMS.ENEMY && baseDamage > 0
+            ? Math.max(1, baseDamage - damageReduction)
+            : Math.max(0, baseDamage - damageReduction);
         actors = resolveExplosion(actors, {
           x: nextProjectile.x,
           y: nextProjectile.y,
           radius: projectile.explosionRadius ?? projectile.radius ?? 0,
-          damage: Math.max(0, (projectile.damage ?? DEFAULT_PLAYER_DAMAGE) - damageReduction),
+          damage,
           knockback: projectile.knockback ?? 0
         });
       }

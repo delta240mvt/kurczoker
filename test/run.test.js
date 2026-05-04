@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { ABILITY_IDS, ARTIFACT_IDS, NODE_TYPES, SCENES, TUNING } from "../src/game/constants.js";
+import { ABILITY_IDS, ARTIFACT_IDS, BATTLE_PHASES, NODE_TYPES, SCENES, TUNING } from "../src/game/constants.js";
+import { createEnemy, createPlayer } from "../src/game/actors.js";
 import { getNodeById } from "../src/game/map.js";
 import {
   applyRunReward,
@@ -36,6 +37,43 @@ test("completeCurrentNode completes battle and offers reward choices", () => {
   assert.equal(next.battle, null);
   assert.ok(next.run.completedNodeIds.includes(selected.run.currentNodeId));
   assert.ok(next.rewardChoices.length >= 1);
+});
+
+test("completeCurrentNode persists won battle player health into the run", () => {
+  const selected = selectMapNode(startRun(8), startRun(8).run.offeredNodeIds[0]);
+  const wonBattle = {
+    ...selected,
+    battle: {
+      ...selected.battle,
+      phase: BATTLE_PHASES.WON,
+      actors: [createPlayer({ health: 1, maxHealth: TUNING.RUN_HEALTH }), createEnemy("grunt", { health: 0 })]
+    }
+  };
+
+  const next = completeCurrentNode(wonBattle);
+
+  assert.equal(next.run.health, 1);
+});
+
+test("heal rewards heal from persisted battle health without exceeding max health", () => {
+  const selected = selectMapNode(startRun(8), startRun(8).run.offeredNodeIds[0]);
+  const rewarded = completeCurrentNode({
+    ...selected,
+    battle: {
+      ...selected.battle,
+      phase: BATTLE_PHASES.WON,
+      actors: [createPlayer({ health: 1, maxHealth: TUNING.RUN_HEALTH }), createEnemy("grunt", { health: 0 })]
+    }
+  });
+
+  const next = applyRunReward(rewarded, {
+    id: "heal-small",
+    type: "heal",
+    label: "Heal",
+    value: 1
+  });
+
+  assert.equal(next.run.health, 2);
 });
 
 test("reward choice bonus increases playable reward choices", () => {

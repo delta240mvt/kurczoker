@@ -201,7 +201,7 @@ test("battle tuning applies artifact stats to default rules", () => {
   );
   const resolved = updateBattle(reduced, {}, 30);
   const reducedPlayer = resolved.actors.find((actor) => actor.id === "player");
-  assert.equal(reducedPlayer.health, 10);
+  assert.equal(reducedPlayer.health, 9);
 });
 
 test("guard chick blocks the next enemy projectile", () => {
@@ -279,6 +279,24 @@ test("shell shield artifact absorbs one enemy hit per battle", () => {
   assert.equal(firstPlayer.health, 10);
   assert.equal(shielded.usedArtifacts.includes(ARTIFACT_IDS.SHELL_SHIELD), true);
   assert.equal(secondPlayer.health, 9);
+});
+
+test("damage reduction does not permanently absorb positive enemy projectile damage", () => {
+  let battle = createBattleState({
+    actors: [player({ x: 10 }), enemy({ x: 24 })],
+    damageReduction: 1,
+    phase: BATTLE_PHASES.ENEMY_TURN,
+    gravity: 0
+  });
+
+  battle = updateBattle(battle, {}, 16);
+  battle = updateBattle(battle, {}, 30);
+  battle = updateBattle({ ...battle, phase: BATTLE_PHASES.ENEMY_TURN }, {}, 16);
+  battle = updateBattle(battle, {}, 30);
+
+  const reducedPlayer = battle.actors.find((actor) => actor.id === "player");
+
+  assert.equal(reducedPlayer.health, 8);
 });
 
 test("applyDamageToActor clamps health at zero", () => {

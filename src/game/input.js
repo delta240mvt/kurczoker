@@ -58,6 +58,7 @@ export function createInputController(options = {}) {
   const onMute = options.onMute ?? noop;
   const pressed = new Set();
   const cleanups = [];
+  let activePointerId = null;
 
   const snapshot = {
     moveX: 0,
@@ -70,6 +71,14 @@ export function createInputController(options = {}) {
 
   function queueAction() {
     snapshot.actionQueued = true;
+  }
+
+  function pointerId(event) {
+    return event.pointerId ?? "default";
+  }
+
+  function isActivePointer(event) {
+    return activePointerId !== null && activePointerId === pointerId(event);
   }
 
   function listen(element, type, handler, listenerOptions) {
@@ -158,23 +167,28 @@ export function createInputController(options = {}) {
 
   function handlePointerDown(event) {
     event.preventDefault?.();
+    activePointerId = pointerId(event);
     setAimFromEvent(event);
     canvas?.setPointerCapture?.(event.pointerId);
   }
 
   function handlePointerMove(event) {
+    if (!isActivePointer(event)) return;
     setAimFromEvent(event);
   }
 
   function handlePointerUp(event) {
+    if (!isActivePointer(event)) return;
     setAimFromEvent(event);
     queueAction();
     canvas?.releasePointerCapture?.(event.pointerId);
+    activePointerId = null;
   }
 
   function handlePointerCancel(event) {
-    setAimFromEvent(event);
+    if (!isActivePointer(event)) return;
     canvas?.releasePointerCapture?.(event.pointerId);
+    activePointerId = null;
   }
 
   function handleTouchStart(event) {
@@ -229,6 +243,7 @@ export function createInputController(options = {}) {
     destroy() {
       while (cleanups.length) cleanups.pop()();
       pressed.clear();
+      activePointerId = null;
     }
   };
 }
