@@ -2,13 +2,14 @@
 const hudItems = [
   { label: "HP", value: "3 / 3", attr: "data-game-health" },
   { label: "Node", value: "start", attr: "data-game-node" },
+  { label: "Scene", value: "Mapa", attr: "data-game-scene" },
   { label: "Ability", value: "egg-bomb", attr: "data-game-ability" }
 ];
 ---
 
 <section class="hero" data-kurczoker-game>
   <div class="hero__content">
-    <p class="hero__eyebrow">Browser roguelite prototype</p>
+    <p class="hero__eyebrow">Jajobomby, artefakty i szybkie wyprawy</p>
     <h1>KURCZOKER</h1>
     <p class="hero__subtitle">
       Feathered fantasy, explosive eggs, crooked artifacts, and a boss waiting at the end of a short run.
@@ -30,6 +31,9 @@ const hudItems = [
       <div class="game-actions">
         <button class="icon-button icon-button--wide" type="button" data-game-start>
           Action
+        </button>
+        <button class="icon-button icon-button--wide" type="button" data-game-restart>
+          Restart
         </button>
         <button class="icon-button" type="button" aria-label="Toggle sound" data-game-mute>
           <span aria-hidden="true">♪</span>

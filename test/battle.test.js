@@ -104,6 +104,16 @@ test("resolveEnemyTurn deterministically damages the player and starts next play
   assert.equal(resolved.turnNumber, 2);
 });
 
+test("updateBattle resolves enemy turn without external orchestration", () => {
+  const battle = createBattleState({ actors: [player(), enemy()], phase: BATTLE_PHASES.ENEMY_TURN });
+
+  const resolved = updateBattle(battle, {}, 100);
+  const damagedPlayer = resolved.actors.find((actor) => actor.id === "player");
+
+  assert.equal(resolved.phase, BATTLE_PHASES.PLAYER_TURN);
+  assert.equal(damagedPlayer.health, 9);
+});
+
 test("updateBattle applies movement constraints, platform landing, and hazard damage", () => {
   const battle = createBattleState({
     actors: [player({ y: 40, vy: 1 }), enemy()],

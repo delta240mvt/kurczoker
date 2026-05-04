@@ -110,6 +110,23 @@ test("markRunDefeated moves to game over and lowers health to zero", () => {
   assert.equal(next.scene, SCENES.GAME_OVER);
   assert.equal(next.run.defeated, true);
   assert.equal(next.run.health, 0);
+  assert.deepEqual(next.run.offeredNodeIds, []);
+});
+
+test("defeated runs cannot select new map nodes", () => {
+  const defeated = markRunDefeated(startRun(4));
+  const tampered = {
+    ...defeated,
+    run: {
+      ...defeated.run,
+      offeredNodeIds: ["battle-1"]
+    }
+  };
+
+  const next = selectMapNode(tampered, "battle-1");
+
+  assert.equal(next.scene, SCENES.GAME_OVER);
+  assert.equal(next.run.defeated, true);
 });
 
 test("markRunComplete can complete the current run directly", () => {

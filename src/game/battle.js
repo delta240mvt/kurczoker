@@ -187,6 +187,10 @@ export function updateBattle(battle, input = {}, delta = 16) {
     };
   }
 
+  if (next.phase === BATTLE_PHASES.ENEMY_TURN) {
+    return resolveEnemyTurn(next);
+  }
+
   return next;
 }
 

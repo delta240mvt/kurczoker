@@ -244,8 +244,7 @@ export function mountKurczokerGame(root = globalThis.document) {
           aim: canvasPointToAim(canvas, input.snapshot.aim)
         };
         const previousPhase = state.battle?.phase;
-        let battle = updateBattle(state.battle, battleInput, delta);
-        if (battle.phase === BATTLE_PHASES.ENEMY_TURN) battle = resolveEnemyTurn(battle);
+        const battle = updateBattle(state.battle, battleInput, delta);
         state = {
           ...state,
           battle,

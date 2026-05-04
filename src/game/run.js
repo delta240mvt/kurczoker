@@ -8,6 +8,10 @@ export function startRun(seed = 1) {
 }
 
 export function selectMapNode(state, nodeId) {
+  if (state.run.defeated || state.run.completed) {
+    return setUiMessage(state, "Ta wyprawa jest zakonczona. Uruchom restart.");
+  }
+
   const node = getNodeById(state.map, nodeId);
 
   if (!node || !state.run.offeredNodeIds.includes(nodeId)) {
@@ -112,7 +116,8 @@ export function markRunDefeated(state) {
     run: {
       ...state.run,
       health: 0,
-      defeated: true
+      defeated: true,
+      offeredNodeIds: []
     },
     ui: {
       ...state.ui,
