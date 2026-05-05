@@ -1,0 +1,146 @@
+/* KURCZOKER mockup base
+   Reset + body + typografia bazowa. Wczytywane PIERWSZE. */
+
+@import url("https://fonts.googleapis.com/css2?family=Lilita+One&family=Inter:wght@400;600;700;800;900&display=swap");
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: #0a0e1c;
+  color: #f5e8c1;
+  font-family: "Inter", system-ui, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  min-height: 100vh;
+  /* Tlo strony pod mockupami: ciemne plotno z subtelna teksturka */
+  background:
+    radial-gradient(ellipse 90% 70% at 50% 0%, #1a223e 0%, transparent 60%),
+    radial-gradient(ellipse 90% 70% at 50% 100%, #131a30 0%, transparent 60%),
+    repeating-linear-gradient(45deg,
+      rgba(255, 255, 255, 0.012) 0 2px,
+      transparent 2px 4px),
+    #0a0e1c;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 16px 64px;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ---- Mockup nav strip (gora kazdego mockupu) ---- */
+.mock-nav {
+  width: var(--max-shell);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--gap);
+  margin: 0 auto 18px;
+  padding: 10px 16px;
+  border: 2px solid var(--shell-edge);
+  border-radius: 8px;
+  background: var(--shell-deep);
+  font-size: var(--fs-small);
+  font-weight: 800;
+  color: var(--ink-cream);
+}
+
+.mock-nav__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.mock-nav__num {
+  display: inline-grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  background: var(--shell-gold);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+}
+
+.mock-nav__name {
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mock-nav__links {
+  display: flex;
+  gap: 8px;
+}
+
+.mock-nav__link {
+  padding: 6px 12px;
+  border: 1px solid var(--shell-gold-deep);
+  border-radius: 6px;
+  background: rgba(212, 160, 74, 0.12);
+  color: var(--shell-gold-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  font-size: 0.7rem;
+  transition: background 0.15s, color 0.15s;
+}
+
+.mock-nav__link:hover {
+  background: var(--shell-gold);
+  color: var(--ink);
+}
+
+.mock-nav__link--disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.mock-caption {
+  width: var(--max-shell);
+  margin: 18px auto 0;
+  padding: 12px 16px;
+  border: 1px dashed rgba(212, 160, 74, 0.4);
+  border-radius: 8px;
+  background: rgba(19, 26, 48, 0.6);
+  font-size: var(--fs-small);
+  color: var(--ink-cream);
+  opacity: 0.78;
+}
+
+.mock-caption strong {
+  color: var(--shell-gold-bright);
+}

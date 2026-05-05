@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KURCZOKER mockup · 05 · Nagroda</title>
+  <link rel="stylesheet" href="_shared/base.css" />
+  <link rel="stylesheet" href="_shared/tokens.css" />
+  <link rel="stylesheet" href="_shared/shell.css" />
+  <link rel="stylesheet" href="_shared/statusbar.css" />
+  <link rel="stylesheet" href="_shared/cards.css" />
+  <link rel="stylesheet" href="_shared/overlays.css" />
+</head>
+<body class="screen screen--nagroda">
+
+  <nav class="mock-nav">
+    <span class="mock-nav__title">
+      <span class="mock-nav__num">05</span>
+      <span class="mock-nav__name">Nagroda — wybór</span>
+    </span>
+    <span class="mock-nav__links">
+      <a class="mock-nav__link" href="04-walka-wroga.html">← Prev</a>
+      <a class="mock-nav__link" href="index.html">Hub</a>
+      <a class="mock-nav__link" href="06-sklep.html">Next →</a>
+    </span>
+  </nav>
+
+  <main class="shell" aria-label="KURCZOKER game shell">
+    <div class="shell__corners" aria-hidden="true">
+      <span class="shell__corner shell__corner--tl"></span>
+      <span class="shell__corner shell__corner--tr"></span>
+      <span class="shell__corner shell__corner--br"></span>
+      <span class="shell__corner shell__corner--bl"></span>
+    </div>
+    <div class="shell__crest" aria-hidden="true"></div>
+
+    <header class="shell__topbar">
+      <div class="hud">
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-hp-heart.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">HP</span><strong class="hud-pill__value">2 / 3</strong></span>
+        </div>
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-node.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">Węzeł</span><strong class="hud-pill__value">battle-1</strong></span>
+        </div>
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-scene-book.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">Scena</span><strong class="hud-pill__value">Nagroda</strong></span>
+        </div>
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-ability-bomb.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">Zdolność</span><strong class="hud-pill__value">egg-bomb</strong></span>
+        </div>
+      </div>
+      <div class="shell-actions">
+        <button class="btn btn--action" type="button" disabled>Akcja</button>
+        <button class="btn btn--restart" type="button">Restart</button>
+        <button class="btn btn--icon" type="button" aria-label="Ustawienia"><img src="assets/svg/icon-gear.svg" alt="" width="22" height="22" /></button>
+      </div>
+    </header>
+
+    <div class="shell__canvas" aria-label="Wybór nagrody">
+      <img src="assets/canvas/05-canvas.png" alt="Painted reference: ekran wyboru nagrody" />
+
+      <!-- CSS reward cards overlaid on canvas -->
+      <div class="reward-row" role="group" aria-label="Dostępne nagrody">
+
+        <article class="reward-card reward-card--selected" tabindex="0">
+          <div class="reward-card__icon">🧪</div>
+          <h3 class="reward-card__name">Jajo Wzmocnione</h3>
+          <p class="reward-card__type">Zdolność</p>
+          <p class="reward-card__desc">Kolejny rzut zadaje 2× więcej obrażeń przy trafieniu krytycznym.</p>
+          <span class="reward-card__value">+2 DMG</span>
+        </article>
+
+        <article class="reward-card" tabindex="0">
+          <div class="reward-card__icon">🛡️</div>
+          <h3 class="reward-card__name">Twarda Skorupa</h3>
+          <p class="reward-card__type">Artefakt</p>
+          <p class="reward-card__desc">Redukuje obrażenia wroga o 1 w każdej turze. Pasywny efekt.</p>
+          <span class="reward-card__value">-1 DMG</span>
+        </article>
+
+        <article class="reward-card" tabindex="0">
+          <div class="reward-card__icon">❤️</div>
+          <h3 class="reward-card__name">Kurze Uzdrowienie</h3>
+          <p class="reward-card__type">Leczenie</p>
+          <p class="reward-card__desc">Przywraca 1 punkt HP na miejscu. Bez warunków wstępnych.</p>
+          <span class="reward-card__value">+1 HP</span>
+        </article>
+
+      </div>
+    </div>
+
+    <footer class="shell__statusbar">
+      <div class="status-pill">
+        <span class="status-pill__icon status-pill__icon--heart"><img src="assets/svg/icon-hp-heart.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">HP</span><span class="status-pill__value">2 / 3</span></span>
+      </div>
+      <div class="status-pill">
+        <span class="status-pill__icon"><img src="assets/svg/icon-node.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">Węzeł</span><span class="status-pill__value">battle-1</span></span>
+      </div>
+      <div class="status-pill">
+        <span class="status-pill__icon"><img src="assets/svg/icon-ability-bomb.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">Zdolność</span><span class="status-pill__value">Egg Bomb</span></span>
+      </div>
+      <div class="status-pill">
+        <span class="status-pill__icon"><img src="assets/svg/icon-audio-note.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">Audio</span><span class="status-pill__value">muzyka</span></span>
+      </div>
+    </footer>
+
+    <div class="shell__ribbon" role="status">
+      <span class="shell__ribbon-icon"><img src="assets/svg/icon-feather-quill.svg" alt="" width="28" height="28" /></span>
+      <span class="shell__ribbon-text">Wybierz nagrodę za pokonanie wroga!</span>
+    </div>
+  </main>
+
+  <p class="mock-caption">
+    <strong>05 · Nagroda.</strong> Trzy karty wyboru (Zdolność / Artefakt / Leczenie) zbudowane w CSS,
+    overlayowane na canvasie. Zaznaczona karta (pierwsza) z efektem złotej poświaty.
+    Brak hint-cards — karty nagrody przejmują całą uwagę.
+  </p>
+
+</body>
+</html>

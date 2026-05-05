@@ -1,0 +1,90 @@
+/* KURCZOKER mockup tokens
+   Wszystkie kolory, fonty, spacing i cienie w jednym miejscu.
+   Wczytywane drugie po base.css. */
+
+:root {
+  /* ---- Rama game-shella ---- */
+  --shell-face:        #1d2746;
+  --shell-deep:        #131a30;
+  --shell-edge:        #0a0e1c;
+  --shell-gold:        #d4a04a;
+  --shell-gold-bright: #f2c15b;
+  --shell-gold-deep:   #8a6322;
+
+  /* ---- Pillsy / pergamin ---- */
+  --paper:             #f3e9c8;
+  --paper-strong:      #fffbe8;
+  --paper-border:      #1a1f3a;
+
+  /* ---- Status bar / ribbon ---- */
+  --status-bg:         #2a1d0a;
+  --status-bg-edge:    #170d02;
+  --status-pill:       var(--shell-gold);
+  --ribbon-bg:         var(--paper);
+  --ribbon-trim:       var(--shell-gold);
+
+  /* ---- Akcenty ---- */
+  --accent-red:        #c43e2c;
+  --accent-red-hi:     #e35c44;
+  --accent-red-deep:   #7a2014;
+  --accent-blue:       #3f7fb8;
+  --accent-blue-hi:    #5a9fd4;
+  --accent-blue-deep:  #1f4e7a;
+  --accent-green:      #4f8a3a;
+  --accent-green-hi:   #6cae54;
+
+  /* ---- Tekst ---- */
+  --ink:               #1a1f3a;
+  --ink-cream:         #f5e8c1;
+  --ink-muted:         #6b5e3a;
+  --ink-on-red:        #fffbe8;
+
+  /* ---- Krysztaly narozne ---- */
+  --crystal:           #4a8fd0;
+  --crystal-hi:        #7ec1f0;
+  --crystal-deep:      #234870;
+
+  /* ---- Typografia ---- */
+  --font-display: "Lilita One", "Bungee", "Bowlby One", system-ui, sans-serif;
+  --font-body:    "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --fs-title:    clamp(3rem, 6.5vw, 5rem);
+  --fs-h2:       clamp(1.4rem, 2.4vw, 1.9rem);
+  --fs-pill-val: 1.05rem;
+  --fs-pill-lab: 0.7rem;
+  --fs-body:     0.92rem;
+  --fs-status:   0.85rem;
+  --fs-small:    0.78rem;
+
+  /* ---- Spacing & shape ---- */
+  --shell-pad:    clamp(14px, 1.6vw, 22px);
+  --shell-radius: 14px;
+  --pill-radius:  10px;
+  --btn-radius:   10px;
+  --card-radius:  12px;
+
+  --pill-h:       54px;
+  --btn-h:        50px;
+  --status-h:     44px;
+  --ribbon-h:     46px;
+
+  --gap-tight:    8px;
+  --gap:          14px;
+  --gap-wide:     22px;
+
+  --max-shell:    min(1180px, 96vw);
+
+  /* ---- Cienie ---- */
+  --sh-shell:    0 26px 60px rgba(10, 14, 28, 0.55),
+                 0 2px 0 var(--shell-edge);
+  --sh-pill:     inset 0 -3px 0 rgba(0, 0, 0, 0.18),
+                 0 2px 0 var(--shell-edge);
+  --sh-btn:      inset 0 -4px 0 rgba(0, 0, 0, 0.30),
+                 0 4px 0 var(--shell-edge);
+  --sh-card:     0 6px 0 rgba(10, 14, 28, 0.65),
+                 0 12px 24px rgba(10, 14, 28, 0.35);
+  --sh-modal:    0 30px 80px rgba(10, 14, 28, 0.7),
+                 0 4px 0 var(--shell-edge);
+  --sh-text-3d:  0 4px 0 var(--shell-gold-deep),
+                 0 6px 0 var(--shell-edge);
+}

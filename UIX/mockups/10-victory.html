@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KURCZOKER mockup · 10 · Victory</title>
+  <link rel="stylesheet" href="_shared/base.css" />
+  <link rel="stylesheet" href="_shared/tokens.css" />
+  <link rel="stylesheet" href="_shared/shell.css" />
+  <link rel="stylesheet" href="_shared/statusbar.css" />
+  <link rel="stylesheet" href="_shared/cards.css" />
+  <link rel="stylesheet" href="_shared/overlays.css" />
+</head>
+<body class="screen screen--victory">
+
+  <nav class="mock-nav">
+    <span class="mock-nav__title">
+      <span class="mock-nav__num">10</span>
+      <span class="mock-nav__name">Wyprawa Ukończona — Victory</span>
+    </span>
+    <span class="mock-nav__links">
+      <a class="mock-nav__link" href="09-game-over.html">← Prev</a>
+      <a class="mock-nav__link" href="index.html">Hub</a>
+      <a class="mock-nav__link mock-nav__link--disabled" href="#">Next →</a>
+    </span>
+  </nav>
+
+  <main class="shell" aria-label="KURCZOKER game shell">
+    <div class="shell__corners" aria-hidden="true">
+      <span class="shell__corner shell__corner--tl"></span>
+      <span class="shell__corner shell__corner--tr"></span>
+      <span class="shell__corner shell__corner--br"></span>
+      <span class="shell__corner shell__corner--bl"></span>
+    </div>
+    <div class="shell__crest" aria-hidden="true"></div>
+
+    <header class="shell__topbar">
+      <div class="hud">
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-hp-heart.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">HP</span><strong class="hud-pill__value">1 / 3</strong></span>
+        </div>
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-node.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">Węzeł</span><strong class="hud-pill__value">boss</strong></span>
+        </div>
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-scene-book.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">Scena</span><strong class="hud-pill__value">Victory</strong></span>
+        </div>
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-ability-bomb.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">Zdolność</span><strong class="hud-pill__value">egg-bomb</strong></span>
+        </div>
+      </div>
+      <div class="shell-actions">
+        <button class="btn btn--restart" type="button">Nowa gra</button>
+        <button class="btn btn--icon" type="button" aria-label="Ustawienia"><img src="assets/svg/icon-gear.svg" alt="" width="22" height="22" /></button>
+      </div>
+    </header>
+
+    <div class="shell__canvas" aria-label="Ekran zwycięstwa z konfetti">
+      <img src="assets/canvas/10-canvas.png" alt="Painted reference: victory — landing z konfetti" />
+
+      <!-- Victory modal overlay -->
+      <div class="end-modal end-modal--victory" role="dialog" aria-modal="true" aria-label="Wyprawa ukończona">
+        <div class="end-modal__inner">
+          <p class="end-modal__eyebrow">🏆 Misja wykonana!</p>
+          <h1 class="end-modal__title">WYPRAWA<br>UKOŃCZONA</h1>
+          <p class="end-modal__sub">Kurczoker pokonał bossa i wrócił z chwałą. Legenda zapisana w kurzej kronice!</p>
+
+          <!-- Victory stats -->
+          <div class="victory-stats" role="list" aria-label="Statystyki wyprawy">
+            <div class="victory-stat" role="listitem">
+              <span class="victory-stat__val">32 🌾</span>
+              <span class="victory-stat__key">Zebrane ziarna</span>
+            </div>
+            <div class="victory-stat" role="listitem">
+              <span class="victory-stat__val">4</span>
+              <span class="victory-stat__key">Artefakty</span>
+            </div>
+            <div class="victory-stat" role="listitem">
+              <span class="victory-stat__val">7</span>
+              <span class="victory-stat__key">Wygrane walki</span>
+            </div>
+          </div>
+
+          <div class="end-modal__cta">
+            <button class="btn btn--action" type="button">Nowa Wyprawa</button>
+            <button class="btn btn--restart" type="button">Menu Główne</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="shell__statusbar shell__statusbar--victory">
+      <div class="status-pill">
+        <span class="status-pill__icon status-pill__icon--heart"><img src="assets/svg/icon-hp-heart.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">HP</span><span class="status-pill__value">1 / 3</span></span>
+      </div>
+      <div class="status-pill">
+        <span class="status-pill__icon"><img src="assets/svg/icon-node.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">Węzły</span><span class="status-pill__value">9 / 9</span></span>
+      </div>
+      <div class="status-pill">
+        <span class="status-pill__icon"><img src="assets/svg/icon-grain-coin.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">Ziarna</span><span class="status-pill__value">32 🌾</span></span>
+      </div>
+      <div class="status-pill">
+        <span class="status-pill__icon"><img src="assets/svg/icon-audio-note.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">Audio</span><span class="status-pill__value">fanfary</span></span>
+      </div>
+    </footer>
+
+    <div class="shell__ribbon shell__ribbon--victory" role="status">
+      <span class="shell__ribbon-icon"><img src="assets/svg/icon-feather-quill.svg" alt="" width="28" height="28" /></span>
+      <span class="shell__ribbon-text">🥚 Kurczoker pokonał bossa! Chwała bohaterowi!</span>
+    </div>
+  </main>
+
+  <p class="mock-caption">
+    <strong>10 · Victory.</strong> Modal victory z tytułem „WYPRAWA UKOŃCZONA", statystykami (Ziarna / Artefakty / Wygrane walki)
+    i dwoma CTA. Canvas z konfetti (PNG ref). Status bar w wariancie „victory" (złote akcenty).
+    Ribbon w wariancie „victory" (złoty). Ostatni ekran serii.
+  </p>
+
+</body>
+</html>

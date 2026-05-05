@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KURCZOKER — UIX Mockups Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Inter:wght@400;600;700;900&display=swap" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold:        #d4a04a;
+      --gold-bright: #f2c15b;
+      --gold-deep:   #8a6322;
+      --navy:        #1d2746;
+      --navy-deep:   #131a30;
+      --edge:        #0a0e1c;
+      --paper:       #f3e9c8;
+      --paper-hi:    #fffbe8;
+      --ink:         #1a1f3a;
+      --ink-cream:   #f5e8c1;
+      --ink-muted:   #6b5e3a;
+      --red:         #c43e2c;
+      --blue:        #3f7fb8;
+      --font-d:      "Lilita One", system-ui, sans-serif;
+      --font-b:      "Inter", system-ui, sans-serif;
+    }
+
+    html, body {
+      min-height: 100%;
+      background: var(--navy-deep);
+      color: var(--ink-cream);
+      font-family: var(--font-b);
+    }
+
+    /* ---- decorative noise bg ---- */
+    body {
+      background-image:
+        repeating-linear-gradient(45deg,
+          rgba(255, 255, 255, 0.018) 0 2px,
+          transparent 2px 8px),
+        linear-gradient(180deg, #0f1526 0%, #131a30 100%);
+    }
+
+    /* ===== HEADER ===== */
+    .hub-header {
+      display: grid;
+      place-items: center;
+      gap: 6px;
+      padding: 52px 24px 32px;
+      text-align: center;
+    }
+
+    .hub-eyebrow {
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+
+    .hub-title {
+      font-family: var(--font-d);
+      font-size: clamp(2.6rem, 6vw, 4.2rem);
+      letter-spacing: 0.04em;
+      line-height: 1;
+      color: var(--gold-bright);
+      text-shadow:
+        0 4px 0 var(--gold-deep),
+        0 6px 0 var(--edge);
+    }
+
+    .hub-sub {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: rgba(245, 232, 193, 0.65);
+      max-width: 560px;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    /* golden divider */
+    .hub-divider {
+      width: min(540px, 80vw);
+      height: 2px;
+      margin: 24px auto 0;
+      background:
+        linear-gradient(90deg, transparent, var(--gold-bright), var(--gold), transparent);
+      border: none;
+    }
+
+    /* ===== GRID ===== */
+    .hub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(340px, 100%), 1fr));
+      gap: 20px;
+      max-width: 1200px;
+      margin: 36px auto 64px;
+      padding: 0 24px;
+    }
+
+    /* ===== CARD ===== */
+    .hub-card {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      border: 2px solid var(--edge);
+      border-radius: 14px;
+      background:
+        linear-gradient(180deg, #253058 0%, var(--navy) 50%, var(--navy-deep) 100%);
+      box-shadow:
+        inset 0 0 0 1px rgba(212, 160, 74, 0.45),
+        0 8px 0 var(--edge),
+        0 16px 32px rgba(10, 14, 28, 0.55);
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
+    }
+
+    .hub-card:hover {
+      transform: translateY(-4px);
+      box-shadow:
+        inset 0 0 0 1px var(--gold-bright),
+        0 12px 0 var(--edge),
+        0 20px 44px rgba(10, 14, 28, 0.65);
+    }
+
+    .hub-card:active {
+      transform: translateY(2px);
+    }
+
+    /* thumbnail */
+    .hub-card__thumb {
+      position: relative;
+      aspect-ratio: 1448 / 1086;
+      overflow: hidden;
+      background: var(--edge);
+      border-bottom: 2px solid rgba(212, 160, 74, 0.35);
+    }
+
+    .hub-card__thumb img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top;
+      transition: transform 0.25s ease-out;
+    }
+
+    .hub-card:hover .hub-card__thumb img {
+      transform: scale(1.03);
+    }
+
+    .hub-card__num {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      display: grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border: 2px solid var(--edge);
+      border-radius: 8px;
+      background:
+        linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 100%);
+      font-family: var(--font-d);
+      font-size: 1rem;
+      color: var(--ink);
+      box-shadow: 0 3px 0 var(--edge);
+    }
+
+    /* body */
+    .hub-card__body {
+      padding: 14px 16px 10px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .hub-card__title {
+      font-family: var(--font-d);
+      font-size: 1.15rem;
+      letter-spacing: 0.03em;
+      color: var(--gold-bright);
+      line-height: 1.05;
+    }
+
+    .hub-card__desc {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: rgba(245, 232, 193, 0.6);
+      line-height: 1.4;
+    }
+
+    /* footer */
+    .hub-card__footer {
+      padding: 8px 16px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .hub-card__tag {
+      display: inline-grid;
+      place-items: center;
+      height: 24px;
+      padding: 0 10px;
+      border: 1.5px solid var(--edge);
+      border-radius: 5px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .hub-card__tag--shell   { background: rgba(29, 39, 70, 0.8); color: var(--gold); }
+    .hub-card__tag--overlay { background: rgba(63, 127, 184, 0.25); color: var(--blue); }
+    .hub-card__tag--modal   { background: rgba(196, 62, 44, 0.25); color: #f08070; }
+
+    .hub-card__arrow {
+      margin-left: auto;
+      font-size: 1.1rem;
+      color: var(--gold-bright);
+      transition: transform 0.15s ease-out;
+    }
+
+    .hub-card:hover .hub-card__arrow {
+      transform: translateX(4px);
+    }
+
+    /* ===== FOOTER ===== */
+    .hub-footer {
+      text-align: center;
+      padding: 0 24px 48px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: rgba(245, 232, 193, 0.35);
+    }
+
+    .hub-footer a {
+      color: var(--gold);
+      text-decoration: none;
+    }
+
+    .hub-footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+  <header class="hub-header">
+    <p class="hub-eyebrow">UIX Mockups · KURCZOKER</p>
+    <h1 class="hub-title">Mockup Hub</h1>
+    <p class="hub-sub">
+      10 statycznych ekranów desktop — granatowa rama, CSS/SVG chrome, PNG podkłady z referencji UIX.
+      Kliknij kafelek aby otworzyć mockup.
+    </p>
+    <hr class="hub-divider" aria-hidden="true" />
+  </header>
+
+  <main class="hub-grid" role="list" aria-label="Lista mockupów">
+
+    <a class="hub-card" href="01-landing.html" role="listitem" id="mock-01">
+      <div class="hub-card__thumb">
+        <img src="assets/canvas/01-canvas.png" alt="" loading="lazy" />
+        <span class="hub-card__num">01</span>
+      </div>
+      <div class="hub-card__body">
+        <h2 class="hub-card__title">Landing / Hero</h2>
+        <p class="hub-card__desc">Tytuł KURCZOKER w canvasie, 4 HUD-pillsy, statusbar, ribbon, 4 hint-cards Run loop.</p>
+      </div>
+      <div class="hub-card__footer">
+        <span class="hub-card__tag hub-card__tag--shell">Shell</span>
+        <span class="hub-card__tag hub-card__tag--overlay">Hints ×4</span>
+        <span class="hub-card__arrow">→</span>
+      </div>
+    </a>
+
+    <a class="hub-card" href="02-mapa.html" role="listitem" id="mock-02">
+      <div class="hub-card__thumb">
+        <img src="assets/canvas/02-canvas.png" alt="" loading="lazy" />
+        <span class="hub-card__num">02</span>
+      </div>
+      <div class="hub-card__body">
+        <h2 class="hub-card__title">Mapa Wyprawy</h2>
+        <p class="hub-card__desc">Panorama królestwa z węzłami ścieżki, 3 hint-cards (Trasa / Nagrody / Ryzyko).</p>
+      </div>
+      <div class="hub-card__footer">
+        <span class="hub-card__tag hub-card__tag--shell">Shell</span>
+        <span class="hub-card__tag hub-card__tag--overlay">Hints ×3</span>
+        <span class="hub-card__arrow">→</span>
+      </div>
+    </a>
+
+    <a class="hub-card" href="03-walka-gracza.html" role="listitem" id="mock-03">
+      <div class="hub-card__thumb">
+        <img src="assets/canvas/03-canvas.png" alt="" loading="lazy" />
+        <span class="hub-card__num">03</span>
+      </div>
+      <div class="hub-card__body">
+        <h2 class="hub-card__title">Walka — Tura Gracza</h2>
+        <p class="hub-card__desc">Scena bitwy z arkiem celowania. 3 hint-cards zdolności (Egg Bomb / Skok / Pancerz).</p>
+      </div>
+      <div class="hub-card__footer">
+        <span class="hub-card__tag hub-card__tag--shell">Shell</span>
+        <span class="hub-card__tag hub-card__tag--overlay">Hints ×3</span>
+        <span class="hub-card__arrow">→</span>
+      </div>
+    </a>
+
+    <a class="hub-card" href="04-walka-wroga.html" role="listitem" id="mock-04">
+      <div class="hub-card__thumb">
+        <img src="assets/canvas/04-canvas.png" alt="" loading="lazy" />
+        <span class="hub-card__num">04</span>
+      </div>
+      <div class="hub-card__body">
+        <h2 class="hub-card__title">Walka — Tura Wroga</h2>
+        <p class="hub-card__desc">Eksplozja jajobomby, odpowiedź wroga. Ribbon „Przeciwnik odpowiada", 4 hint-cards.</p>
+      </div>
+      <div class="hub-card__footer">
+        <span class="hub-card__tag hub-card__tag--shell">Shell</span>
+        <span class="hub-card__tag hub-card__tag--overlay">Hints ×4</span>
+        <span class="hub-card__arrow">→</span>
+      </div>
+    </a>
+
+    <a class="hub-card" href="05-nagroda.html" role="listitem" id="mock-05">
+      <div class="hub-card__thumb">
+        <img src="assets/canvas/05-canvas.png" alt="" loading="lazy" />
+        <span class="hub-card__num">05</span>
+      </div>
+      <div class="hub-card__body">
+        <h2 class="hub-card__title">Wybór Nagrody</h2>
+        <p class="hub-card__desc">3 CSS reward-karty (Zdolność / Artefakt / Leczenie) z golden-selected efektem.</p>
+      </div>
+      <div class="hub-card__footer">
+        <span class="hub-card__tag hub-card__tag--shell">Shell</span>
+        <span class="hub-card__tag hub-card__tag--overlay">Cards ×3</span>
+        <span class="hub-card__arrow">→</span>
+      </div>
+    </a>
+
+    <a class="hub-card" href="06-sklep.html" role="listitem" id="mock-06">
+      <div class="hub-card__thumb">
+        <img src="assets/canvas/06-canvas.png" alt="" loading="lazy" />
+        <span class="hub-card__num">06</span>
+      </div>
+      <div class="hub-card__body">
+        <h2 class="hub-card__title">Sklep Wyprawowy</h2>
+        <p class="hub-card__desc">4 shop-karty z ceną ziaren i przyciskiem „Kup". HUD z licznikiem ziaren.</p>
+      </div>
+      <div class="hub-card__footer">
+        <span class="hub-card__tag hub-card__tag--shell">Shell</span>
+        <span class="hub-card__tag hub-card__tag--overlay">Cards ×4</span>
+        <span class="hub-card__arrow">→</span>
+      </div>
+    </a>
+
+    <a class="hub-card" href="07-skarb.html" role="listitem" id="mock-07">
+      <div class="hub-card__thumb">
+        <img src="assets/canvas/07-canvas.png" alt="" loading="lazy" />
+        <span class="hub-card__num">07</span>
+      </div>
+      <div class="hub-card__body">
+        <h2 class="hub-card__title">Skarb — Jaskinia</h2>
+        <p class="hub-card__desc">3 karty skarbu + CTA „Weź nagrodę". Środkowa karta zaznaczona (selected).</p>
+      </div>
+      <div class="hub-card__footer">
+        <span class="hub-card__tag hub-card__tag--shell">Shell</span>
+        <span class="hub-card__tag hub-card__tag--overlay">Cards ×3 + CTA</span>
+        <span class="hub-card__arrow">→</span>
+      </div>
+    </a>
+
+    <a class="hub-card" href="08-boss.html" role="listitem" id="mock-08">
+      <div class="hub-card__thumb">
+        <img src="assets/canvas/08-canvas.png" alt="" loading="lazy" />
+        <span class="hub-card__num">08</span>
+      </div>
+      <div class="hub-card__body">
+        <h2 class="hub-card__title">Walka z Bossem</h2>
+        <p class="hub-card__desc">Pasek HP bossa (CSS progress bar) w canvasie. Ribbon danger. 3 zdolności bossowe.</p>
+      </div>
+      <div class="hub-card__footer">
+        <span class="hub-card__tag hub-card__tag--shell">Shell</span>
+        <span class="hub-card__tag hub-card__tag--modal">Boss Bar</span>
+        <span class="hub-card__tag hub-card__tag--overlay">Hints ×3</span>
+        <span class="hub-card__arrow">→</span>
+      </div>
+    </a>
+
+    <a class="hub-card" href="09-game-over.html" role="listitem" id="mock-09">
+      <div class="hub-card__thumb">
+        <img src="assets/canvas/09-canvas.png" alt="" loading="lazy" />
+        <span class="hub-card__num">09</span>
+      </div>
+      <div class="hub-card__body">
+        <h2 class="hub-card__title">Koniec Wyprawy</h2>
+        <p class="hub-card__desc">Modal game-over: tytuł XXL, statystyki, 2 CTA. Status bar w stanie dead. 4 hint-cards.</p>
+      </div>
+      <div class="hub-card__footer">
+        <span class="hub-card__tag hub-card__tag--modal">Modal</span>
+        <span class="hub-card__tag hub-card__tag--overlay">Hints ×4</span>
+        <span class="hub-card__arrow">→</span>
+      </div>
+    </a>
+
+    <a class="hub-card" href="10-victory.html" role="listitem" id="mock-10">
+      <div class="hub-card__thumb">
+        <img src="assets/canvas/10-canvas.png" alt="" loading="lazy" />
+        <span class="hub-card__num">10</span>
+      </div>
+      <div class="hub-card__body">
+        <h2 class="hub-card__title">Wyprawa Ukończona</h2>
+        <p class="hub-card__desc">Modal victory: tytuł złoty, 3 statystyki, konfetti canvas. Ribbon i statusbar victory.</p>
+      </div>
+      <div class="hub-card__footer">
+        <span class="hub-card__tag hub-card__tag--modal">Modal</span>
+        <span class="hub-card__tag hub-card__tag--overlay">Victory Stats</span>
+        <span class="hub-card__arrow">→</span>
+      </div>
+    </a>
+
+  </main>
+
+  <footer class="hub-footer">
+    <p>
+      KURCZOKER UIX Mockups — <a href="DESIGN.md">DESIGN.md</a> · tylko desktop, bez implementacji
+    </p>
+  </footer>
+
+</body>
+</html>

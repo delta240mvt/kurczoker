@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KURCZOKER mockup · 09 · Game Over</title>
+  <link rel="stylesheet" href="_shared/base.css" />
+  <link rel="stylesheet" href="_shared/tokens.css" />
+  <link rel="stylesheet" href="_shared/shell.css" />
+  <link rel="stylesheet" href="_shared/statusbar.css" />
+  <link rel="stylesheet" href="_shared/cards.css" />
+  <link rel="stylesheet" href="_shared/overlays.css" />
+</head>
+<body class="screen screen--game-over">
+
+  <nav class="mock-nav">
+    <span class="mock-nav__title">
+      <span class="mock-nav__num">09</span>
+      <span class="mock-nav__name">Koniec Wyprawy — Game Over</span>
+    </span>
+    <span class="mock-nav__links">
+      <a class="mock-nav__link" href="08-boss.html">← Prev</a>
+      <a class="mock-nav__link" href="index.html">Hub</a>
+      <a class="mock-nav__link" href="10-victory.html">Next →</a>
+    </span>
+  </nav>
+
+  <main class="shell" aria-label="KURCZOKER game shell">
+    <div class="shell__corners" aria-hidden="true">
+      <span class="shell__corner shell__corner--tl"></span>
+      <span class="shell__corner shell__corner--tr"></span>
+      <span class="shell__corner shell__corner--br"></span>
+      <span class="shell__corner shell__corner--bl"></span>
+    </div>
+    <div class="shell__crest" aria-hidden="true"></div>
+
+    <header class="shell__topbar">
+      <div class="hud">
+        <div class="hud-pill hud-pill--dead">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-hp-heart.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">HP</span><strong class="hud-pill__value">0 / 3</strong></span>
+        </div>
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-node.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">Węzeł</span><strong class="hud-pill__value">battle-3</strong></span>
+        </div>
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-scene-book.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">Scena</span><strong class="hud-pill__value">Koniec</strong></span>
+        </div>
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-ability-bomb.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">Zdolność</span><strong class="hud-pill__value">egg-bomb</strong></span>
+        </div>
+      </div>
+      <div class="shell-actions">
+        <button class="btn btn--restart" type="button">Restart</button>
+        <button class="btn btn--icon" type="button" aria-label="Ustawienia"><img src="assets/svg/icon-gear.svg" alt="" width="22" height="22" /></button>
+      </div>
+    </header>
+
+    <div class="shell__canvas" aria-label="Ekran końca wyprawy">
+      <img src="assets/canvas/09-canvas.png" alt="Painted reference: koniec gry — tło landing" />
+
+      <!-- Game Over modal overlay -->
+      <div class="end-modal end-modal--game-over" role="dialog" aria-modal="true" aria-label="Koniec Wyprawy">
+        <div class="end-modal__inner">
+          <p class="end-modal__eyebrow">Wyprawa zakończona</p>
+          <h1 class="end-modal__title">KONIEC<br>WYPRAWY</h1>
+          <p class="end-modal__sub">Kurczoker padł po 3 węzłach. Nie poddawaj się — każda próba uczy walki.</p>
+          <div class="end-modal__stats">
+            <div class="end-modal__stat">
+              <span class="end-modal__stat-val">3</span>
+              <span class="end-modal__stat-key">Węzły</span>
+            </div>
+            <div class="end-modal__stat">
+              <span class="end-modal__stat-val">5 🌾</span>
+              <span class="end-modal__stat-key">Ziarna</span>
+            </div>
+            <div class="end-modal__stat">
+              <span class="end-modal__stat-val">2</span>
+              <span class="end-modal__stat-key">Wygrane walki</span>
+            </div>
+          </div>
+          <div class="end-modal__cta">
+            <button class="btn btn--action" type="button">Nowa Wyprawa</button>
+            <button class="btn btn--restart" type="button">Menu Główne</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="shell__statusbar shell__statusbar--dead">
+      <div class="status-pill">
+        <span class="status-pill__icon status-pill__icon--heart"><img src="assets/svg/icon-hp-heart.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">HP</span><span class="status-pill__value">0 / 3</span></span>
+      </div>
+      <div class="status-pill">
+        <span class="status-pill__icon"><img src="assets/svg/icon-node.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">Węzły</span><span class="status-pill__value">3 / 9</span></span>
+      </div>
+      <div class="status-pill">
+        <span class="status-pill__icon"><img src="assets/svg/icon-grain-coin.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">Ziarna</span><span class="status-pill__value">5 🌾</span></span>
+      </div>
+      <div class="status-pill">
+        <span class="status-pill__icon"><img src="assets/svg/icon-audio-note.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">Audio</span><span class="status-pill__value">cisza</span></span>
+      </div>
+    </footer>
+
+    <div class="shell__ribbon shell__ribbon--danger" role="status">
+      <span class="shell__ribbon-icon"><img src="assets/svg/icon-feather-quill.svg" alt="" width="28" height="28" /></span>
+      <span class="shell__ribbon-text">Kurczoker poległ. Wyprawa zakończona przedwcześnie.</span>
+    </div>
+  </main>
+
+  <section class="hint-cards hint-cards--4" aria-label="Co możesz zrobić">
+    <article class="hint-card">
+      <span class="hint-card__icon hint-card__icon--red"><img src="assets/svg/icon-hp-heart.svg" alt="" width="26" height="26" /></span>
+      <div class="hint-card__body">
+        <h3 class="hint-card__title">Spróbuj znowu</h3>
+        <p class="hint-card__desc">Każda porażka to lekcja. Nowa wyprawa zaczyna się od pełnych 3 HP.</p>
+      </div>
+    </article>
+    <article class="hint-card">
+      <span class="hint-card__icon hint-card__icon--gold"><img src="assets/svg/icon-node.svg" alt="" width="26" height="26" /></span>
+      <div class="hint-card__body">
+        <h3 class="hint-card__title">Inna ścieżka</h3>
+        <p class="hint-card__desc">Wybierz inną trasę na mapie — unikaj walki gdy HP jest niskie.</p>
+      </div>
+    </article>
+    <article class="hint-card">
+      <span class="hint-card__icon hint-card__icon--blue"><img src="assets/svg/icon-grain-coin.svg" alt="" width="26" height="26" /></span>
+      <div class="hint-card__body">
+        <h3 class="hint-card__title">Odwiedź sklep</h3>
+        <p class="hint-card__desc">Zbieraj ziarna i wydaj je w sklepie na pancerz lub uzdrowienie.</p>
+      </div>
+    </article>
+    <article class="hint-card">
+      <span class="hint-card__icon hint-card__icon--gold"><img src="assets/svg/icon-ability-bomb.svg" alt="" width="26" height="26" /></span>
+      <div class="hint-card__body">
+        <h3 class="hint-card__title">Ulepsz zdolność</h3>
+        <p class="hint-card__desc">Nagradza za wygrane walki — mocniejszy Egg Bomb to klucz do bossa.</p>
+      </div>
+    </article>
+  </section>
+
+  <p class="mock-caption">
+    <strong>09 · Game Over.</strong> Modal end-game centralnie nad canvasem z tytułem XXL, statystykami i dwoma CTA.
+    Status bar w wariancie „dead" (stonowane kolory). Ribbon czerwony. 4 hint-cards z poradami po przegranej.
+  </p>
+
+</body>
+</html>

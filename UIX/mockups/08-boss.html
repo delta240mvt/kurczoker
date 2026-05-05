@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KURCZOKER mockup · 08 · Boss</title>
+  <link rel="stylesheet" href="_shared/base.css" />
+  <link rel="stylesheet" href="_shared/tokens.css" />
+  <link rel="stylesheet" href="_shared/shell.css" />
+  <link rel="stylesheet" href="_shared/statusbar.css" />
+  <link rel="stylesheet" href="_shared/cards.css" />
+  <link rel="stylesheet" href="_shared/overlays.css" />
+</head>
+<body class="screen screen--boss">
+
+  <nav class="mock-nav">
+    <span class="mock-nav__title">
+      <span class="mock-nav__num">08</span>
+      <span class="mock-nav__name">Walka z bossem</span>
+    </span>
+    <span class="mock-nav__links">
+      <a class="mock-nav__link" href="07-skarb.html">← Prev</a>
+      <a class="mock-nav__link" href="index.html">Hub</a>
+      <a class="mock-nav__link" href="09-game-over.html">Next →</a>
+    </span>
+  </nav>
+
+  <main class="shell" aria-label="KURCZOKER game shell">
+    <div class="shell__corners" aria-hidden="true">
+      <span class="shell__corner shell__corner--tl"></span>
+      <span class="shell__corner shell__corner--tr"></span>
+      <span class="shell__corner shell__corner--br"></span>
+      <span class="shell__corner shell__corner--bl"></span>
+    </div>
+    <div class="shell__crest" aria-hidden="true"></div>
+
+    <header class="shell__topbar">
+      <div class="hud">
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-hp-heart.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">HP</span><strong class="hud-pill__value">2 / 3</strong></span>
+        </div>
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-node.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">Węzeł</span><strong class="hud-pill__value">boss</strong></span>
+        </div>
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-scene-book.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">Scena</span><strong class="hud-pill__value">Boss</strong></span>
+        </div>
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-ability-bomb.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">Zdolność</span><strong class="hud-pill__value">egg-bomb</strong></span>
+        </div>
+      </div>
+      <div class="shell-actions">
+        <button class="btn btn--action" type="button">Akcja</button>
+        <button class="btn btn--restart" type="button">Restart</button>
+        <button class="btn btn--icon" type="button" aria-label="Ustawienia"><img src="assets/svg/icon-gear.svg" alt="" width="22" height="22" /></button>
+      </div>
+    </header>
+
+    <div class="shell__canvas" aria-label="Arena finałowej walki z bossem">
+      <img src="assets/canvas/08-canvas.png" alt="Painted reference: arena bossa" />
+
+      <!-- Boss HP bar at top of canvas -->
+      <div class="boss-bar" role="progressbar" aria-label="HP bossa" aria-valuenow="80" aria-valuemin="0" aria-valuemax="100">
+        <div class="boss-bar__header">
+          <span class="boss-bar__name">KURCZOKER BOSS</span>
+          <span class="boss-bar__value">80 / 100</span>
+        </div>
+        <div class="boss-bar__track">
+          <div class="boss-bar__fill" style="--boss-hp-pct: 80%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <footer class="shell__statusbar">
+      <div class="status-pill">
+        <span class="status-pill__icon status-pill__icon--heart"><img src="assets/svg/icon-hp-heart.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">HP</span><span class="status-pill__value">2 / 3</span></span>
+      </div>
+      <div class="status-pill">
+        <span class="status-pill__icon"><img src="assets/svg/icon-node.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">Węzeł</span><span class="status-pill__value">boss</span></span>
+      </div>
+      <div class="status-pill">
+        <span class="status-pill__icon"><img src="assets/svg/icon-ability-bomb.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">Zdolność</span><span class="status-pill__value">Egg Bomb</span></span>
+      </div>
+      <div class="status-pill">
+        <span class="status-pill__icon"><img src="assets/svg/icon-audio-note.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">Audio</span><span class="status-pill__value">muzyka</span></span>
+      </div>
+    </footer>
+
+    <div class="shell__ribbon shell__ribbon--danger" role="status">
+      <span class="shell__ribbon-icon"><img src="assets/svg/icon-feather-quill.svg" alt="" width="28" height="28" /></span>
+      <span class="shell__ribbon-text">Tura gracza — boss HP 80/100. Atak!</span>
+    </div>
+  </main>
+
+  <section class="hint-cards hint-cards--3" aria-label="Dostępne zdolności bossowe">
+    <article class="hint-card">
+      <span class="hint-card__icon hint-card__icon--blue"><img src="assets/svg/icon-ability-bomb.svg" alt="" width="26" height="26" /></span>
+      <div class="hint-card__body">
+        <h3 class="hint-card__title">Egg Bomb</h3>
+        <p class="hint-card__desc">Celuj w słaby punkt bossa — głowę. Zadaje 2 DMG przy trafieniu.</p>
+      </div>
+    </article>
+    <article class="hint-card">
+      <span class="hint-card__icon hint-card__icon--gold"><img src="assets/svg/icon-jump.svg" alt="" width="26" height="26" /></span>
+      <div class="hint-card__body">
+        <h3 class="hint-card__title">Mocny Rzut</h3>
+        <p class="hint-card__desc">Potężniejszy, wolniejszy atak — 3 DMG, ale boss reaguje silniej.</p>
+      </div>
+    </article>
+    <article class="hint-card">
+      <span class="hint-card__icon hint-card__icon--red"><img src="assets/svg/icon-shield.svg" alt="" width="26" height="26" /></span>
+      <div class="hint-card__body">
+        <h3 class="hint-card__title">Twarda Skorupa</h3>
+        <p class="hint-card__desc">Przygotuj obronę przed atakiem bossa. Redukuje następny cios o 1 DMG.</p>
+      </div>
+    </article>
+  </section>
+
+  <p class="mock-caption">
+    <strong>08 · Boss.</strong> Pasek HP bossa (CSS progress bar z imieniem KURCZOKER BOSS + wartością 80/100)
+    w górnej części canvasu. Ribbon w wariancie „danger" (czerwony). 3 hint-cards zdolności bossowych pod shellem.
+  </p>
+
+</body>
+</html>

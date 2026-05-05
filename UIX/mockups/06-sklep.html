@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KURCZOKER mockup · 06 · Sklep</title>
+  <link rel="stylesheet" href="_shared/base.css" />
+  <link rel="stylesheet" href="_shared/tokens.css" />
+  <link rel="stylesheet" href="_shared/shell.css" />
+  <link rel="stylesheet" href="_shared/statusbar.css" />
+  <link rel="stylesheet" href="_shared/cards.css" />
+  <link rel="stylesheet" href="_shared/overlays.css" />
+</head>
+<body class="screen screen--sklep">
+
+  <nav class="mock-nav">
+    <span class="mock-nav__title">
+      <span class="mock-nav__num">06</span>
+      <span class="mock-nav__name">Sklep Wyprawowy</span>
+    </span>
+    <span class="mock-nav__links">
+      <a class="mock-nav__link" href="05-nagroda.html">← Prev</a>
+      <a class="mock-nav__link" href="index.html">Hub</a>
+      <a class="mock-nav__link" href="07-skarb.html">Next →</a>
+    </span>
+  </nav>
+
+  <main class="shell" aria-label="KURCZOKER game shell">
+    <div class="shell__corners" aria-hidden="true">
+      <span class="shell__corner shell__corner--tl"></span>
+      <span class="shell__corner shell__corner--tr"></span>
+      <span class="shell__corner shell__corner--br"></span>
+      <span class="shell__corner shell__corner--bl"></span>
+    </div>
+    <div class="shell__crest" aria-hidden="true"></div>
+
+    <header class="shell__topbar">
+      <div class="hud">
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-hp-heart.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">HP</span><strong class="hud-pill__value">3 / 3</strong></span>
+        </div>
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-node.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">Węzeł</span><strong class="hud-pill__value">shop-1</strong></span>
+        </div>
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-scene-book.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">Scena</span><strong class="hud-pill__value">Sklep</strong></span>
+        </div>
+        <div class="hud-pill">
+          <span class="hud-pill__icon"><img src="assets/svg/icon-grain-coin.svg" alt="" width="32" height="32" /></span>
+          <span class="hud-pill__text"><span class="hud-pill__label">Ziarna</span><strong class="hud-pill__value">12 🌾</strong></span>
+        </div>
+      </div>
+      <div class="shell-actions">
+        <button class="btn btn--action" type="button" disabled>Akcja</button>
+        <button class="btn btn--restart" type="button">Restart</button>
+        <button class="btn btn--icon" type="button" aria-label="Ustawienia"><img src="assets/svg/icon-gear.svg" alt="" width="22" height="22" /></button>
+      </div>
+    </header>
+
+    <div class="shell__canvas" aria-label="Sklep wyprawowy">
+      <img src="assets/canvas/06-canvas.png" alt="Painted reference: sklep wyprawowy" />
+
+      <!-- 4 CSS shop cards overlaid on canvas -->
+      <div class="shop-row" role="list" aria-label="Towary w sklepie">
+
+        <article class="shop-card" role="listitem" tabindex="0">
+          <div class="shop-card__icon"><img src="assets/svg/icon-hp-heart.svg" alt="" width="32" height="32" /></div>
+          <h3 class="shop-card__name">Kurze Ziele</h3>
+          <p class="shop-card__desc">Przywraca 1 HP natychmiast. Jeden razem tylko.</p>
+          <div class="shop-card__price">
+            <img src="assets/svg/icon-grain-coin.svg" alt="Ziarna" width="16" height="16" /> 4
+          </div>
+          <button class="shop-card__buy" type="button">Kup</button>
+        </article>
+
+        <article class="shop-card" role="listitem" tabindex="0">
+          <div class="shop-card__icon"><img src="assets/svg/icon-ability-bomb.svg" alt="" width="32" height="32" /></div>
+          <h3 class="shop-card__name">Mega Bomba</h3>
+          <p class="shop-card__desc">Wzmocniona jajobomba — 3 DMG zamiast 1. Jednorazowe.</p>
+          <div class="shop-card__price">
+            <img src="assets/svg/icon-grain-coin.svg" alt="Ziarna" width="16" height="16" /> 6
+          </div>
+          <button class="shop-card__buy" type="button">Kup</button>
+        </article>
+
+        <article class="shop-card" role="listitem" tabindex="0">
+          <div class="shop-card__icon"><img src="assets/svg/icon-shield.svg" alt="" width="32" height="32" /></div>
+          <h3 class="shop-card__name">Zbroja Kurza</h3>
+          <p class="shop-card__desc">Blokuje 1 DMG w następnej walce. Wybucha po użyciu.</p>
+          <div class="shop-card__price">
+            <img src="assets/svg/icon-grain-coin.svg" alt="Ziarna" width="16" height="16" /> 5
+          </div>
+          <button class="shop-card__buy" type="button">Kup</button>
+        </article>
+
+        <article class="shop-card" role="listitem" tabindex="0">
+          <div class="shop-card__icon"><img src="assets/svg/icon-scene-book.svg" alt="" width="32" height="32" /></div>
+          <h3 class="shop-card__name">Kodeks Taktyki</h3>
+          <p class="shop-card__desc">Odkrywa trasy na mapie i wskazuje węzły nagrody.</p>
+          <div class="shop-card__price">
+            <img src="assets/svg/icon-grain-coin.svg" alt="Ziarna" width="16" height="16" /> 7
+          </div>
+          <button class="shop-card__buy" type="button">Kup</button>
+        </article>
+
+      </div>
+    </div>
+
+    <footer class="shell__statusbar">
+      <div class="status-pill">
+        <span class="status-pill__icon status-pill__icon--heart"><img src="assets/svg/icon-hp-heart.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">HP</span><span class="status-pill__value">3 / 3</span></span>
+      </div>
+      <div class="status-pill">
+        <span class="status-pill__icon"><img src="assets/svg/icon-grain-coin.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">Ziarna</span><span class="status-pill__value">12 🌾</span></span>
+      </div>
+      <div class="status-pill">
+        <span class="status-pill__icon"><img src="assets/svg/icon-node.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">Węzeł</span><span class="status-pill__value">shop-1</span></span>
+      </div>
+      <div class="status-pill">
+        <span class="status-pill__icon"><img src="assets/svg/icon-audio-note.svg" alt="" width="22" height="22" /></span>
+        <span class="status-pill__text"><span class="status-pill__label">Audio</span><span class="status-pill__value">muzyka</span></span>
+      </div>
+    </footer>
+
+    <div class="shell__ribbon" role="status">
+      <span class="shell__ribbon-icon"><img src="assets/svg/icon-feather-quill.svg" alt="" width="28" height="28" /></span>
+      <span class="shell__ribbon-text">Sklep Wyprawowy — wydaj ziarna mądrze!</span>
+    </div>
+  </main>
+
+  <p class="mock-caption">
+    <strong>06 · Sklep.</strong> 4 karty sklepu (grid 4-kolumnowy) z ceną ziaren i przyciskiem „Kup".
+    HUD czwarty pill zastąpiony licznikiem ziaren. Canvas = namalowana scena sklepu.
+  </p>
+
+</body>
+</html>

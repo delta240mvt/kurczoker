@@ -1,0 +1,178 @@
+/* KURCZOKER mockup statusbar
+   Dolny brazowy pasek z 4 zlotymi pillsami + kremowy ribbon wiadomosci. */
+
+.shell__statusbar {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gap-tight);
+  margin-top: var(--gap);
+  padding: 6px 10px;
+  height: var(--status-h);
+  border: 2px solid var(--shell-edge);
+  border-radius: var(--pill-radius);
+  background:
+    linear-gradient(180deg, #3a2810 0%, var(--status-bg) 50%, var(--status-bg-edge) 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(212, 160, 74, 0.4),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.5);
+  font-family: var(--font-body);
+  font-size: var(--fs-status);
+  font-weight: 800;
+  color: var(--ink-cream);
+}
+
+.status-pill {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 0 10px;
+  min-width: 0;
+}
+
+.status-pill__icon {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  color: var(--shell-gold-bright);
+}
+
+.status-pill__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.status-pill__icon--heart { color: var(--accent-red); }
+
+.status-pill__text {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-pill__label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: rgba(245, 232, 193, 0.65);
+}
+
+.status-pill__value {
+  font-weight: 900;
+  color: var(--ink-cream);
+}
+
+/* ================================================================
+   RIBBON wiadomosci (pod statusbar-em)
+   ================================================================ */
+
+.shell__ribbon {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 0 16px;
+  height: var(--ribbon-h);
+  border: 2px solid var(--shell-edge);
+  border-radius: var(--pill-radius);
+  background:
+    linear-gradient(180deg, var(--paper-strong) 0%, var(--paper) 100%);
+  box-shadow:
+    inset 0 0 0 1px var(--shell-gold-bright),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.12),
+    0 2px 0 var(--shell-edge);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.92rem;
+}
+
+.shell__ribbon::before,
+.shell__ribbon::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  transform: translateY(-50%);
+  background: url("../assets/svg/ribbon-seal.svg") no-repeat center / contain;
+}
+
+.shell__ribbon::before { left: -4px;  }
+.shell__ribbon::after  { right: -4px; }
+
+.shell__ribbon-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  color: var(--shell-gold-deep);
+}
+
+.shell__ribbon-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.shell__ribbon-text {
+  font-style: italic;
+  color: var(--ink);
+}
+
+/* Czerwony stan ribbonu (np. game over) */
+.shell__ribbon--alert {
+  background:
+    linear-gradient(180deg, #f0a499 0%, var(--accent-red-hi) 100%);
+  color: var(--ink-on-red);
+}
+
+.shell__ribbon--alert .shell__ribbon-text { color: var(--ink-on-red); }
+.shell__ribbon--alert .shell__ribbon-icon { color: rgba(255, 251, 232, 0.8); }
+
+/* --danger: deeper red (game-over, boss ribbon) */
+.shell__ribbon--danger {
+  background:
+    linear-gradient(180deg, var(--accent-red-hi) 0%, var(--accent-red) 60%, var(--accent-red-deep) 100%);
+  color: var(--ink-on-red);
+}
+.shell__ribbon--danger .shell__ribbon-text { color: var(--ink-on-red); }
+.shell__ribbon--danger .shell__ribbon-icon { color: rgba(255, 251, 232, 0.85); }
+
+/* --victory: golden celebratory ribbon */
+.shell__ribbon--victory {
+  background:
+    linear-gradient(180deg, var(--shell-gold-bright) 0%, var(--shell-gold) 60%, var(--shell-gold-deep) 100%);
+  color: var(--ink);
+  box-shadow:
+    inset 0 0 0 1px var(--shell-gold-bright),
+    inset 0 -3px 0 rgba(0, 0, 0, 0.18),
+    0 2px 0 var(--shell-edge);
+}
+.shell__ribbon--victory .shell__ribbon-text { color: var(--ink); }
+.shell__ribbon--victory .shell__ribbon-icon { color: var(--ink); }
+
+/* Statusbar state modifiers */
+.shell__statusbar--dead {
+  background:
+    linear-gradient(180deg, #2a1d0a 0%, #140c02 100%);
+  opacity: 0.65;
+}
+
+.shell__statusbar--victory {
+  background:
+    linear-gradient(180deg, var(--shell-gold) 0%, var(--shell-gold-deep) 100%);
+}
+.shell__statusbar--victory .status-pill__label,
+.shell__statusbar--victory .status-pill__value { color: var(--ink); }
+.shell__statusbar--victory .status-pill__icon { color: var(--ink); }
