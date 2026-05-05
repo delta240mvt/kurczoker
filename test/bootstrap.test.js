@@ -7,6 +7,12 @@ import { createEncounter, mountKurczokerGame, ownedAbilityId, rewardHitboxes } f
 function createElement() {
   const listeners = new Map();
   return {
+    attributes: new Map(),
+    className: "",
+    disabled: false,
+    hidden: false,
+    innerHTML: "",
+    style: {},
     textContent: "",
     addEventListener(type, handler) {
       listeners.set(type, handler);
@@ -14,7 +20,12 @@ function createElement() {
     removeEventListener(type, handler) {
       if (listeners.get(type) === handler) listeners.delete(type);
     },
-    setAttribute() {},
+    setAttribute(name, value) {
+      this.attributes.set(name, String(value));
+    },
+    getAttribute(name) {
+      return this.attributes.get(name) ?? null;
+    },
     trigger(type, event = {}) {
       listeners.get(type)?.(event);
     }
@@ -43,21 +54,53 @@ function createMountRoot() {
     getBoundingClientRect: () => ({ left: 0, top: 0, width: 960, height: 540 })
   };
   const restartButton = createElement();
+  const rootListeners = new Map();
+  const shell = createElement();
+  const backdrop = createElement();
+  const overlay = createElement();
+  const hints = createElement();
+  const boss = createElement();
+  const statusbar = createElement();
+  const ribbon = createElement();
   const elements = new Map([
     ["[data-game-canvas]", canvas],
     ["canvas", canvas],
     ["[data-game-restart]", restartButton],
+    ["[data-game-start]", createElement()],
     ["[data-game-health]", createElement()],
     ["[data-game-node]", createElement()],
     ["[data-game-ability]", createElement()],
+    ["[data-game-ability-label]", createElement()],
     ["[data-game-scene]", createElement()],
     ["[data-game-message]", createElement()],
-    ["[data-game-mute]", createElement()]
+    ["[data-game-mute]", createElement()],
+    ["[data-game-shell]", shell],
+    ["[data-game-backdrop]", backdrop],
+    ["[data-game-overlay]", overlay],
+    ["[data-game-hints]", hints],
+    ["[data-game-boss]", boss],
+    ["[data-game-statusbar]", statusbar],
+    ["[data-game-ribbon]", ribbon],
+    ["[data-game-status-health]", createElement()],
+    ["[data-game-status-node]", createElement()],
+    ["[data-game-status-action]", createElement()],
+    ["[data-game-status-action-label]", createElement()],
+    ["[data-game-status-audio]", createElement()]
   ]);
 
   return {
     canvas,
+    elements,
     restartButton,
+    addEventListener(type, handler) {
+      rootListeners.set(type, handler);
+    },
+    removeEventListener(type, handler) {
+      if (rootListeners.get(type) === handler) rootListeners.delete(type);
+    },
+    trigger(type, event = {}) {
+      rootListeners.get(type)?.(event);
+    },
     querySelector(selector) {
       return elements.get(selector) ?? null;
     }
@@ -183,6 +226,20 @@ test("restart button clears stale queued action before the next map frame", () =
     assert.equal(game.state.scene, SCENES.MAP);
     assert.equal(game.input.actionQueued, false);
     assert.equal(game.state.run.currentNodeId, "start");
+    game.destroy();
+  });
+});
+
+test("mount renders UIX shell state into optional DOM targets", () => {
+  withAnimationFrames(() => {
+    const root = createMountRoot();
+    const game = mountKurczokerGame(root);
+
+    assert.equal(root.elements.get("[data-game-shell]").className, "shell shell--map");
+    assert.equal(root.elements.get("[data-game-backdrop]").getAttribute("data-backdrop"), "02");
+    assert.match(root.elements.get("[data-game-hints]").innerHTML, /Trasa/);
+    assert.equal(root.elements.get("[data-game-status-action-label]").textContent, "Akcja");
+
     game.destroy();
   });
 });

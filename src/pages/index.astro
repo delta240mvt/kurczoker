@@ -1,7 +1,5 @@
 ---
-import ArtifactShowcase from "../components/ArtifactShowcase.astro";
 import HeroGame from "../components/HeroGame.astro";
-import LandingSection from "../components/LandingSection.astro";
 import "../styles/global.css";
 ---
 
@@ -12,64 +10,29 @@ import "../styles/global.css";
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="KURCZOKER is a browser mini roguelite with a playable canvas hero, odd artifacts, and compact fantasy battles."
+      content="KURCZOKER to przeglądarkowa mini gra roguelite z mapą wyprawy, walkami, sklepem, skarbami i finałowym bossem."
     />
     <title>KURCZOKER</title>
   </head>
   <body>
     <main>
       <HeroGame />
-
-      <LandingSection
-        eyebrow="Run loop"
-        title="A tiny fantasy run built for one more attempt"
-        tone="light"
-      >
-        <div class="section-grid section-grid--three">
-          <article class="feature-tile">
-            <span class="feature-tile__mark">01</span>
-            <h3>Pick a path</h3>
-            <p>Move through short map branches with battles, treasure, shops, elites, and a final boss node.</p>
+      <section class="uix-band" aria-label="Co dalej w wyprawie">
+        <div class="uix-band__inner">
+          <article>
+            <strong>Mapa</strong>
+            <span>Wybieraj walki, skarby i sklep bez przeładowania strony.</span>
           </article>
-          <article class="feature-tile">
-            <span class="feature-tile__mark">02</span>
-            <h3>Win the turn</h3>
-            <p>Every fight favors fast reads, arcing shots, risky jumps, and visible enemy answers.</p>
+          <article>
+            <strong>Walka</strong>
+            <span>Celuj, skacz i odpal jedną akcję w turze gracza.</span>
           </article>
-          <article class="feature-tile">
-            <span class="feature-tile__mark">03</span>
-            <h3>Shape the run</h3>
-            <p>Artifacts and abilities stack into stranger runs without accounts, grind, or backend state.</p>
+          <article>
+            <strong>Finał</strong>
+            <span>Dotrzyj do bossa albo rozpocznij kolejną wyprawę.</span>
           </article>
         </div>
-      </LandingSection>
-
-      <ArtifactShowcase />
-
-      <LandingSection
-        eyebrow="Roadmap"
-        title="A small kingdom of bad ideas and good explosions"
-        tone="dark"
-      >
-        <div class="roadmap">
-          <p>
-            KURCZOKER is built around short runs: pick a risky route, survive a few strange fights,
-            collect relics that bend the rules, and reach the boss before the kurnik bites back.
-          </p>
-          <ul class="roadmap__list">
-            <li>Branching map choices</li>
-            <li>Active-turn egg artillery</li>
-            <li>Relics, summons, and risky upgrades</li>
-            <li>A boss run that fits in a coffee break</li>
-          </ul>
-        </div>
-      </LandingSection>
+      </section>
     </main>
-    <footer class="site-footer">
-      <div class="site-footer__inner">
-        <span>KURCZOKER</span>
-        <span>Browser run, no login, no backend.</span>
-      </div>
-    </footer>
   </body>
 </html>

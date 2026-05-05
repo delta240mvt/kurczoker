@@ -42,11 +42,28 @@ export function selectMapNode(state, nodeId) {
     };
   }
 
+  if (node.type === NODE_TYPES.SHOP) {
+    return {
+      ...state,
+      scene: SCENES.SHOP,
+      run,
+      battle: null,
+      rewardChoices: [],
+      rewardMode: "shop",
+      shopOffers: createShopOffers(node, run, state.seed),
+      ui: {
+        ...state.ui,
+        message: "Kup wzmocnienie albo ruszaj dalej."
+      }
+    };
+  }
+
   return completeCurrentNode({
     ...state,
     scene: SCENES.REWARD,
     run,
-    rewardChoices: []
+    rewardChoices: [],
+    rewardMode: node.type === NODE_TYPES.TREASURE ? "treasure" : "reward"
   });
 }
 
@@ -82,6 +99,8 @@ export function completeCurrentNode(state) {
     battle: null,
     run,
     rewardChoices: createRewardChoices(node, runAfterBattle, state.seed),
+    rewardMode: node.type === NODE_TYPES.TREASURE ? "treasure" : "reward",
+    shopOffers: [],
     ui: {
       ...state.ui,
       message: "Wybierz nagrode."
@@ -109,9 +128,82 @@ export function applyRunReward(state, reward) {
       offeredNodeIds
     },
     rewardChoices: [],
+    rewardMode: null,
+    shopOffers: [],
     ui: {
       ...state.ui,
       message: offeredNodeIds.length > 0 ? "Wybierz kolejny szlak." : "Droga zamknieta."
+    }
+  };
+}
+
+export function purchaseShopOffer(state, offerId) {
+  if (state.scene !== SCENES.SHOP || state.run?.defeated || state.run?.completed) {
+    return setUiMessage(state, "Sklep nie jest dostepny.");
+  }
+
+  const offer = (state.shopOffers ?? []).find((entry) => entry.id === offerId);
+  if (!offer) {
+    return setUiMessage(state, "Nie ma takiej oferty.");
+  }
+
+  if ((state.run.gold ?? 0) < (offer.price ?? 0)) {
+    return setUiMessage(state, "Za malo ziaren.");
+  }
+
+  const node = getNodeById(state.map, state.run.currentNodeId);
+  const completedNodeIds = Array.from(new Set([...state.run.completedNodeIds, state.run.currentNodeId]));
+  const purchasedRun = applyRewardToRun(
+    {
+      ...state.run,
+      gold: (state.run.gold ?? 0) - (offer.price ?? 0),
+      completedNodeIds
+    },
+    offer
+  );
+  const offeredNodeIds = getAvailableNodes(state.map, completedNodeIds, node?.id ?? state.run.currentNodeId).map(
+    (nextNode) => nextNode.id
+  );
+
+  return {
+    ...state,
+    scene: SCENES.MAP,
+    run: {
+      ...purchasedRun,
+      offeredNodeIds
+    },
+    rewardChoices: [],
+    rewardMode: null,
+    shopOffers: [],
+    ui: {
+      ...state.ui,
+      message: offeredNodeIds.length > 0 ? "Zakup gotowy. Wybierz kolejny szlak." : "Zakup gotowy."
+    }
+  };
+}
+
+export function skipShop(state) {
+  if (state.scene !== SCENES.SHOP || state.run?.defeated || state.run?.completed) {
+    return setUiMessage(state, "Sklep nie jest dostepny.");
+  }
+
+  const completedNodeIds = Array.from(new Set([...state.run.completedNodeIds, state.run.currentNodeId]));
+  const offeredNodeIds = getAvailableNodes(state.map, completedNodeIds, state.run.currentNodeId).map((node) => node.id);
+
+  return {
+    ...state,
+    scene: SCENES.MAP,
+    run: {
+      ...state.run,
+      completedNodeIds,
+      offeredNodeIds
+    },
+    rewardChoices: [],
+    rewardMode: null,
+    shopOffers: [],
+    ui: {
+      ...state.ui,
+      message: offeredNodeIds.length > 0 ? "Sklep ominiety. Wybierz kolejny szlak." : "Sklep ominiety."
     }
   };
 }
@@ -122,6 +214,8 @@ export function markRunDefeated(state) {
     scene: SCENES.GAME_OVER,
     battle: null,
     rewardChoices: [],
+    rewardMode: null,
+    shopOffers: [],
     run: {
       ...state.run,
       health: 0,
@@ -141,6 +235,8 @@ export function markRunComplete(state) {
     scene: SCENES.RUN_COMPLETE,
     battle: null,
     rewardChoices: [],
+    rewardMode: null,
+    shopOffers: [],
     run: {
       ...state.run,
       completed: true
@@ -181,6 +277,22 @@ function createRewardChoices(node, run, seed) {
       value: tier
     }
   ];
+}
+
+function createShopOffers(node, run, seed) {
+  const rewards = getRewardChoices(seed + (node.payload.rewardTier ?? 1) + 11, run)
+    .filter((reward) => reward.type !== "gold" && reward.id !== ARTIFACT_IDS.GOLDEN_GRAIN_RING)
+    .slice(0, 4);
+  const fallback = [
+    { id: "heal-small", type: "heal", label: "Kurze Uzdrowienie", value: 1 },
+    { id: "grain-guard", type: "summon", label: "Pisklak Straznik", value: 1 }
+  ];
+  const offers = [...rewards, ...fallback].slice(0, 4);
+
+  return offers.map((offer, index) => ({
+    ...offer,
+    price: offer.price ?? 4 + index * 2 + (offer.type === "artifact" ? 2 : 0)
+  }));
 }
 
 function applyRewardToRun(run, reward) {

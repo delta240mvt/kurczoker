@@ -8,7 +8,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "test": "node --test",
-    "deploy": "wrangler pages deploy dist --project-name delta240-com"
+    "deploy": "npm run build && wrangler pages deploy dist --project-name delta240-com"
   },
   "dependencies": {
     "astro": "^5.0.0"

@@ -9,7 +9,9 @@ import {
   completeCurrentNode,
   markRunDefeated,
   markRunComplete,
+  purchaseShopOffer,
   selectMapNode,
+  skipShop,
   startRun
 } from "../src/game/run.js";
 
@@ -104,6 +106,59 @@ test("applyRunReward adds reward and returns to map with next offered nodes", ()
   assert.deepEqual(next.rewardChoices, []);
   assert.ok(next.run.artifacts.includes(ARTIFACT_IDS.SHELL_SHIELD));
   assert.ok(next.run.offeredNodeIds.length > 0);
+});
+
+test("shop nodes open a shop scene and purchases spend grains before applying the reward", () => {
+  let state = startRun(1);
+  state = {
+    ...state,
+    run: {
+      ...state.run,
+      currentNodeId: "battle-1",
+      completedNodeIds: ["battle-1"],
+      offeredNodeIds: ["shop-1"],
+      gold: 12
+    }
+  };
+
+  state = selectMapNode(state, "shop-1");
+
+  assert.equal(state.scene, SCENES.SHOP);
+  assert.equal(state.shopOffers.length, 4);
+
+  const offer = state.shopOffers.find((entry) => entry.price <= 12);
+  state = purchaseShopOffer(state, offer.id);
+
+  assert.ok(state.run.gold < 12);
+  assert.equal(state.scene, SCENES.MAP);
+  assert.equal(state.shopOffers.length, 0);
+  assert.ok(state.run.completedNodeIds.includes("shop-1"));
+});
+
+test("shop nodes can be skipped when offers are unaffordable", () => {
+  let state = startRun(1);
+  state = {
+    ...state,
+    run: {
+      ...state.run,
+      currentNodeId: "battle-1",
+      completedNodeIds: ["battle-1"],
+      offeredNodeIds: ["shop-1"],
+      gold: 0
+    }
+  };
+
+  state = selectMapNode(state, "shop-1");
+  const afterFailedPurchase = purchaseShopOffer(state, state.shopOffers[0].id);
+
+  assert.equal(afterFailedPurchase.scene, SCENES.SHOP);
+
+  const skipped = skipShop(afterFailedPurchase);
+
+  assert.equal(skipped.scene, SCENES.MAP);
+  assert.equal(skipped.shopOffers.length, 0);
+  assert.ok(skipped.run.completedNodeIds.includes("shop-1"));
+  assert.ok(skipped.run.offeredNodeIds.length > 0);
 });
 
 test("applyRunReward supports ability, heal, and gold reward types", () => {

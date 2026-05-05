@@ -124,11 +124,10 @@ export function drawGame(ctx, canvas = getCanvas(ctx), state = {}) {
   const scene = state.scene ?? SCENES.MAP;
   if (scene === SCENES.BATTLE) drawBattle(ctx, state);
   else if (scene === SCENES.REWARD) drawReward(ctx, state);
+  else if (scene === SCENES.SHOP) drawShop(ctx, state);
   else if (scene === SCENES.GAME_OVER) drawEndScene(ctx, state, "Game Over", "#fee2e2");
   else if (scene === SCENES.RUN_COMPLETE) drawEndScene(ctx, state, "Run Complete", "#dcfce7");
   else drawMap(ctx, state);
-
-  drawHud(ctx, state);
 }
 
 export function drawMap(ctx, state = {}) {
@@ -254,6 +253,22 @@ export function drawReward(ctx, state = {}) {
     writeText(ctx, reward.label ?? reward.id, x + 20, 205, { font: "bold 18px Arial, sans-serif" });
     writeText(ctx, reward.type ?? "reward", x + 20, 245, { color: "#475569" });
     writeText(ctx, `+${reward.value ?? 1}`, x + 20, 292, { font: "bold 32px Arial, sans-serif", color: "#b45309" });
+  });
+}
+
+export function drawShop(ctx, state = {}) {
+  fillBackground(ctx, "#f3e9c8", "#d4a04a");
+  writeText(ctx, "Sklep nioski", 32, 52, { font: "bold 30px Arial, sans-serif", color: "#1a1f3a" });
+  writeText(ctx, `Ziarna: ${state.run?.gold ?? 0}`, CANVAS.WIDTH - 32, 52, {
+    align: "right",
+    font: "bold 24px Arial, sans-serif",
+    color: "#1a1f3a"
+  });
+  drawPanel(ctx, 80, 110, CANVAS.WIDTH - 160, 245, "rgba(255,251,232,0.72)");
+  writeText(ctx, "Wybierz karte w sklepie albo kliknij oferte pod scena.", CANVAS.WIDTH / 2, 235, {
+    align: "center",
+    font: "bold 24px Arial, sans-serif",
+    color: "#6b5e3a"
   });
 }
 

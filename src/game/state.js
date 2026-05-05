@@ -22,6 +22,8 @@ export function createInitialGameState(seed = 1) {
     map,
     battle: null,
     rewardChoices: [],
+    rewardMode: null,
+    shopOffers: [],
     ui: {
       muted: true,
       selectedAbilityId: ABILITY_IDS.EGG_BOMB,

@@ -8,6 +8,7 @@ export const SCENES = {
   MAP: "map",
   BATTLE: "battle",
   REWARD: "reward",
+  SHOP: "shop",
   GAME_OVER: "game-over",
   RUN_COMPLETE: "run-complete"
 };
