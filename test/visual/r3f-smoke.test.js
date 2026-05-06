@@ -244,6 +244,39 @@ function assertChangedPixels(before, after, label) {
   assert.ok(diff.changed >= 250 || diff.ratio >= 0.002, `${label} should change decoded pixels; changed=${diff.changed} ratio=${diff.ratio}`);
 }
 
+const POST_FIRE_MESSAGE_PATTERN = /Tura wroga|Trafienie/;
+const POST_FIRE_SCENE_PATTERN = /Nagroda|Skarb|Sklep|Koniec|Zwycięstwo/;
+
+function acceptsPostFireOutcome(message, scene) {
+  return POST_FIRE_MESSAGE_PATTERN.test(message) || POST_FIRE_SCENE_PATTERN.test(scene);
+}
+
+test("post-fire outcome accepts lethal battle transitions", () => {
+  assert.equal(acceptsPostFireOutcome("Trafienie za 2.", "Walka"), true);
+  assert.equal(acceptsPostFireOutcome("Tura wroga.", "Walka"), true);
+  assert.equal(acceptsPostFireOutcome("", "Nagroda"), true);
+  assert.equal(acceptsPostFireOutcome("", "Sklep"), true);
+  assert.equal(acceptsPostFireOutcome("", "Koniec"), true);
+  assert.equal(acceptsPostFireOutcome("", "Zwycięstwo"), true);
+  assert.equal(acceptsPostFireOutcome("Wybierz szlak.", "Mapa"), false);
+});
+
+const POST_FIRE_OUTCOME_WAIT = {
+  messageSource: POST_FIRE_MESSAGE_PATTERN.source,
+  sceneSource: POST_FIRE_SCENE_PATTERN.source
+};
+
+async function waitForPostFireOutcome(page) {
+  await page.waitForFunction(
+    ({ messageSource, sceneSource }) => {
+      const message = document.querySelector("[data-game-message]")?.textContent ?? "";
+      const scene = document.querySelector("[data-game-scene]")?.textContent ?? "";
+      return new RegExp(messageSource).test(message) || new RegExp(sceneSource).test(scene);
+    },
+    POST_FIRE_OUTCOME_WAIT
+  );
+}
+
 test("r3f game renders and advances through map and battle", { timeout: 90000 }, async () => {
   const port = await findDeterministicFreePort();
   const baseUrl = `http://${HOST}:${port}`;
@@ -276,7 +309,7 @@ test("r3f game renders and advances through map and battle", { timeout: 90000 },
     await desktop.mouse.move(canvasBox.x + canvasBox.width * 0.74, canvasBox.y + canvasBox.height * 0.36, { steps: 8 });
     await desktop.mouse.click(canvasBox.x + canvasBox.width * 0.74, canvasBox.y + canvasBox.height * 0.36);
     await desktop.locator("[data-game-message]").waitFor({ state: "visible" });
-    await desktop.waitForFunction(() => /Tura wroga|Trafienie/.test(document.querySelector("[data-game-message]")?.textContent ?? ""));
+    await waitForPostFireOutcome(desktop);
     const afterFire = await getCanvasShot(desktop);
     assertChangedPixels(beforeFire, afterFire, "aiming and firing");
 
