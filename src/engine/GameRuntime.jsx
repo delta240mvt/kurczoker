@@ -1,4 +1,4 @@
-import { lazy, Suspense, useRef } from "react";
+import { Component, lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { CameraRig } from "./components/CameraRig.jsx";
 import { SceneLights } from "./components/SceneLights.jsx";
@@ -6,7 +6,9 @@ import { MapScene } from "./scenes/MapScene.jsx";
 import { selectEngineScene } from "./runtime/sceneSelection.js";
 import { useGameStore } from "./store/useGameStore.js";
 
-const BattleScene = lazy(() => import("./scenes/BattleScene.jsx").then((module) => ({ default: module.BattleScene })));
+function createBattleSceneLazy() {
+  return lazy(() => import("./scenes/BattleScene.jsx").then((module) => ({ default: module.BattleScene })));
+}
 
 const SCENE_PLACEHOLDERS = {
   battle: { color: "#d95f43", position: [0, -0.15, 0], scale: [2.4, 1.1, 0.45] },
@@ -76,6 +78,96 @@ function BattleSceneLoading() {
   );
 }
 
+function BattleSceneErrorFallback({ onRetry }) {
+  const markerRef = useRef(null);
+
+  useFrame((_, delta) => {
+    if (markerRef.current) {
+      markerRef.current.rotation.z -= delta * 1.2;
+    }
+  });
+
+  return (
+    <group position={[0, -0.04, 0]}>
+      <mesh position={[0, 0, -0.7]}>
+        <planeGeometry args={[9.6, 5.4]} />
+        <meshBasicMaterial color="#211827" />
+      </mesh>
+      <mesh position={[0, -1.62, -0.08]}>
+        <boxGeometry args={[7.8, 0.32, 0.46]} />
+        <meshStandardMaterial color="#4b2c2c" roughness={0.7} metalness={0.02} />
+      </mesh>
+      <mesh position={[0, 0.1, 0.02]}>
+        <boxGeometry args={[2.35, 1.06, 0.16]} />
+        <meshStandardMaterial color="#7f1d1d" emissive="#991b1b" emissiveIntensity={0.22} roughness={0.44} metalness={0.04} />
+      </mesh>
+      <mesh ref={markerRef} position={[0, 0.42, 0.14]}>
+        <ringGeometry args={[0.27, 0.35, 3]} />
+        <meshStandardMaterial color="#fecaca" emissive="#ef4444" emissiveIntensity={0.3} roughness={0.38} />
+      </mesh>
+      <mesh position={[-0.42, -0.08, 0.16]}>
+        <boxGeometry args={[0.18, 0.46, 0.08]} />
+        <meshStandardMaterial color="#fee2e2" emissive="#f87171" emissiveIntensity={0.18} />
+      </mesh>
+      <mesh position={[0, -0.08, 0.16]}>
+        <boxGeometry args={[0.18, 0.46, 0.08]} />
+        <meshStandardMaterial color="#fee2e2" emissive="#f87171" emissiveIntensity={0.18} />
+      </mesh>
+      <mesh position={[0.42, -0.08, 0.16]}>
+        <boxGeometry args={[0.18, 0.46, 0.08]} />
+        <meshStandardMaterial color="#fee2e2" emissive="#f87171" emissiveIntensity={0.18} />
+      </mesh>
+      <mesh
+        position={[0, -0.72, 0.18]}
+        onClick={(event) => {
+          event.stopPropagation();
+          onRetry();
+        }}
+      >
+        <boxGeometry args={[1.08, 0.3, 0.12]} />
+        <meshStandardMaterial color="#f8d36c" emissive="#facc15" emissiveIntensity={0.24} roughness={0.36} metalness={0.04} />
+      </mesh>
+    </group>
+  );
+}
+
+class BattleSceneErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch() {
+    this.props.onError?.();
+  }
+
+  componentDidUpdate(previousProps) {
+    if (previousProps.resetKey !== this.props.resetKey && this.state.hasError) {
+      this.setState({ hasError: false });
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+
+    return this.props.children;
+  }
+}
+
+function BattleSceneRuntime({ BattleSceneComponent, onReady, ...props }) {
+  useEffect(() => {
+    onReady();
+  }, [onReady]);
+
+  return <BattleSceneComponent {...props} />;
+}
+
 export function GameRuntime() {
   const game = useGameStore((state) => state.game);
   const aim = useGameStore((state) => state.input.aim);
@@ -85,9 +177,34 @@ export function GameRuntime() {
   const turnEnded = useGameStore((state) => state.turnEnded);
   const tickBattle = useGameStore((state) => state.tickBattle);
   const engineScene = selectEngineScene(game);
+  const battleSceneKey = engineScene === "battle" ? `${game.battle?.nodeId ?? "battle"}:${game.battle?.encounterId ?? "encounter"}` : "idle";
+  const [readyBattleKey, setReadyBattleKey] = useState(null);
+  const [battleSceneRetry, setBattleSceneRetry] = useState(0);
+  const [BattleSceneComponent, setBattleSceneComponent] = useState(createBattleSceneLazy);
+  const battleRuntimeReady = readyBattleKey === battleSceneKey;
+
+  const pauseBattleRuntime = useCallback(() => {
+    setReadyBattleKey(null);
+  }, []);
+
+  useEffect(() => {
+    if (engineScene !== "battle") {
+      pauseBattleRuntime();
+    }
+  }, [engineScene, pauseBattleRuntime]);
+
+  const markBattleRuntimeReady = useCallback(() => {
+    setReadyBattleKey(battleSceneKey);
+  }, [battleSceneKey]);
+
+  const retryBattleScene = useCallback(() => {
+    pauseBattleRuntime();
+    setBattleSceneRetry((retry) => retry + 1);
+    setBattleSceneComponent(() => createBattleSceneLazy());
+  }, [pauseBattleRuntime]);
 
   useFrame((_, delta) => {
-    if (engineScene === "battle") {
+    if (engineScene === "battle" && battleRuntimeReady) {
       tickBattle(delta * 1000);
     }
   });
@@ -99,9 +216,24 @@ export function GameRuntime() {
       <CameraRig />
       {engineScene === "map" ? <MapScene game={game} selectNode={selectNode} /> : null}
       {engineScene === "battle" ? (
-        <Suspense fallback={<BattleSceneLoading />}>
-          <BattleScene game={game} aim={aim} setAim={setAim} projectileHitEnemy={projectileHitEnemy} turnEnded={turnEnded} />
-        </Suspense>
+        <BattleSceneErrorBoundary
+          resetKey={`${battleSceneKey}:${battleSceneRetry}`}
+          fallback={<BattleSceneErrorFallback onRetry={retryBattleScene} />}
+          onError={pauseBattleRuntime}
+        >
+          <Suspense fallback={<BattleSceneLoading />}>
+            <BattleSceneRuntime
+              key={`${battleSceneKey}:${battleSceneRetry}`}
+              BattleSceneComponent={BattleSceneComponent}
+              game={game}
+              aim={aim}
+              setAim={setAim}
+              projectileHitEnemy={projectileHitEnemy}
+              turnEnded={turnEnded}
+              onReady={markBattleRuntimeReady}
+            />
+          </Suspense>
+        </BattleSceneErrorBoundary>
       ) : null}
       {engineScene !== "map" && engineScene !== "battle" ? <ScenePlaceholder engineScene={engineScene} /> : null}
     </>
