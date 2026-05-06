@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
 import { once } from "node:events";
-import { createServer } from "node:net";
-import { join } from "node:path";
+import { readFile, stat } from "node:fs/promises";
+import { createServer as createHttpServer } from "node:http";
+import { createServer as createNetServer } from "node:net";
+import { extname, resolve, sep } from "node:path";
 import test from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
 import { PNG } from "pngjs";
@@ -11,9 +12,22 @@ import { chromium } from "playwright";
 const HOST = "127.0.0.1";
 const PORT_START = 47631;
 const PORT_ATTEMPTS = 20;
+const DIST_DIR = resolve(process.cwd(), "dist");
+const MIME_TYPES = new Map([
+  [".css", "text/css; charset=utf-8"],
+  [".html", "text/html; charset=utf-8"],
+  [".ico", "image/x-icon"],
+  [".js", "text/javascript; charset=utf-8"],
+  [".json", "application/json; charset=utf-8"],
+  [".png", "image/png"],
+  [".svg", "image/svg+xml"],
+  [".webp", "image/webp"],
+  [".woff", "font/woff"],
+  [".woff2", "font/woff2"]
+]);
 
 async function isPortFree(port) {
-  const server = createServer();
+  const server = createNetServer();
   server.unref();
   server.listen({ host: HOST, port });
 
@@ -38,18 +52,77 @@ async function findDeterministicFreePort() {
     }
   }
 
-  throw new Error(`No free preview port found from ${PORT_START} to ${PORT_START + PORT_ATTEMPTS - 1}`);
+  throw new Error(`No free static server port found from ${PORT_START} to ${PORT_START + PORT_ATTEMPTS - 1}`);
 }
 
-async function waitForPreview(url, preview) {
+async function assertBuiltDist() {
+  const indexPath = resolve(DIST_DIR, "index.html");
+  try {
+    const index = await stat(indexPath);
+    assert.ok(index.isFile(), "dist/index.html should be a file");
+  } catch (error) {
+    throw new Error("Visual smoke test requires a prior static build. Run `npm run build` before `npm run test:visual`.");
+  }
+}
+
+function staticFilePath(url) {
+  const parsed = new URL(url, `http://${HOST}`);
+  const decodedPath = decodeURIComponent(parsed.pathname);
+  const requestedPath = decodedPath === "/" ? "/index.html" : decodedPath;
+  const normalized = resolve(DIST_DIR, `.${requestedPath}`);
+  const insideDist = normalized === DIST_DIR || normalized.startsWith(`${DIST_DIR}${sep}`);
+
+  if (!insideDist) {
+    return null;
+  }
+
+  return normalized;
+}
+
+async function sendStaticFile(response, filePath) {
+  try {
+    const file = await stat(filePath);
+    if (!file.isFile()) {
+      response.writeHead(404);
+      response.end("Not found");
+      return;
+    }
+
+    response.writeHead(200, {
+      "content-type": MIME_TYPES.get(extname(filePath)) ?? "application/octet-stream",
+      "cache-control": "no-store"
+    });
+    response.end(await readFile(filePath));
+  } catch (error) {
+    response.writeHead(404);
+    response.end("Not found");
+  }
+}
+
+async function startStaticServer(port) {
+  await assertBuiltDist();
+
+  const server = createHttpServer((request, response) => {
+    const filePath = staticFilePath(request.url ?? "/");
+    if (!filePath) {
+      response.writeHead(403);
+      response.end("Forbidden");
+      return;
+    }
+
+    void sendStaticFile(response, filePath);
+  });
+
+  server.listen({ host: HOST, port });
+  await once(server, "listening");
+  return server;
+}
+
+async function waitForServer(url) {
   const started = Date.now();
   let lastError;
 
   while (Date.now() - started < 30000) {
-    if (preview.exitCode !== null) {
-      throw new Error(`preview exited before becoming ready with code ${preview.exitCode}`);
-    }
-
     try {
       const response = await fetch(url);
       if (response.ok) {
@@ -63,170 +136,21 @@ async function waitForPreview(url, preview) {
     await delay(250);
   }
 
-  throw new Error(`preview was not ready after 30s: ${lastError?.message ?? "unknown error"}`);
+  throw new Error(`static server was not ready after 30s: ${lastError?.message ?? "unknown error"}`);
 }
 
-async function runCommand(command, args) {
-  return new Promise((resolve) => {
-    const child = spawn(command, args, {
-      stdio: ["ignore", "pipe", "pipe"],
-      windowsHide: true
-    });
-    let stdout = "";
-    let stderr = "";
-
-    child.stdout.on("data", (chunk) => {
-      stdout += chunk;
-    });
-    child.stderr.on("data", (chunk) => {
-      stderr += chunk;
-    });
-    child.once("error", (error) => {
-      resolve({ code: 1, stdout, stderr: `${stderr}${error.message}` });
-    });
-    child.once("exit", (code) => {
-      resolve({ code: code ?? 0, stdout, stderr });
+async function stopStaticServer(server) {
+  if (!server) return;
+  await new Promise((resolve, reject) => {
+    server.close((error) => {
+      if (error) reject(error);
+      else resolve();
     });
   });
 }
 
-async function runPowerShell(script) {
-  return runCommand("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script]);
-}
-
-function windowsPreviewPidScript(port) {
-  return `
-$port = ${Number(port)};
-$pids = @();
-$listeners = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue;
-if ($listeners) {
-  $pids += $listeners | Select-Object -ExpandProperty OwningProcess;
-}
-$portPattern = "--port\\s+$port(\\s|$)";
-$matchingProcesses = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
-  $_.CommandLine -and
-  $_.CommandLine -match "astro\\.js" -and
-  $_.CommandLine -match "\\bpreview\\b" -and
-  $_.CommandLine -match $portPattern
-};
-if ($matchingProcesses) {
-  $pids += $matchingProcesses | Select-Object -ExpandProperty ProcessId;
-}
-$pids = @($pids | Where-Object { $_ -and $_ -ne 0 } | Select-Object -Unique);
-if ($pids.Count -eq 0) {
-  "[]";
-} else {
-  $pids | ConvertTo-Json -Compress;
-}
-`;
-}
-
-async function findWindowsPreviewPids(port) {
-  const result = await runPowerShell(windowsPreviewPidScript(port));
-  const output = result.stdout.trim();
-  if (!output) return [];
-
-  try {
-    const parsed = JSON.parse(output);
-    const pids = Array.isArray(parsed) ? parsed : [parsed];
-    return pids.map(Number).filter((pid) => Number.isInteger(pid) && pid > 0);
-  } catch (error) {
-    throw new Error(`Could not parse Windows preview PID list for port ${port}: ${output}`);
-  }
-}
-
-async function findListeningPids(port) {
-  if (process.platform === "win32") {
-    return findWindowsPreviewPids(port);
-  }
-
-  const lsof = await runCommand("lsof", ["-nP", `-iTCP:${port}`, "-sTCP:LISTEN", "-t"]);
-  if (lsof.code === 0 && lsof.stdout.trim()) {
-    return [...new Set(lsof.stdout.trim().split(/\s+/).filter(Boolean).map(Number).filter(Number.isFinite))];
-  }
-
-  const ss = await runCommand("ss", ["-ltnp"]);
-  const pids = new Set();
-  for (const line of ss.stdout.split(/\r?\n/)) {
-    if (!line.includes(`:${port}`)) continue;
-    const match = line.match(/pid=(\d+)/);
-    if (match) {
-      pids.add(Number(match[1]));
-    }
-  }
-
-  return [...pids];
-}
-
-async function killProcessTree(pid) {
-  if (!pid) return;
-
-  if (process.platform === "win32") {
-    await runCommand("taskkill", ["/PID", String(pid), "/T", "/F"]);
-  } else {
-    try {
-      process.kill(pid, "SIGTERM");
-    } catch (error) {
-      if (error.code !== "ESRCH") throw error;
-    }
-    await delay(500);
-    try {
-      process.kill(pid, "SIGKILL");
-    } catch (error) {
-      if (error.code !== "ESRCH") throw error;
-    }
-  }
-}
-
-async function killPreviewPidsForPort(port) {
-  const pids = await findListeningPids(port);
-  await Promise.all(pids.map((pid) => killProcessTree(pid)));
-  return pids;
-}
-
-async function waitForPreviewStopped(port) {
-  const started = Date.now();
-  let quietSince = null;
-  const quietPeriodMs = 3000;
-  const timeoutMs = 20000;
-
-  while (Date.now() - started < timeoutMs) {
-    const pids = await killPreviewPidsForPort(port);
-    if (pids.length === 0) {
-      quietSince ??= Date.now();
-      if (Date.now() - quietSince >= quietPeriodMs) {
-        return;
-      }
-    } else {
-      quietSince = null;
-    }
-    await delay(250);
-  }
-
-  const remainingPids = await findListeningPids(port);
-  throw new Error(`preview port ${port} still has listener or astro preview process after cleanup: ${remainingPids.join(", ")}`);
-}
-
-async function assertPreviewStopped(port) {
-  const pids = await findListeningPids(port);
-  assert.deepEqual(pids, [], `preview port ${port} should not have listener or astro preview process after cleanup`);
-}
-
-async function stopPreview(preview, port) {
-  if (preview && preview.exitCode === null) {
-    await killProcessTree(preview.pid);
-
-    try {
-      await Promise.race([once(preview, "exit"), delay(3000)]);
-    } finally {
-      if (preview.exitCode === null) {
-        await killProcessTree(preview.pid);
-      }
-    }
-  }
-
-  await waitForPreviewStopped(port);
-  await assertPreviewStopped(port);
+async function assertServerStopped(port) {
+  assert.equal(await isPortFree(port), true, `static server port ${port} should be free after cleanup`);
 }
 
 async function getCanvasShot(page) {
@@ -293,15 +217,11 @@ function assertChangedPixels(before, after, label) {
 test("r3f game renders and advances through map and battle", { timeout: 90000 }, async () => {
   const port = await findDeterministicFreePort();
   const baseUrl = `http://${HOST}:${port}`;
-  const astroCli = join(process.cwd(), "node_modules", "astro", "astro.js");
-  const preview = spawn(process.execPath, [astroCli, "preview", "--host", HOST, "--port", String(port)], {
-    stdio: "ignore",
-    windowsHide: true
-  });
+  const server = await startStaticServer(port);
   let browser;
 
   try {
-    await waitForPreview(baseUrl, preview);
+    await waitForServer(baseUrl);
     browser = await chromium.launch();
 
     const desktop = await browser.newPage({ viewport: { width: 1440, height: 900 } });
@@ -336,9 +256,8 @@ test("r3f game renders and advances through map and battle", { timeout: 90000 },
     assertNonblankShot(await getCanvasShot(mobile), "mobile map");
   } finally {
     await browser?.close();
-    await stopPreview(preview, port);
-    await delay(1500);
-    await assertPreviewStopped(port);
+    await stopStaticServer(server);
+    await assertServerStopped(port);
   }
 });
 

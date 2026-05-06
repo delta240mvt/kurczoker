@@ -102,6 +102,34 @@ test("engine store applies battle projectile hits and hands off surviving enemy 
   assert.equal(store.getState().game.battle.phase, BATTLE_PHASES.ENEMY_TURN);
 });
 
+test("engine store ticks surviving projectile hits out of enemy turn", () => {
+  const store = createEngineStore(1);
+  store.setState({
+    game: {
+      ...store.getState().game,
+      scene: SCENES.BATTLE,
+      battle: createBattleState({ actors: [createPlayer(), createEnemy("grunt", { id: "enemy-1" })] }),
+      ui: { message: "" }
+    }
+  });
+
+  store.getState().projectileHitEnemy({ actorId: "enemy-1", damage: 1 });
+  assert.equal(store.getState().game.battle.phase, BATTLE_PHASES.ENEMY_TURN);
+
+  for (
+    let tick = 0;
+    tick < 80 && ![BATTLE_PHASES.PLAYER_TURN, BATTLE_PHASES.WON, BATTLE_PHASES.LOST].includes(store.getState().game.battle?.phase);
+    tick += 1
+  ) {
+    store.getState().tickBattle(34);
+  }
+
+  assert.ok(
+    [BATTLE_PHASES.PLAYER_TURN, BATTLE_PHASES.WON, BATTLE_PHASES.LOST].includes(store.getState().game.battle?.phase),
+    `battle should leave ENEMY_TURN, got ${store.getState().game.battle?.phase}`
+  );
+});
+
 test("engine store advances lethal battle hits into reward scene", () => {
   const store = createEngineStore(1);
   const nodeId = store.getState().game.run.offeredNodeIds[0];

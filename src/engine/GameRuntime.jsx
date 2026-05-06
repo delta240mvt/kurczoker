@@ -1,3 +1,4 @@
+import { useFrame } from "@react-three/fiber";
 import { CameraRig } from "./components/CameraRig.jsx";
 import { SceneLights } from "./components/SceneLights.jsx";
 import { BattleScene } from "./scenes/BattleScene.jsx";
@@ -29,7 +30,14 @@ export function GameRuntime() {
   const selectNode = useGameStore((state) => state.selectNode);
   const projectileHitEnemy = useGameStore((state) => state.projectileHitEnemy);
   const turnEnded = useGameStore((state) => state.turnEnded);
+  const tickBattle = useGameStore((state) => state.tickBattle);
   const engineScene = selectEngineScene(game);
+
+  useFrame((_, delta) => {
+    if (engineScene === "battle") {
+      tickBattle(delta * 1000);
+    }
+  });
 
   return (
     <>

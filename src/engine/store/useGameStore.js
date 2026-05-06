@@ -1,9 +1,17 @@
 import { create } from "zustand";
 import { createStore } from "zustand/vanilla";
 import { createEnemy, createPlayer } from "../../game/actors.js";
-import { createBattleState } from "../../game/battle.js";
+import { createBattleState, updateBattle } from "../../game/battle.js";
 import { BATTLE_PHASES, SCENES } from "../../game/constants.js";
-import { applyRunReward, completeCurrentNode, purchaseShopOffer, selectMapNode, skipShop, startRun } from "../../game/run.js";
+import {
+  applyRunReward,
+  completeCurrentNode,
+  markRunDefeated,
+  purchaseShopOffer,
+  selectMapNode,
+  skipShop,
+  startRun
+} from "../../game/run.js";
 import { resetRun, setUiMessage } from "../../game/state.js";
 import { projectileHitEnemy, turnEnded } from "../runtime/domainEvents.js";
 
@@ -46,6 +54,18 @@ function hydrateEngineBattle(game) {
   };
 }
 
+function stateAfterBattle(game) {
+  if (game.battle?.phase === BATTLE_PHASES.WON) {
+    return completeCurrentNode(game);
+  }
+
+  if (game.battle?.phase === BATTLE_PHASES.LOST) {
+    return markRunDefeated(game);
+  }
+
+  return game;
+}
+
 export function createEngineStateInitializer(seed = 1) {
   return (set, get) => ({
     game: setUiMessage(startRun(seed), "Gotowy do wyprawy."),
@@ -73,10 +93,23 @@ export function createEngineStateInitializer(seed = 1) {
     },
     projectileHitEnemy(payload) {
       const next = projectileHitEnemy(get().game, payload);
-      set({ game: next.battle?.phase === BATTLE_PHASES.WON ? completeCurrentNode(next) : next });
+      set({ game: stateAfterBattle(next) });
     },
     turnEnded() {
       set({ game: turnEnded(get().game) });
+    },
+    tickBattle(delta = 16) {
+      const game = get().game;
+      if (game.scene !== SCENES.BATTLE || !game.battle) {
+        return;
+      }
+
+      const next = {
+        ...game,
+        battle: updateBattle(game.battle, {}, delta)
+      };
+
+      set({ game: stateAfterBattle(next) });
     },
     reset() {
       set({ game: setUiMessage(resetRun(get().game), "Nowa wyprawa gotowa.") });

@@ -30,7 +30,7 @@ bl_info = {
     "category": "Interface",
 }
 
-RODIN_FREE_TRIAL_KEY = "k9TcfFoEhNd9cCPP2guHAHHHkctZHIRhZDywZ1euGUXwihbYLpOjQhofby80NJez"
+RODIN_FREE_TRIAL_KEY = os.getenv("HYPER3D_API_KEY") or os.getenv("RODIN_API_KEY") or ""
 
 # Add User-Agent as required by Poly Haven API
 REQ_HEADERS = requests.utils.default_headers()
