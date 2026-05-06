@@ -5,6 +5,7 @@ import { createServer } from "node:net";
 import { join } from "node:path";
 import test from "node:test";
 import { setTimeout as delay } from "node:timers/promises";
+import { PNG } from "pngjs";
 import { chromium } from "playwright";
 
 const HOST = "127.0.0.1";
@@ -91,27 +92,64 @@ async function stopPreview(preview) {
 }
 
 async function getCanvasShot(page) {
-  return page.locator(".kurczoker-r3f canvas").screenshot({ animations: "disabled" });
+  const buffer = await page.locator(".kurczoker-r3f canvas").screenshot({ animations: "disabled" });
+  return PNG.sync.read(buffer);
 }
 
-function assertNonblankShot(buffer, label) {
-  const uniqueBytes = new Set(buffer);
+function sampledPixels(image) {
+  const pixels = [];
+  const stepX = Math.max(1, Math.floor(image.width / 24));
+  const stepY = Math.max(1, Math.floor(image.height / 18));
 
-  assert.ok(buffer.length > 1000, `${label} screenshot should contain rendered canvas data`);
-  assert.ok(uniqueBytes.size > 16, `${label} screenshot should not be a blank or flat image`);
+  for (let y = 0; y < image.height; y += stepY) {
+    for (let x = 0; x < image.width; x += stepX) {
+      const offset = (image.width * y + x) * 4;
+      pixels.push([image.data[offset], image.data[offset + 1], image.data[offset + 2], image.data[offset + 3]]);
+    }
+  }
+
+  return pixels;
 }
 
-function countChangedBytes(before, after) {
-  const length = Math.min(before.length, after.length);
-  let changed = Math.abs(before.length - after.length);
+function assertNonblankShot(image, label) {
+  assert.ok(image.width > 0 && image.height > 0, `${label} screenshot should decode to dimensions`);
+  const samples = sampledPixels(image);
+  const visible = samples.filter(([red, green, blue, alpha]) => alpha > 0 && red + green + blue > 24);
+  const colors = new Set(samples.map(([red, green, blue, alpha]) => `${red},${green},${blue},${alpha}`));
 
-  for (let index = 0; index < length; index += 1) {
-    if (Math.abs(before[index] - after[index]) > 8) {
+  assert.ok(visible.length >= Math.max(8, samples.length * 0.1), `${label} screenshot should contain visible pixels`);
+  assert.ok(colors.size >= 8, `${label} screenshot should contain varied decoded pixel colors`);
+}
+
+function countChangedPixels(before, after) {
+  assert.equal(before.width, after.width, "screenshots should have equal width for pixel diff");
+  assert.equal(before.height, after.height, "screenshots should have equal height for pixel diff");
+
+  let changed = 0;
+  const pixelCount = before.width * before.height;
+
+  for (let offset = 0; offset < before.data.length; offset += 4) {
+    const delta =
+      Math.abs(before.data[offset] - after.data[offset]) +
+      Math.abs(before.data[offset + 1] - after.data[offset + 1]) +
+      Math.abs(before.data[offset + 2] - after.data[offset + 2]) +
+      Math.abs(before.data[offset + 3] - after.data[offset + 3]);
+
+    if (delta > 24) {
       changed += 1;
     }
   }
 
-  return changed;
+  return {
+    changed,
+    ratio: changed / pixelCount
+  };
+}
+
+function assertChangedPixels(before, after, label) {
+  const diff = countChangedPixels(before, after);
+
+  assert.ok(diff.changed >= 250 || diff.ratio >= 0.002, `${label} should change decoded pixels; changed=${diff.changed} ratio=${diff.ratio}`);
 }
 
 test("r3f game renders and advances through map and battle", { timeout: 90000 }, async () => {
@@ -142,7 +180,7 @@ test("r3f game renders and advances through map and battle", { timeout: 90000 },
     await expectText(desktop, "[data-game-scene]", /Walka/);
     await delay(500);
     const afterRoute = await getCanvasShot(desktop);
-    assert.ok(countChangedBytes(beforeRoute, afterRoute) > 64, "clicking a route should visibly change the scene");
+    assertChangedPixels(beforeRoute, afterRoute, "clicking a route");
 
     const canvasBox = await desktop.locator(".kurczoker-r3f canvas").boundingBox();
     assert.ok(canvasBox, "battle canvas should have a bounding box");
@@ -152,10 +190,7 @@ test("r3f game renders and advances through map and battle", { timeout: 90000 },
     await desktop.locator("[data-game-message]").waitFor({ state: "visible" });
     await desktop.waitForFunction(() => /Tura wroga|Trafienie/.test(document.querySelector("[data-game-message]")?.textContent ?? ""));
     const afterFire = await getCanvasShot(desktop);
-    assert.ok(
-      countChangedBytes(beforeFire, afterFire) > 64 || /Tura wroga|Trafienie/.test(await desktop.locator("[data-game-message]").textContent()),
-      "aiming and firing should visibly update the battle scene or battle status"
-    );
+    assertChangedPixels(beforeFire, afterFire, "aiming and firing");
 
     const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
     await mobile.goto(baseUrl, { waitUntil: "networkidle" });
