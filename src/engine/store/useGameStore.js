@@ -32,8 +32,8 @@ function createEngineBattleState(game) {
       createPlayer({ health: game.run.health, maxHealth: game.run.maxHealth }),
       createEnemy(enemyType, {
         id: boss ? "boss-jajokrol" : `${enemyType}-1`,
-        health: boss ? 7 : elite ? 4 : 2,
-        maxHealth: boss ? 7 : elite ? 4 : 2,
+        health: boss ? 6 : elite ? 4 : 2,
+        maxHealth: boss ? 6 : elite ? 4 : 2,
         damage: elite ? 2 : 1
       })
     ],

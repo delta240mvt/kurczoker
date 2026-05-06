@@ -13,6 +13,7 @@ const HOST = "127.0.0.1";
 const PORT_START = 47631;
 const PORT_ATTEMPTS = 20;
 const DIST_DIR = resolve(process.cwd(), "dist");
+const EXTERNAL_BASE_URL = process.env.KURCZOKER_VISUAL_BASE_URL;
 const MIME_TYPES = new Map([
   [".css", "text/css; charset=utf-8"],
   [".html", "text/html; charset=utf-8"],
@@ -158,6 +159,11 @@ async function getCanvasShot(page) {
   return PNG.sync.read(buffer);
 }
 
+async function getShellShot(page) {
+  const buffer = await page.locator("[data-game-shell]").screenshot({ animations: "disabled" });
+  return PNG.sync.read(buffer);
+}
+
 async function waitForCanvasReady(page, label) {
   const canvas = page.locator(".kurczoker-r3f canvas");
   let lastError;
@@ -266,21 +272,107 @@ const POST_FIRE_OUTCOME_WAIT = {
   sceneSource: POST_FIRE_SCENE_PATTERN.source
 };
 
-async function waitForPostFireOutcome(page) {
+async function waitForPostFireOutcome(page, timeout = 12000) {
   await page.waitForFunction(
     ({ messageSource, sceneSource }) => {
       const message = document.querySelector("[data-game-message]")?.textContent ?? "";
       const scene = document.querySelector("[data-game-scene]")?.textContent ?? "";
       return new RegExp(messageSource).test(message) || new RegExp(sceneSource).test(scene);
     },
-    POST_FIRE_OUTCOME_WAIT
+    POST_FIRE_OUTCOME_WAIT,
+    { timeout }
   );
 }
 
+async function sceneText(page) {
+  return page.locator("[data-game-scene]").textContent();
+}
+
+async function messageText(page) {
+  return page.locator("[data-game-message]").textContent();
+}
+
+async function waitForPlayerTurn(page, timeout = 20000) {
+  await page.waitForFunction(
+    ({ sceneSource, messageSource }) => {
+      const scene = document.querySelector("[data-game-scene]")?.textContent ?? "";
+      const message = document.querySelector("[data-game-message]")?.textContent ?? "";
+      if (!new RegExp(sceneSource).test(scene)) return true;
+      return !new RegExp(messageSource).test(message);
+    },
+    { sceneSource: "Walka|Boss", messageSource: "Tura wroga" },
+    { timeout }
+  );
+}
+
+async function assertPlayableScreen(page, label, scenePattern) {
+  await expectText(page, "[data-game-scene]", scenePattern);
+  assertNonblankShot(await getShellShot(page), `${label} shell`);
+  assertNonblankShot(await getCanvasShot(page), `${label} canvas`);
+}
+
+async function clickRoute(page, routeId) {
+  const routeType = routeId.split("-")[0];
+  const route = page
+    .locator(".map-route-actions__btn")
+    .filter({ has: page.locator(".map-route-actions__type", { hasText: new RegExp(`^${routeType}$`) }) })
+    .first();
+  await route.waitFor({ state: "visible", timeout: 15000 });
+  await route.click();
+  await page.waitForFunction(() => !document.querySelector(".map-route-actions__btn"), null, { timeout: 15000 });
+  await page.waitForFunction(() => !/Mapa/.test(document.querySelector("[data-game-scene]")?.textContent ?? ""), null, { timeout: 15000 });
+  await delay(700);
+}
+
+async function fireAt(page, xRatio = 0.74, yRatio = 0.36) {
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    await waitForPlayerTurn(page);
+    const canvasBox = await page.locator(".kurczoker-r3f canvas").boundingBox();
+    assert.ok(canvasBox, "battle canvas should have a bounding box");
+    await page.mouse.move(canvasBox.x + canvasBox.width * xRatio, canvasBox.y + canvasBox.height * yRatio, { steps: 8 });
+    await page.mouse.click(canvasBox.x + canvasBox.width * xRatio, canvasBox.y + canvasBox.height * yRatio);
+
+    try {
+      await waitForPostFireOutcome(page);
+      await delay(1200);
+      return;
+    } catch (error) {
+      if (attempt === 3) {
+        const scene = await sceneText(page);
+        const message = await messageText(page);
+        throw new Error(`Firing did not produce a battle outcome after ${attempt} attempts; scene=${scene}; message=${message}; ${error.message}`);
+      }
+      await delay(700);
+    }
+  }
+  await delay(1200);
+}
+
+async function winCurrentBattle(page, label, maxShots = 6) {
+  for (let shot = 0; shot < maxShots; shot += 1) {
+    const scene = await sceneText(page);
+    if (!/Walka|Boss/.test(scene ?? "")) {
+      return;
+    }
+    await fireAt(page);
+  }
+
+  const scene = await sceneText(page);
+  assert.ok(!/Walka|Boss/.test(scene ?? ""), `${label} should finish within ${maxShots} shots, current scene: ${scene}`);
+}
+
+async function chooseReward(page, preferredNamePattern) {
+  const preferred = preferredNamePattern ? page.locator(".reward-card").filter({ hasText: preferredNamePattern }).first() : null;
+  const card = preferred && (await preferred.count()) > 0 ? preferred : page.locator(".reward-card").first();
+  await card.waitFor({ state: "visible", timeout: 15000 });
+  await card.click();
+  await expectText(page, "[data-game-scene]", /Mapa/);
+}
+
 test("r3f game renders and advances through map and battle", { timeout: 90000 }, async () => {
-  const port = await findDeterministicFreePort();
-  const baseUrl = `http://${HOST}:${port}`;
-  const server = await startStaticServer(port);
+  const port = EXTERNAL_BASE_URL ? null : await findDeterministicFreePort();
+  const baseUrl = EXTERNAL_BASE_URL ?? `http://${HOST}:${port}`;
+  const server = EXTERNAL_BASE_URL ? null : await startStaticServer(port);
   let browser;
 
   try {
@@ -306,10 +398,7 @@ test("r3f game renders and advances through map and battle", { timeout: 90000 },
     const canvasBox = await desktop.locator(".kurczoker-r3f canvas").boundingBox();
     assert.ok(canvasBox, "battle canvas should have a bounding box");
     const beforeFire = await getCanvasShot(desktop);
-    await desktop.mouse.move(canvasBox.x + canvasBox.width * 0.74, canvasBox.y + canvasBox.height * 0.36, { steps: 8 });
-    await desktop.mouse.click(canvasBox.x + canvasBox.width * 0.74, canvasBox.y + canvasBox.height * 0.36);
-    await desktop.locator("[data-game-message]").waitFor({ state: "visible" });
-    await waitForPostFireOutcome(desktop);
+    await fireAt(desktop);
     const afterFire = await getCanvasShot(desktop);
     assertChangedPixels(beforeFire, afterFire, "aiming and firing");
 
@@ -331,16 +420,95 @@ test("r3f game renders and advances through map and battle", { timeout: 90000 },
 
     const mobileCanvasBox = await mobile.locator(".kurczoker-r3f canvas").boundingBox();
     assert.ok(mobileCanvasBox, "mobile battle canvas should have a bounding box");
-    await mobile.touchscreen.tap(
-      mobileCanvasBox.x + mobileCanvasBox.width * 0.74,
-      mobileCanvasBox.y + mobileCanvasBox.height * 0.36
-    );
-    await waitForPostFireOutcome(mobile);
+    await fireAt(mobile);
     assertChangedPixels(mobileBattle, await getCanvasShot(mobile), "mobile firing");
   } finally {
     await browser?.close();
     await stopStaticServer(server);
-    await assertServerStopped(port);
+    if (port) {
+      await assertServerStopped(port);
+    }
+  }
+});
+
+test("all production game screens are reachable and playable", { timeout: 180000 }, async () => {
+  const port = EXTERNAL_BASE_URL ? null : await findDeterministicFreePort();
+  const baseUrl = EXTERNAL_BASE_URL ?? `http://${HOST}:${port}`;
+  const server = EXTERNAL_BASE_URL ? null : await startStaticServer(port);
+  let browser;
+
+  try {
+    await waitForServer(baseUrl);
+    browser = await chromium.launch();
+
+    const run = await browser.newPage({ viewport: { width: 1440, height: 900 } });
+    await run.goto(baseUrl, { waitUntil: "networkidle" });
+    await waitForCanvasReady(run, "all-screens run");
+    await assertPlayableScreen(run, "map", /Mapa/);
+
+    await clickRoute(run, "battle-1");
+    await delay(500);
+    await assertPlayableScreen(run, "battle", /Walka/);
+    await winCurrentBattle(run, "battle-1");
+    await assertPlayableScreen(run, "reward", /Nagroda/);
+    await chooseReward(run, /Guard Chick|Wind Boots|Rosol|Warm Broth/);
+
+    await clickRoute(run, "treasure-1");
+    await assertPlayableScreen(run, "treasure", /Skarb/);
+    await chooseReward(run, /Chaos Egg/);
+
+    await clickRoute(run, "battle-2");
+    await assertPlayableScreen(run, "battle-2", /Walka/);
+    await winCurrentBattle(run, "battle-2");
+    await assertPlayableScreen(run, "reward after battle-2", /Nagroda/);
+    await chooseReward(run, /Warm Broth|Rosol|Golden Grain/);
+
+    await clickRoute(run, "elite-1");
+    await assertPlayableScreen(run, "elite battle", /Walka/);
+    await winCurrentBattle(run, "elite-1");
+    await assertPlayableScreen(run, "elite reward", /Nagroda/);
+    await chooseReward(run, /Prophet Hen|Warm Broth|Rosol/);
+
+    await clickRoute(run, "battle-3");
+    await assertPlayableScreen(run, "battle-3", /Walka/);
+    await winCurrentBattle(run, "battle-3");
+    await assertPlayableScreen(run, "late reward", /Nagroda/);
+    await chooseReward(run, /Shell Shield|Warm Broth|Rosol/);
+
+    await clickRoute(run, "boss");
+    await delay(500);
+    await assertPlayableScreen(run, "boss", /Boss/);
+    await winCurrentBattle(run, "boss", 8);
+    await assertPlayableScreen(run, "victory", /Zwycięstwo/);
+
+    const shop = await browser.newPage({ viewport: { width: 1280, height: 820 } });
+    await shop.goto(baseUrl, { waitUntil: "networkidle" });
+    await waitForCanvasReady(shop, "shop branch");
+    await clickRoute(shop, "battle-1");
+    await winCurrentBattle(shop, "shop setup battle");
+    await chooseReward(shop, /Guard Chick|Wind Boots|Rosol|Warm Broth/);
+    await clickRoute(shop, "shop-1");
+    await assertPlayableScreen(shop, "shop", /Sklep/);
+    await shop.getByRole("button", { name: /^Dalej$/ }).click();
+    await assertPlayableScreen(shop, "map after shop skip", /Mapa/);
+
+    const defeat = await browser.newPage({ viewport: { width: 1280, height: 820 } });
+    await defeat.goto(baseUrl, { waitUntil: "networkidle" });
+    await waitForCanvasReady(defeat, "defeat branch");
+    await clickRoute(defeat, "battle-1");
+    await assertPlayableScreen(defeat, "defeat battle", /Walka/);
+    await defeat.waitForFunction(
+      () => /Koniec/.test(document.querySelector("[data-game-scene]")?.textContent ?? ""),
+      null,
+      { timeout: 80000 }
+    );
+    await assertPlayableScreen(defeat, "game over", /Koniec/);
+  } finally {
+    await browser?.close();
+    await stopStaticServer(server);
+    if (port) {
+      await assertServerStopped(port);
+    }
   }
 });
 

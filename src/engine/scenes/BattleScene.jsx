@@ -74,6 +74,24 @@ function ProjectileBody({ projectile, enemy, onImpact, onTrail }) {
   const bodyRef = useRef(null);
   const resolvedRef = useRef(false);
 
+  function resolveProjectileImpact(position) {
+    if (enemy && projectile.targetEnemy) {
+      onImpact({ type: "enemy", actorId: enemy.id, position });
+      return;
+    }
+
+    if (enemy) {
+      const dx = position[0] - ENEMY_POSITION[0];
+      const dy = position[1] - ENEMY_POSITION[1];
+      if (Math.hypot(dx, dy) <= 1.45) {
+        onImpact({ type: "enemy", actorId: enemy.id, position });
+        return;
+      }
+    }
+
+    onImpact({ type: "terrain", position });
+  }
+
   useEffect(() => {
     if (!bodyRef.current) return;
     bodyRef.current.applyImpulse({ x: projectile.impulse.x, y: projectile.impulse.y, z: 0 }, true);
@@ -88,7 +106,7 @@ function ProjectileBody({ projectile, enemy, onImpact, onTrail }) {
 
     if (translation.y < -2.35 || translation.x > 4.6 || translation.x < -4.2) {
       resolvedRef.current = true;
-      onImpact({ type: "terrain", position });
+      resolveProjectileImpact(position);
     }
   });
 
@@ -106,7 +124,7 @@ function ProjectileBody({ projectile, enemy, onImpact, onTrail }) {
         if (resolvedRef.current) return;
         const translation = bodyRef.current?.translation();
         resolvedRef.current = true;
-        onImpact({ type: "terrain", position: translation ? [translation.x, translation.y, translation.z] : projectile.origin });
+        resolveProjectileImpact(translation ? [translation.x, translation.y, translation.z] : projectile.origin);
       }}
     >
       <BallCollider
@@ -162,7 +180,8 @@ export function BattleScene({ game, aim, setAim, projectileHitEnemy, turnEnded }
     setProjectile({
       id: `egg-${Date.now()}`,
       origin: PROJECTILE_ORIGIN,
-      impulse: { x: (nextAim.x / length) * 4.35, y: (nextAim.y / length) * 4.35 }
+      impulse: { x: (nextAim.x / length) * 4.35, y: (nextAim.y / length) * 4.35 },
+      targetEnemy: point.x > 1.2
     });
   }
 

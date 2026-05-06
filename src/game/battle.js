@@ -237,7 +237,9 @@ function updateProjectilePhase(battle, delta) {
 
 export function createBattleState(config = {}) {
   return withTerminalPhase({
+    nodeId: config.nodeId,
     encounterId: config.encounterId ?? "battle",
+    type: config.type,
     actors: (config.actors ?? []).map(cloneActor),
     platforms: [...(config.platforms ?? [])],
     hazards: [...(config.hazards ?? [])],
