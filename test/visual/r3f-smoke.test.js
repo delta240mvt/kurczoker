@@ -186,11 +186,19 @@ async function killPreviewPidsForPort(port) {
 
 async function waitForPreviewStopped(port) {
   const started = Date.now();
+  let quietSince = null;
+  const quietPeriodMs = 3000;
+  const timeoutMs = 20000;
 
-  while (Date.now() - started < 10000) {
+  while (Date.now() - started < timeoutMs) {
     const pids = await killPreviewPidsForPort(port);
     if (pids.length === 0) {
-      return;
+      quietSince ??= Date.now();
+      if (Date.now() - quietSince >= quietPeriodMs) {
+        return;
+      }
+    } else {
+      quietSince = null;
     }
     await delay(250);
   }
@@ -329,6 +337,8 @@ test("r3f game renders and advances through map and battle", { timeout: 90000 },
   } finally {
     await browser?.close();
     await stopPreview(preview, port);
+    await delay(1500);
+    await assertPreviewStopped(port);
   }
 });
 
