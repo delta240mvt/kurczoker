@@ -131,6 +131,41 @@ function BattleSceneErrorFallback({ onRetry }) {
   );
 }
 
+function MapSceneFallback() {
+  return (
+    <group>
+      <mesh position={[0, 0, -0.72]}>
+        <planeGeometry args={[9.6, 5.4]} />
+        <meshBasicMaterial color="#7fc8f8" />
+      </mesh>
+      <mesh position={[0, -1.18, -0.08]}>
+        <boxGeometry args={[7.2, 1.16, 0.18]} />
+        <meshStandardMaterial color="#6ca45f" roughness={0.72} />
+      </mesh>
+      <mesh position={[-2.8, -0.72, 0.04]}>
+        <boxGeometry args={[0.86, 0.34, 0.14]} />
+        <meshStandardMaterial color="#3f7d39" roughness={0.68} />
+      </mesh>
+      <mesh position={[0, -0.48, 0.04]}>
+        <boxGeometry args={[0.86, 0.34, 0.14]} />
+        <meshStandardMaterial color="#286cc7" roughness={0.5} metalness={0.08} />
+      </mesh>
+      <mesh position={[2.8, -0.72, 0.04]}>
+        <boxGeometry args={[0.86, 0.34, 0.14]} />
+        <meshStandardMaterial color="#9c221f" roughness={0.58} />
+      </mesh>
+      <mesh position={[-1.4, -0.62, 0.01]} rotation={[0, 0, -0.18]}>
+        <boxGeometry args={[1.95, 0.08, 0.08]} />
+        <meshStandardMaterial color="#d9be7c" roughness={0.7} />
+      </mesh>
+      <mesh position={[1.4, -0.62, 0.01]} rotation={[0, 0, 0.18]}>
+        <boxGeometry args={[1.95, 0.08, 0.08]} />
+        <meshStandardMaterial color="#d9be7c" roughness={0.7} />
+      </mesh>
+    </group>
+  );
+}
+
 class BattleSceneErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -211,10 +246,17 @@ export function GameRuntime() {
 
   return (
     <>
-      <color attach="background" args={["#7fc8f8"]} />
+      <color attach="background" args={[engineScene === "battle" ? "#111a2e" : "#7fc8f8"]} />
+      <fog attach="fog" args={[engineScene === "battle" ? "#111a2e" : "#7fc8f8", 7, 14]} />
       <SceneLights />
       <CameraRig />
-      {engineScene === "map" ? <MapScene game={game} selectNode={selectNode} /> : null}
+      {engineScene === "map" ? (
+        <BattleSceneErrorBoundary resetKey="map" fallback={<MapSceneFallback />}>
+          <Suspense fallback={<ScenePlaceholder engineScene="reward" />}>
+            <MapScene game={game} selectNode={selectNode} />
+          </Suspense>
+        </BattleSceneErrorBoundary>
+      ) : null}
       {engineScene === "battle" ? (
         <BattleSceneErrorBoundary
           resetKey={`${battleSceneKey}:${battleSceneRetry}`}

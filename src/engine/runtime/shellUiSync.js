@@ -110,6 +110,9 @@ export function syncShellUiModel(root, model) {
   const backdrop = one(root, "[data-game-backdrop]");
   setAttr(backdrop, "data-backdrop", model.canvasBackdrop);
 
+  const shell = one(root, "[data-game-shell]");
+  setAttr(shell, "data-game-phase", model.battlePhase ?? "");
+
   const action = one(root, "[data-game-start]");
   const actionDisabled = model.scene === "battle" || model.actionDisabled;
   setDisabled(action, actionDisabled);
@@ -126,7 +129,7 @@ export function syncShellUiModel(root, model) {
     }
   }
 
-  setSceneClass(one(root, "[data-game-shell]"), model.scene);
+  setSceneClass(shell, model.scene);
   setStatusVariant(one(root, "[data-game-statusbar]"), model.statusVariant);
   setHints(root, model.hints);
 }

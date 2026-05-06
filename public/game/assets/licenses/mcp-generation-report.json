@@ -1,0 +1,35 @@
+{
+  "generatedAt": "2026-05-06T22:44:49",
+  "runtimeAssetPolicy": "All listed runtime GLB assets are procedural Blender outputs generated locally by tools/generate-kurczoker-wow-assets.py. No third-party Sketchfab, Hyper3D, or Hunyuan3D model files were imported, downloaded, converted, or embedded.",
+  "tools": {
+    "blender": {
+      "ok": true,
+      "mode": "LOCAL_PROCEDURAL_GENERATION",
+      "sourceScript": "tools/generate-kurczoker-wow-assets.py"
+    },
+    "sketchfab": {
+      "ok": true,
+      "mode": "API_CONNECTIVITY_AND_REFERENCE_SEARCH_ONLY",
+      "importedRuntimeAssets": false,
+      "licenseGate": "No Sketchfab result was used as a runtime asset; non-commercial results are explicitly excluded from import."
+    },
+    "hyper3d": {
+      "ok": false,
+      "code": 500,
+      "importedRuntimeAssets": false
+    },
+    "hunyuan3d": {
+      "ok": false,
+      "reason": "Configured local endpoint was unavailable.",
+      "mode": "LOCAL_API",
+      "importedRuntimeAssets": false
+    }
+  },
+  "assets": [
+    "models/kurczoker-hero-knight.glb",
+    "models/kurczoker-enemy-grunt.glb",
+    "models/kurczoker-boss-rooster.glb",
+    "models/kurczoker-map-props.glb",
+    "models/kurczoker-terrain-kit.glb"
+  ]
+}

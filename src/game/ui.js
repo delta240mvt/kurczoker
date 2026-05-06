@@ -169,6 +169,7 @@ export function createUiModel(state = {}, input = {}) {
 
   const model = {
     scene,
+    battlePhase: state.battle?.phase ?? "",
     sceneLabel,
     canvasBackdrop: getBackdrop(state),
     actionDisabled: isActionDisabled(state),

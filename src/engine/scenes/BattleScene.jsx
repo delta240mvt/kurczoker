@@ -3,6 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BATTLE_PHASES, ACTOR_TEAMS } from "../../game/constants.js";
 import { BattleActor } from "../components/BattleActor.jsx";
+import { ModelAsset, preloadModelAsset } from "../components/ModelAsset.jsx";
 import { ProjectileArc } from "../components/ProjectileArc.jsx";
 import { ExplosionFx } from "../fx/ExplosionFx.jsx";
 import { ProjectileTrail } from "../fx/ProjectileTrail.jsx";
@@ -28,28 +29,63 @@ function getLivingActor(actors, team) {
 }
 
 function PaintedBattleBackdrop() {
+  const sparks = [
+    [-4.15, 1.45, 0.08, 0.06],
+    [-3.38, 1.05, 0.06, 0.04],
+    [3.95, 1.32, 0.07, 0.05],
+    [4.38, 0.82, 0.06, 0.04],
+    [0.2, 1.78, 0.04, 0.035]
+  ];
+
   return (
     <group position={[0, 0, -1]}>
       <mesh position={[0, 0, -0.32]}>
         <planeGeometry args={[9.6, 5.4]} />
-        <meshBasicMaterial color="#15233b" />
+        <meshBasicMaterial color="#111a2e" />
       </mesh>
-      <mesh position={[-1.9, 0.9, -0.18]} rotation={[0, 0, -0.08]}>
-        <planeGeometry args={[6.6, 2.6]} />
-        <meshBasicMaterial color="#425f83" transparent opacity={0.76} />
+      <mesh position={[0, 1.18, -0.28]}>
+        <planeGeometry args={[9.6, 2.2]} />
+        <meshBasicMaterial color="#234a78" transparent opacity={0.82} />
       </mesh>
-      <mesh position={[2.25, 0.1, -0.12]} rotation={[0, 0, 0.12]}>
-        <planeGeometry args={[5.7, 2.2]} />
-        <meshBasicMaterial color="#203c4c" transparent opacity={0.7} />
+      <mesh position={[-2.5, 0.55, -0.2]} rotation={[0, 0, -0.08]}>
+        <planeGeometry args={[5.8, 1.3]} />
+        <meshBasicMaterial color="#405f8a" transparent opacity={0.72} />
+      </mesh>
+      <mesh position={[2.7, 0.52, -0.18]} rotation={[0, 0, 0.08]}>
+        <planeGeometry args={[4.8, 1.05]} />
+        <meshBasicMaterial color="#1d3647" transparent opacity={0.72} />
+      </mesh>
+      <mesh position={[-3.42, -0.05, -0.08]}>
+        <boxGeometry args={[0.36, 1.8, 0.08]} />
+        <meshStandardMaterial color="#4a2a13" roughness={0.82} />
+      </mesh>
+      <mesh position={[-3.42, 0.72, -0.02]}>
+        <planeGeometry args={[0.95, 0.88]} />
+        <meshBasicMaterial color="#8f1e14" />
+      </mesh>
+      <mesh position={[3.62, -0.05, -0.08]}>
+        <boxGeometry args={[0.36, 1.8, 0.08]} />
+        <meshStandardMaterial color="#4a2a13" roughness={0.82} />
+      </mesh>
+      <mesh position={[3.62, 0.72, -0.02]}>
+        <planeGeometry args={[0.95, 0.88]} />
+        <meshBasicMaterial color="#8f1e14" />
       </mesh>
       <mesh position={[0, -1.72, -0.04]}>
         <planeGeometry args={[8.6, 1.2]} />
-        <meshBasicMaterial color="#244636" transparent opacity={0.74} />
+        <meshBasicMaterial color="#342311" transparent opacity={0.82} />
       </mesh>
       <mesh position={[0, 1.55, 0]}>
         <planeGeometry args={[8.9, 0.42]} />
-        <meshBasicMaterial color="#f9d783" transparent opacity={0.16} />
+        <meshBasicMaterial color="#f9d783" transparent opacity={0.2} />
       </mesh>
+      <ModelAsset src="/game/assets/models/kurczoker-map-props.glb" scale={0.24} position={[2.55, -0.02, 0.02]} rotation={[0, -0.28, 0]} />
+      {sparks.map(([x, y, z, scale], index) => (
+        <mesh key={`spark-${index}`} position={[x, y, z]} scale={scale}>
+          <sphereGeometry args={[1, 12, 8]} />
+          <meshBasicMaterial color={index % 2 ? "#f97316" : "#facc15"} transparent opacity={0.78} />
+        </mesh>
+      ))}
     </group>
   );
 }
@@ -65,6 +101,10 @@ function TerrainPlatform({ platform }) {
       <mesh position={[0, platform.size[1] / 2 + 0.025, 0.01]}>
         <boxGeometry args={[platform.size[0] * 0.96, 0.05, platform.size[2] * 0.9]} />
         <meshStandardMaterial color="#9dc46b" roughness={0.7} />
+      </mesh>
+      <mesh position={[0, -platform.size[1] / 2 - 0.045, 0.025]}>
+        <boxGeometry args={[platform.size[0] * 0.86, 0.09, platform.size[2] * 0.78]} />
+        <meshStandardMaterial color="#2b2117" roughness={0.86} />
       </mesh>
     </RigidBody>
   );
@@ -205,6 +245,7 @@ export function BattleScene({ game, aim, setAim, projectileHitEnemy, turnEnded }
       }}
     >
       <PaintedBattleBackdrop />
+      <ModelAsset src="/game/assets/models/kurczoker-terrain-kit.glb" scale={0.22} position={[0, -2.12, -0.02]} rotation={[0, 0, 0]} />
       <Physics gravity={[0, GRAVITY_Y, 0]} timeStep={1 / 60} interpolation={false}>
         {TERRAIN.map((platform) => (
           <TerrainPlatform key={platform.id} platform={platform} />
@@ -237,3 +278,8 @@ export function BattleScene({ game, aim, setAim, projectileHitEnemy, turnEnded }
     </group>
   );
 }
+
+preloadModelAsset("/game/assets/models/kurczoker-hero-knight.glb");
+preloadModelAsset("/game/assets/models/kurczoker-enemy-grunt.glb");
+preloadModelAsset("/game/assets/models/kurczoker-boss-rooster.glb");
+preloadModelAsset("/game/assets/models/kurczoker-terrain-kit.glb");

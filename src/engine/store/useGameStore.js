@@ -104,10 +104,14 @@ export function createEngineStateInitializer(seed = 1) {
         return;
       }
 
-      const next = {
+      let next = {
         ...game,
         battle: updateBattle(game.battle, {}, delta)
       };
+
+      if (game.battle.phase !== BATTLE_PHASES.PLAYER_TURN && next.battle.phase === BATTLE_PHASES.PLAYER_TURN) {
+        next = setUiMessage(next, "Celuj, ruszaj się i odpal jedną akcję.");
+      }
 
       set({ game: stateAfterBattle(next) });
     },

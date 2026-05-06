@@ -263,7 +263,72 @@ const UIX_ASSETS = [
   };
 });
 
+const GENERATED_MODEL_ASSETS = [
+  {
+    id: "model.kurczoker.hero.knight",
+    type: "model",
+    path: "/game/assets/models/kurczoker-hero-knight.glb",
+    source: "blender-mcp-pipeline",
+    sourceUrl: "",
+    author: "KURCZOKER",
+    license: "generated-owned",
+    attributionRequired: false,
+    ready: true,
+    notes: "Blender-generated armored Kurczoker hero GLB, inspired by the approved UIX references."
+  },
+  {
+    id: "model.kurczoker.enemy.grunt",
+    type: "model",
+    path: "/game/assets/models/kurczoker-enemy-grunt.glb",
+    source: "blender-mcp-pipeline",
+    sourceUrl: "",
+    author: "KURCZOKER",
+    license: "generated-owned",
+    attributionRequired: false,
+    ready: true,
+    notes: "Blender-generated red armored enemy rooster."
+  },
+  {
+    id: "model.kurczoker.boss.rooster",
+    type: "model",
+    path: "/game/assets/models/kurczoker-boss-rooster.glb",
+    source: "blender-mcp-pipeline",
+    sourceUrl: "",
+    author: "KURCZOKER",
+    license: "generated-owned",
+    attributionRequired: false,
+    ready: true,
+    notes: "Blender-generated dark final boss rooster with molten glow accents."
+  },
+  {
+    id: "model.kurczoker.map.props",
+    type: "model",
+    path: "/game/assets/models/kurczoker-map-props.glb",
+    source: "blender-mcp-pipeline",
+    sourceUrl: "",
+    author: "KURCZOKER",
+    license: "generated-owned",
+    attributionRequired: false,
+    ready: true,
+    notes: "Blender-generated castle, chest, shop wagon, and banner props."
+  },
+  {
+    id: "model.kurczoker.terrain.kit",
+    type: "model",
+    path: "/game/assets/models/kurczoker-terrain-kit.glb",
+    source: "blender-mcp-pipeline",
+    sourceUrl: "",
+    author: "KURCZOKER",
+    license: "generated-owned",
+    attributionRequired: false,
+    ready: true,
+    notes: "Blender-generated mossy floating platform and rock kit for battle arenas."
+  }
+];
+
 export const ASSETS = PLANNED_ASSETS.map((asset) => ({
   ...asset,
   ready: false
-})).concat(UIX_ASSETS.map((asset) => ({ ...asset, ready: asset.ready ?? false })));
+}))
+  .concat(UIX_ASSETS.map((asset) => ({ ...asset, ready: asset.ready ?? false })))
+  .concat(GENERATED_MODEL_ASSETS);

@@ -296,8 +296,10 @@ async function waitForPlayerTurn(page, timeout = 20000) {
   await page.waitForFunction(
     ({ sceneSource, messageSource }) => {
       const scene = document.querySelector("[data-game-scene]")?.textContent ?? "";
+      const phase = document.querySelector("[data-game-shell]")?.getAttribute("data-game-phase") ?? "";
       const message = document.querySelector("[data-game-message]")?.textContent ?? "";
       if (!new RegExp(sceneSource).test(scene)) return true;
+      if (phase === "player-turn") return true;
       return !new RegExp(messageSource).test(message);
     },
     { sceneSource: "Walka|Boss", messageSource: "Tura wroga" },
@@ -404,10 +406,13 @@ async function fireAt(page, xRatio = 0.82, yRatio = 0.36) {
   await delay(1200);
 }
 
-async function winCurrentBattle(page, label, maxShots = 6) {
+async function winCurrentBattle(page, label, maxShots = 6, expectedScenePattern = null) {
   for (let shot = 0; shot < maxShots; shot += 1) {
     const scene = await sceneText(page);
     if (!/Walka|Boss/.test(scene ?? "")) {
+      if (expectedScenePattern) {
+        await expectText(page, "[data-game-scene]", expectedScenePattern);
+      }
       return;
     }
     await fireAt(page);
@@ -415,6 +420,33 @@ async function winCurrentBattle(page, label, maxShots = 6) {
 
   const scene = await sceneText(page);
   assert.ok(!/Walka|Boss/.test(scene ?? ""), `${label} should finish within ${maxShots} shots, current scene: ${scene}`);
+  if (expectedScenePattern) {
+    await expectText(page, "[data-game-scene]", expectedScenePattern);
+  }
+}
+
+async function loseCurrentBattle(page, label, maxShots = 6) {
+  for (let shot = 0; shot < maxShots; shot += 1) {
+    const scene = await sceneText(page);
+    if (/Koniec/.test(scene ?? "")) {
+      return;
+    }
+
+    await fireAt(page, 0.2, 0.52);
+    await delay(9000);
+    if (/Koniec/.test((await sceneText(page)) ?? "")) {
+      return;
+    }
+    await waitForPlayerTurn(page, 30000);
+  }
+
+  await page.waitForFunction(
+    () => /Koniec/.test(document.querySelector("[data-game-scene]")?.textContent ?? ""),
+    null,
+    { timeout: 30000 }
+  );
+  const scene = await sceneText(page);
+  assert.ok(/Koniec/.test(scene ?? ""), `${label} should reach game over within ${maxShots} misses, current scene: ${scene}`);
 }
 
 async function chooseReward(page, preferredNamePattern) {
@@ -490,7 +522,7 @@ test("r3f game renders and advances through map and battle", { timeout: 90000 },
   }
 });
 
-test("all production game screens are reachable and playable", { timeout: 180000 }, async () => {
+test("all production game screens are reachable and playable", { timeout: 300000 }, async () => {
   const port = EXTERNAL_BASE_URL ? null : await findDeterministicFreePort();
   const baseUrl = EXTERNAL_BASE_URL ?? `http://${HOST}:${port}`;
   const server = EXTERNAL_BASE_URL ? null : await startStaticServer(port);
@@ -537,7 +569,7 @@ test("all production game screens are reachable and playable", { timeout: 180000
     await clickRoute(run, "boss");
     await delay(500);
     await assertPlayableScreen(run, "boss", /Boss/);
-    await winCurrentBattle(run, "boss", 8);
+    await winCurrentBattle(run, "boss", 8, /Zwycięstwo/);
     await assertPlayableScreen(run, "victory", /Zwycięstwo/);
 
     const shop = await browser.newPage({ viewport: { width: 1280, height: 820 } });
@@ -550,17 +582,15 @@ test("all production game screens are reachable and playable", { timeout: 180000
     await assertPlayableScreen(shop, "shop", /Sklep/);
     await shop.getByRole("button", { name: /^Dalej$/ }).click();
     await assertPlayableScreen(shop, "map after shop skip", /Mapa/);
+    await run.close();
+    await shop.close();
 
     const defeat = await browser.newPage({ viewport: { width: 1280, height: 820 } });
     await defeat.goto(baseUrl, { waitUntil: "networkidle" });
     await waitForCanvasReady(defeat, "defeat branch");
     await clickRoute(defeat, "battle-1");
     await assertPlayableScreen(defeat, "defeat battle", /Walka/);
-    await defeat.waitForFunction(
-      () => /Koniec/.test(document.querySelector("[data-game-scene]")?.textContent ?? ""),
-      null,
-      { timeout: 80000 }
-    );
+    await loseCurrentBattle(defeat, "defeat branch");
     await assertPlayableScreen(defeat, "game over", /Koniec/);
   } finally {
     await browser?.close();
@@ -616,7 +646,7 @@ test("mobile production game screens fit and remain playable", { timeout: 210000
 
     await clickRoute(run, "boss");
     await assertPlayableScreen(run, "mobile boss", /Boss/);
-    await winCurrentBattle(run, "mobile boss", 8);
+    await winCurrentBattle(run, "mobile boss", 8, /Zwycięstwo/);
     await assertPlayableScreen(run, "mobile victory", /Zwycięstwo/);
 
     const shop = await browser.newPage({ viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true });
@@ -630,17 +660,15 @@ test("mobile production game screens fit and remain playable", { timeout: 210000
     await assertPlayableScreen(shop, "small mobile shop", /Sklep/);
     await shop.getByRole("button", { name: /^Dalej$/ }).click();
     await assertPlayableScreen(shop, "small mobile map after shop skip", /Mapa/);
+    await run.close();
+    await shop.close();
 
     const defeat = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     await defeat.goto(baseUrl, { waitUntil: "networkidle" });
     await waitForCanvasReady(defeat, "mobile defeat branch");
     await clickRoute(defeat, "battle-1");
     await assertPlayableScreen(defeat, "mobile defeat battle", /Walka/);
-    await defeat.waitForFunction(
-      () => /Koniec/.test(document.querySelector("[data-game-scene]")?.textContent ?? ""),
-      null,
-      { timeout: 80000 }
-    );
+    await loseCurrentBattle(defeat, "mobile defeat branch");
     await assertPlayableScreen(defeat, "mobile game over", /Koniec/);
   } finally {
     await browser?.close();

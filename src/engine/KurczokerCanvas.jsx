@@ -138,6 +138,7 @@ export function KurczokerCanvas() {
           className="kurczoker-r3f"
           dpr={[1, 1.5]}
           orthographic
+          shadows
           role="img"
           camera={{ position: [0, 0, 10], zoom: 72, near: 0.1, far: 100 }}
           gl={{ antialias: false, alpha: true }}

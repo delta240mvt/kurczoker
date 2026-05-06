@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { MapNode } from "../components/MapNode.jsx";
+import { ModelAsset, preloadModelAsset } from "../components/ModelAsset.jsx";
 import { buildNodePositions } from "../runtime/mapLayout.js";
 
 function RoutePath({ from, to, active = false }) {
@@ -30,28 +31,62 @@ function RoutePath({ from, to, active = false }) {
 }
 
 function PaintedMapBackdrop() {
+  const trees = [
+    [-4.6, -1.95, 0.05, 0.55],
+    [-4.2, -1.62, 0.04, 0.46],
+    [-3.7, -2.02, 0.05, 0.5],
+    [3.9, -1.78, 0.05, 0.48],
+    [4.42, -1.98, 0.04, 0.58],
+    [3.35, -2.06, 0.04, 0.38]
+  ];
+
   return (
     <group position={[0, 0, -0.85]}>
-      <mesh position={[0, 0, -0.28]}>
+      <mesh position={[0, 0, -0.35]}>
         <planeGeometry args={[10.8, 5.8]} />
-        <meshBasicMaterial color="#1d7668" />
+        <meshBasicMaterial color="#11495d" />
+      </mesh>
+      <mesh position={[0, 1.55, -0.32]}>
+        <planeGeometry args={[10.8, 2.5]} />
+        <meshBasicMaterial color="#6ab9e8" />
+      </mesh>
+      <mesh position={[-2.4, 1.25, -0.27]} rotation={[0, 0, -0.06]}>
+        <planeGeometry args={[5.2, 0.85]} />
+        <meshBasicMaterial color="#d9edf3" transparent opacity={0.74} />
+      </mesh>
+      <mesh position={[2.7, 1.05, -0.265]} rotation={[0, 0, 0.08]}>
+        <planeGeometry args={[4.5, 0.72]} />
+        <meshBasicMaterial color="#b9d9e7" transparent opacity={0.62} />
       </mesh>
       <mesh position={[-2.2, 0.85, -0.18]} rotation={[0, 0, -0.12]}>
         <planeGeometry args={[7.4, 2.9]} />
-        <meshBasicMaterial color="#3da86b" transparent opacity={0.86} />
+        <meshBasicMaterial color="#286b55" transparent opacity={0.86} />
       </mesh>
       <mesh position={[2.1, -1.0, -0.16]} rotation={[0, 0, 0.14]}>
         <planeGeometry args={[7.8, 2.7]} />
-        <meshBasicMaterial color="#276db5" transparent opacity={0.76} />
+        <meshBasicMaterial color="#3d91c3" transparent opacity={0.68} />
       </mesh>
       <mesh position={[0.3, 0.05, -0.1]} rotation={[0, 0, -0.04]}>
         <planeGeometry args={[8.9, 3.9]} />
-        <meshBasicMaterial color="#5fbf75" transparent opacity={0.5} />
+        <meshBasicMaterial color="#6bbf62" transparent opacity={0.52} />
       </mesh>
       <mesh position={[0, 0, 0.02]}>
         <planeGeometry args={[10.2, 5.2]} />
         <meshBasicMaterial color="#0f2d44" transparent opacity={0.18} />
       </mesh>
+      {trees.map(([x, y, z, scale], index) => (
+        <group key={`tree-${index}`} position={[x, y, z]} scale={scale}>
+          <mesh position={[0, 0.24, 0.03]}>
+            <coneGeometry args={[0.26, 0.74, 8]} />
+            <meshStandardMaterial color="#174b35" roughness={0.82} />
+          </mesh>
+          <mesh position={[0, -0.16, 0.02]}>
+            <boxGeometry args={[0.09, 0.42, 0.06]} />
+            <meshStandardMaterial color="#5a3515" roughness={0.9} />
+          </mesh>
+        </group>
+      ))}
+      <ModelAsset src="/game/assets/models/kurczoker-map-props.glb" scale={0.33} position={[0.05, -0.26, 0.16]} rotation={[0, 0.08, 0]} />
     </group>
   );
 }
@@ -95,3 +130,5 @@ export function MapScene({ game, selectNode }) {
     </group>
   );
 }
+
+preloadModelAsset("/game/assets/models/kurczoker-map-props.glb");
