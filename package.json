@@ -17,7 +17,7 @@
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
     "@react-three/rapier": "^2.2.0",
-    "astro": "^5.0.0",
+    "astro": "^6.2.2",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "three": "^0.184.0",
@@ -25,10 +25,13 @@
   },
   "devDependencies": {
     "@babel/parser": "^7.29.3",
-    "@cloudflare/mcp-server-cloudflare": "^0.2.0",
+    "@cloudflare/mcp-server-cloudflare": "^0.1.2",
     "playwright": "^1.59.1",
     "pngjs": "^7.0.0",
     "threejs-devtools-mcp": "^0.4.1",
     "wrangler": "^4.14.1"
+  },
+  "overrides": {
+    "@modelcontextprotocol/sdk": "^1.25.2"
   }
 }
