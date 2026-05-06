@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createStore } from "zustand/vanilla";
-import { BATTLE_PHASES } from "../../game/constants.js";
+import { BATTLE_PHASES, SCENES } from "../../game/constants.js";
 import { applyRunReward, completeCurrentNode, purchaseShopOffer, selectMapNode, skipShop, startRun } from "../../game/run.js";
 import { resetRun, setUiMessage } from "../../game/state.js";
 import { projectileHitEnemy, turnEnded } from "../runtime/domainEvents.js";
@@ -13,8 +13,13 @@ export function createEngineStateInitializer(seed = 1) {
       set({ game: selectMapNode(get().game, nodeId) });
     },
     chooseReward(rewardId) {
-      const reward = get().game.rewardChoices?.find((entry) => entry.id === rewardId);
-      set({ game: applyRunReward(get().game, reward) });
+      const game = get().game;
+      const reward = game.rewardChoices?.find((entry) => entry.id === rewardId);
+      if (game.scene !== SCENES.REWARD || !reward) {
+        return;
+      }
+
+      set({ game: applyRunReward(game, reward) });
     },
     buyShopOffer(offerId) {
       set({ game: purchaseShopOffer(get().game, offerId) });

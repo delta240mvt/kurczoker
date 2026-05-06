@@ -49,6 +49,30 @@ test("engine store applies reward and returns to map", () => {
   assert.deepEqual(store.getState().game.rewardChoices, []);
 });
 
+test("engine store ignores invalid reward ids without advancing reward scene", () => {
+  const store = createEngineStore(1);
+  const nodeId = store.getState().game.run.offeredNodeIds[0];
+
+  store.getState().selectNode(nodeId);
+  store.setState({ game: completeCurrentNode(store.getState().game) });
+  const before = store.getState().game;
+  store.getState().chooseReward("stale-reward-id");
+
+  assert.equal(store.getState().game.scene, SCENES.REWARD);
+  assert.deepEqual(store.getState().game.rewardChoices, before.rewardChoices);
+});
+
+test("engine store ignores reward selection outside reward scene", () => {
+  const store = createEngineStore(1);
+  const before = store.getState().game;
+
+  store.getState().chooseReward("heal-small");
+
+  assert.equal(store.getState().game.scene, SCENES.MAP);
+  assert.deepEqual(store.getState().game.rewardChoices, before.rewardChoices);
+  assert.deepEqual(store.getState().game.run.offeredNodeIds, before.run.offeredNodeIds);
+});
+
 test("engine store applies battle projectile hits and hands off surviving enemy turns", () => {
   const store = createEngineStore(1);
   store.setState({
