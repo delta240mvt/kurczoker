@@ -307,8 +307,64 @@ async function waitForPlayerTurn(page, timeout = 20000) {
 
 async function assertPlayableScreen(page, label, scenePattern) {
   await expectText(page, "[data-game-scene]", scenePattern);
+  await assertResponsiveLayout(page, label);
   assertNonblankShot(await getShellShot(page), `${label} shell`);
   assertNonblankShot(await getCanvasShot(page), `${label} canvas`);
+}
+
+async function assertResponsiveLayout(page, label) {
+  const metrics = await page.evaluate(() => {
+    const readRect = (selector) => {
+      const rect = document.querySelector(selector)?.getBoundingClientRect();
+      return rect ? { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom, width: rect.width, height: rect.height } : null;
+    };
+    const viewportWidth = document.documentElement.clientWidth;
+    const overflowing = [...document.querySelectorAll("body *")]
+      .filter((element) => {
+        const rect = element.getBoundingClientRect();
+        return rect.width > 1 && (rect.left < -1 || rect.right > viewportWidth + 1);
+      })
+      .slice(0, 8)
+      .map((element) => ({
+        tag: element.tagName,
+        className: typeof element.className === "string" ? element.className : "",
+        left: element.getBoundingClientRect().left,
+        right: element.getBoundingClientRect().right,
+        width: element.getBoundingClientRect().width
+      }));
+
+    return {
+      viewportWidth,
+      viewportHeight: document.documentElement.clientHeight,
+      scrollWidth: document.documentElement.scrollWidth,
+      shell: readRect("[data-game-shell]"),
+      canvas: readRect(".shell__canvas"),
+      topbar: readRect(".shell__topbar"),
+      overflowing,
+      routeButtons: [...document.querySelectorAll(".map-route-actions__btn")].map((button) => {
+        const rect = button.getBoundingClientRect();
+        return { width: rect.width, height: rect.height };
+      }),
+      actionButtons: [...document.querySelectorAll(".shell-actions .btn")].map((button) => {
+        const rect = button.getBoundingClientRect();
+        return { width: rect.width, height: rect.height };
+      })
+    };
+  });
+
+  assert.equal(metrics.scrollWidth, metrics.viewportWidth, `${label} should not create horizontal page overflow`);
+  assert.deepEqual(metrics.overflowing, [], `${label} should not have horizontally overflowing elements`);
+  assert.ok(metrics.shell?.left >= -0.5 && metrics.shell?.right <= metrics.viewportWidth + 0.5, `${label} shell should fit viewport`);
+  assert.ok(metrics.canvas?.width >= 300, `${label} canvas should preserve a playable width`);
+  assert.ok(metrics.canvas?.height >= 168, `${label} canvas should preserve a playable height`);
+
+  if (metrics.viewportWidth <= 700) {
+    assert.ok(metrics.topbar?.height <= 170, `${label} mobile topbar should stay compact`);
+    assert.ok(metrics.canvas?.top <= 275, `${label} mobile canvas should start high enough for gameplay`);
+    for (const button of [...metrics.routeButtons, ...metrics.actionButtons]) {
+      assert.ok(button.height >= 40, `${label} mobile touch targets should be at least 40px tall`);
+    }
+  }
 }
 
 async function clickRoute(page, routeId) {
@@ -324,7 +380,7 @@ async function clickRoute(page, routeId) {
   await delay(700);
 }
 
-async function fireAt(page, xRatio = 0.74, yRatio = 0.36) {
+async function fireAt(page, xRatio = 0.82, yRatio = 0.36) {
   for (let attempt = 1; attempt <= 3; attempt += 1) {
     await waitForPlayerTurn(page);
     const canvasBox = await page.locator(".kurczoker-r3f canvas").boundingBox();
@@ -382,6 +438,7 @@ test("r3f game renders and advances through map and battle", { timeout: 90000 },
     const desktop = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     await desktop.goto(baseUrl, { waitUntil: "networkidle" });
     await waitForCanvasReady(desktop, "desktop");
+    await assertResponsiveLayout(desktop, "desktop map");
     assertNonblankShot(await getCanvasShot(desktop), "desktop map");
 
     const route = desktop.locator(".map-route-actions__btn").first();
@@ -405,6 +462,7 @@ test("r3f game renders and advances through map and battle", { timeout: 90000 },
     const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     await mobile.goto(baseUrl, { waitUntil: "load" });
     await waitForCanvasReady(mobile, "mobile");
+    await assertResponsiveLayout(mobile, "mobile map");
     const mobileMap = await getCanvasShot(mobile);
     assertNonblankShot(mobileMap, "mobile map");
 
@@ -414,6 +472,7 @@ test("r3f game renders and advances through map and battle", { timeout: 90000 },
     await mobile.waitForFunction(() => !document.querySelector(".map-route-actions__btn"));
     await expectText(mobile, "[data-game-scene]", /Walka/);
     await delay(500);
+    await assertResponsiveLayout(mobile, "mobile battle");
     const mobileBattle = await getCanvasShot(mobile);
     assertNonblankShot(mobileBattle, "mobile battle");
     assertChangedPixels(mobileMap, mobileBattle, "mobile route transition");
@@ -503,6 +562,86 @@ test("all production game screens are reachable and playable", { timeout: 180000
       { timeout: 80000 }
     );
     await assertPlayableScreen(defeat, "game over", /Koniec/);
+  } finally {
+    await browser?.close();
+    await stopStaticServer(server);
+    if (port) {
+      await assertServerStopped(port);
+    }
+  }
+});
+
+test("mobile production game screens fit and remain playable", { timeout: 210000 }, async () => {
+  const port = EXTERNAL_BASE_URL ? null : await findDeterministicFreePort();
+  const baseUrl = EXTERNAL_BASE_URL ?? `http://${HOST}:${port}`;
+  const server = EXTERNAL_BASE_URL ? null : await startStaticServer(port);
+  let browser;
+
+  try {
+    await waitForServer(baseUrl);
+    browser = await chromium.launch();
+
+    const run = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    await run.goto(baseUrl, { waitUntil: "networkidle" });
+    await waitForCanvasReady(run, "mobile all-screens run");
+    await assertPlayableScreen(run, "mobile map", /Mapa/);
+
+    await clickRoute(run, "battle-1");
+    await assertPlayableScreen(run, "mobile battle", /Walka/);
+    await winCurrentBattle(run, "mobile battle-1");
+    await assertPlayableScreen(run, "mobile reward", /Nagroda/);
+    await chooseReward(run, /Guard Chick|Wind Boots|Rosol|Warm Broth/);
+
+    await clickRoute(run, "treasure-1");
+    await assertPlayableScreen(run, "mobile treasure", /Skarb/);
+    await chooseReward(run, /Chaos Egg/);
+
+    await clickRoute(run, "battle-2");
+    await assertPlayableScreen(run, "mobile battle-2", /Walka/);
+    await winCurrentBattle(run, "mobile battle-2");
+    await assertPlayableScreen(run, "mobile reward after battle-2", /Nagroda/);
+    await chooseReward(run, /Warm Broth|Rosol|Golden Grain/);
+
+    await clickRoute(run, "elite-1");
+    await assertPlayableScreen(run, "mobile elite battle", /Walka/);
+    await winCurrentBattle(run, "mobile elite-1");
+    await assertPlayableScreen(run, "mobile elite reward", /Nagroda/);
+    await chooseReward(run, /Prophet Hen|Warm Broth|Rosol/);
+
+    await clickRoute(run, "battle-3");
+    await assertPlayableScreen(run, "mobile battle-3", /Walka/);
+    await winCurrentBattle(run, "mobile battle-3");
+    await assertPlayableScreen(run, "mobile late reward", /Nagroda/);
+    await chooseReward(run, /Shell Shield|Warm Broth|Rosol/);
+
+    await clickRoute(run, "boss");
+    await assertPlayableScreen(run, "mobile boss", /Boss/);
+    await winCurrentBattle(run, "mobile boss", 8);
+    await assertPlayableScreen(run, "mobile victory", /Zwycięstwo/);
+
+    const shop = await browser.newPage({ viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true });
+    await shop.goto(baseUrl, { waitUntil: "networkidle" });
+    await waitForCanvasReady(shop, "small mobile shop branch");
+    await assertPlayableScreen(shop, "small mobile map", /Mapa/);
+    await clickRoute(shop, "battle-1");
+    await winCurrentBattle(shop, "small mobile shop setup battle");
+    await chooseReward(shop, /Guard Chick|Wind Boots|Rosol|Warm Broth/);
+    await clickRoute(shop, "shop-1");
+    await assertPlayableScreen(shop, "small mobile shop", /Sklep/);
+    await shop.getByRole("button", { name: /^Dalej$/ }).click();
+    await assertPlayableScreen(shop, "small mobile map after shop skip", /Mapa/);
+
+    const defeat = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+    await defeat.goto(baseUrl, { waitUntil: "networkidle" });
+    await waitForCanvasReady(defeat, "mobile defeat branch");
+    await clickRoute(defeat, "battle-1");
+    await assertPlayableScreen(defeat, "mobile defeat battle", /Walka/);
+    await defeat.waitForFunction(
+      () => /Koniec/.test(document.querySelector("[data-game-scene]")?.textContent ?? ""),
+      null,
+      { timeout: 80000 }
+    );
+    await assertPlayableScreen(defeat, "mobile game over", /Koniec/);
   } finally {
     await browser?.close();
     await stopStaticServer(server);

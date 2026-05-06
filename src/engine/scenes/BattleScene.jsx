@@ -181,7 +181,7 @@ export function BattleScene({ game, aim, setAim, projectileHitEnemy, turnEnded }
       id: `egg-${Date.now()}`,
       origin: PROJECTILE_ORIGIN,
       impulse: { x: (nextAim.x / length) * 4.35, y: (nextAim.y / length) * 4.35 },
-      targetEnemy: point.x > 1.2
+      targetEnemy: point.x > 0.65
     });
   }
 

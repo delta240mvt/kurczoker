@@ -965,7 +965,7 @@ button:disabled {
 }
 
 .uix-band__inner {
-  width: var(--max-shell);
+  width: min(100%, var(--max-shell));
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--gap);
@@ -1161,8 +1161,31 @@ button:disabled {
 
 @media (max-width: 700px) {
   :root {
-    --shell-pad: 10px;
+    --shell-pad: 8px;
+    --gap-tight: 6px;
+    --gap: 10px;
+    --pill-h: 42px;
+    --btn-h: 44px;
     --status-h: auto;
+  }
+
+  .game-stage {
+    gap: 7px;
+    min-height: 100svh;
+    padding: 8px 6px 18px;
+  }
+
+  .game-stage__brand {
+    gap: 0;
+  }
+
+  .game-stage__brand p {
+    display: none;
+  }
+
+  .game-stage__brand h1 {
+    font-size: clamp(1.85rem, 13vw, 3rem);
+    text-shadow: 0 3px 0 var(--shell-gold-deep), 0 5px 0 var(--shell-edge);
   }
 
   .game-stage {
@@ -1170,19 +1193,184 @@ button:disabled {
   }
 
   .shell {
-    width: min(100%, 96vw);
+    width: calc(100vw - 12px);
+    padding: var(--shell-pad);
+    border-width: 2px;
+    border-radius: 10px;
+  }
+
+  .shell::before {
+    inset: 5px;
+    border-width: 1px;
+  }
+
+  .shell__corner {
+    width: 26px;
+    height: 26px;
+  }
+
+  .shell__crest {
+    top: -10px;
+    width: 46px;
+    height: 25px;
+  }
+
+  .shell__topbar {
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 3px;
   }
 
   .hud {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
   }
 
   .hud-pill {
-    height: 48px;
+    grid-template-columns: 24px minmax(0, 1fr);
+    gap: 6px;
+    height: var(--pill-h);
+    padding: 4px 7px;
+    border-width: 1px;
+    border-radius: 8px;
+  }
+
+  .hud-pill__icon img {
+    width: 24px;
+    height: 24px;
+  }
+
+  .hud-pill__label {
+    font-size: 0.58rem;
+    letter-spacing: 0.04em;
+  }
+
+  .hud-pill__value {
+    font-size: 0.82rem;
+  }
+
+  .shell-actions {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px;
+    gap: 6px;
+  }
+
+  .btn {
+    min-width: 0;
+    height: var(--btn-h);
+    padding: 0 10px;
+    border-width: 1px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+  }
+
+  .btn--icon {
+    width: var(--btn-h);
+  }
+
+  .shell__canvas {
+    border-width: 2px;
+    border-radius: 7px;
+    box-shadow:
+      inset 0 0 0 1px var(--shell-gold-deep),
+      inset 0 0 0 3px var(--shell-edge),
+      inset 0 0 18px rgba(0, 0, 0, 0.5);
   }
 
   .shell__statusbar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px 6px;
+    margin-top: 8px;
+    padding: 5px 6px;
+    border-width: 1px;
+    font-size: 0.72rem;
+  }
+
+  .status-pill {
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: 5px;
+    padding: 0 4px;
+  }
+
+  .status-pill__icon img {
+    width: 18px;
+    height: 18px;
+  }
+
+  .status-pill__label {
+    font-size: 0.56rem;
+    letter-spacing: 0.03em;
+  }
+
+  .status-pill__text {
+    gap: 4px;
+  }
+
+  .shell__ribbon {
+    grid-template-columns: 20px minmax(0, 1fr);
+    gap: 7px;
+    min-height: 38px;
+    margin-top: 6px;
+    padding: 6px 10px;
+    border-width: 1px;
+    font-size: 0.78rem;
+  }
+
+  .shell__ribbon::before,
+  .shell__ribbon::after {
+    width: 10px;
+    height: 10px;
+  }
+
+  .shell__ribbon-icon img {
+    width: 20px;
+    height: 20px;
+  }
+
+  .map-route-actions {
+    right: 8px;
+    bottom: 8px;
+    left: 8px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .map-route-actions__btn {
+    min-height: 44px;
+    padding: 7px 8px;
+    border-width: 1px;
+  }
+
+  .map-route-actions__type {
+    font-size: 0.62rem;
+  }
+
+  .map-route-actions__label {
+    font-size: 0.74rem;
+  }
+
+  .hint-cards {
+    width: calc(100vw - 12px);
+    gap: 8px;
+  }
+
+  .hint-card {
+    grid-template-columns: 36px minmax(0, 1fr);
+    gap: 9px;
+    padding: 10px;
+  }
+
+  .hint-card__icon {
+    width: 36px;
+    height: 36px;
+  }
+
+  .hint-card__title {
+    font-size: 0.82rem;
+  }
+
+  .hint-card__desc {
+    font-size: 0.72rem;
   }
 
   .reward-row,
@@ -1195,7 +1383,27 @@ button:disabled {
   .reward-overlay {
     align-content: start;
     overflow: auto;
-    padding: 12px;
+    gap: 10px;
+    padding: 10px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .reward-overlay__header {
+    padding: 9px 12px 10px;
+    border-width: 1px;
+  }
+
+  .reward-overlay__eyebrow {
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+  }
+
+  .reward-overlay__header h2 {
+    font-size: clamp(1.25rem, 8vw, 1.75rem);
+  }
+
+  .reward-overlay__header p {
+    font-size: 0.72rem;
   }
 
   .reward-overlay--shop .reward-row,
@@ -1214,17 +1422,24 @@ button:disabled {
   .shell--game-over .shell__canvas,
   .shell--run-complete .shell__canvas {
     aspect-ratio: auto;
-    min-height: 520px;
+    min-height: min(560px, calc(100svh - 246px));
   }
 
   .shell--game-over .shell__canvas,
   .shell--run-complete .shell__canvas {
-    min-height: 430px;
+    min-height: min(430px, calc(100svh - 246px));
   }
 
   .reward-card,
   .shop-card {
-    min-height: 188px;
+    min-height: 168px;
+    padding: 12px 10px 10px;
+    border-width: 2px;
+  }
+
+  .reward-card {
+    grid-template-rows: 48px auto auto minmax(42px, 1fr) 30px;
+    gap: 6px;
   }
 
   .reward-card__icon,
