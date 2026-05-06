@@ -66,29 +66,115 @@ async function waitForPreview(url, preview) {
   throw new Error(`preview was not ready after 30s: ${lastError?.message ?? "unknown error"}`);
 }
 
-async function stopPreview(preview) {
-  if (!preview || preview.exitCode !== null) return;
-
-  if (process.platform === "win32") {
-    await new Promise((resolve) => {
-      const taskkill = spawn("taskkill", ["/pid", String(preview.pid), "/T", "/F"], {
-        stdio: "ignore",
-        windowsHide: true
-      });
-      taskkill.once("exit", resolve);
-      taskkill.once("error", resolve);
+async function runCommand(command, args) {
+  return new Promise((resolve) => {
+    const child = spawn(command, args, {
+      stdio: ["ignore", "pipe", "pipe"],
+      windowsHide: true
     });
-  } else {
-    preview.kill("SIGTERM");
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk;
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk;
+    });
+    child.once("error", (error) => {
+      resolve({ code: 1, stdout, stderr: `${stderr}${error.message}` });
+    });
+    child.once("exit", (code) => {
+      resolve({ code: code ?? 0, stdout, stderr });
+    });
+  });
+}
+
+async function findListeningPids(port) {
+  if (process.platform === "win32") {
+    const result = await runCommand("netstat", ["-ano"]);
+    const pids = new Set();
+
+    for (const line of result.stdout.split(/\r?\n/)) {
+      const columns = line.trim().split(/\s+/);
+      if (columns[0] !== "TCP") continue;
+      const [, localAddress, , state, pid] = columns;
+      if (state !== "LISTENING" || !localAddress?.endsWith(`:${port}`)) continue;
+      if (/^\d+$/.test(pid) && pid !== "0") {
+        pids.add(Number(pid));
+      }
+    }
+
+    return [...pids];
   }
 
-  try {
-    await Promise.race([once(preview, "exit"), delay(3000)]);
-  } finally {
-    if (preview.exitCode === null) {
-      preview.kill("SIGKILL");
+  const lsof = await runCommand("lsof", ["-nP", `-iTCP:${port}`, "-sTCP:LISTEN", "-t"]);
+  if (lsof.code === 0 && lsof.stdout.trim()) {
+    return [...new Set(lsof.stdout.trim().split(/\s+/).filter(Boolean).map(Number).filter(Number.isFinite))];
+  }
+
+  const ss = await runCommand("ss", ["-ltnp"]);
+  const pids = new Set();
+  for (const line of ss.stdout.split(/\r?\n/)) {
+    if (!line.includes(`:${port}`)) continue;
+    const match = line.match(/pid=(\d+)/);
+    if (match) {
+      pids.add(Number(match[1]));
     }
   }
+
+  return [...pids];
+}
+
+async function killProcessTree(pid) {
+  if (!pid) return;
+
+  if (process.platform === "win32") {
+    await runCommand("taskkill", ["/PID", String(pid), "/T", "/F"]);
+  } else {
+    try {
+      process.kill(pid, "SIGTERM");
+    } catch (error) {
+      if (error.code !== "ESRCH") throw error;
+    }
+    await delay(500);
+    try {
+      process.kill(pid, "SIGKILL");
+    } catch (error) {
+      if (error.code !== "ESRCH") throw error;
+    }
+  }
+}
+
+async function waitForPortClosed(port) {
+  const started = Date.now();
+
+  while (Date.now() - started < 10000) {
+    const pids = await findListeningPids(port);
+    if (pids.length === 0) {
+      return;
+    }
+    await Promise.all(pids.map((pid) => killProcessTree(pid)));
+    await delay(250);
+  }
+
+  throw new Error(`preview port ${port} is still listening after cleanup`);
+}
+
+async function stopPreview(preview, port) {
+  if (preview && preview.exitCode === null) {
+    await killProcessTree(preview.pid);
+
+    try {
+      await Promise.race([once(preview, "exit"), delay(3000)]);
+    } finally {
+      if (preview.exitCode === null) {
+        await killProcessTree(preview.pid);
+      }
+    }
+  }
+
+  await waitForPortClosed(port);
 }
 
 async function getCanvasShot(page) {
@@ -198,7 +284,7 @@ test("r3f game renders and advances through map and battle", { timeout: 90000 },
     assertNonblankShot(await getCanvasShot(mobile), "mobile map");
   } finally {
     await browser?.close();
-    await stopPreview(preview);
+    await stopPreview(preview, port);
   }
 });
 
