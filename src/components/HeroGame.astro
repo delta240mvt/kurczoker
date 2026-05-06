@@ -1,4 +1,6 @@
 ---
+import KurczokerCanvas from "../engine/KurczokerCanvas.jsx";
+
 const iconPath = "/uix/svg/";
 const hudItems = [
   { label: "HP", value: "3 / 3", attr: "data-game-health", icon: "icon-hp-heart.svg" },
@@ -58,7 +60,9 @@ const statusItems = [
 
     <div class="shell__canvas" aria-label="KURCZOKER playable scene">
       <div class="shell__backdrop" data-game-backdrop aria-hidden="true"></div>
-      <canvas data-game-canvas width="960" height="540" aria-label="KURCZOKER game canvas"></canvas>
+      <div class="shell__r3f" data-engine-r3f>
+        <KurczokerCanvas client:load />
+      </div>
       <div data-game-boss></div>
       <div data-game-overlay></div>
     </div>
@@ -89,7 +93,3 @@ const statusItems = [
 
   <section class="hint-cards hint-cards--3" data-game-hints aria-label="Wskazówki wyprawy"></section>
 </section>
-
-<script>
-  import "../game/bootstrap.js";
-</script>
