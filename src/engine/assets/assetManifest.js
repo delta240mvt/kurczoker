@@ -221,7 +221,49 @@ const PLANNED_ASSETS = [
   }
 ];
 
+const UIX_ASSETS = [
+  "canvas/01-canvas.webp",
+  "canvas/02-canvas.webp",
+  "canvas/03-canvas.webp",
+  "canvas/04-canvas.webp",
+  "canvas/05-canvas.webp",
+  "canvas/06-canvas.webp",
+  "canvas/07-canvas.webp",
+  "canvas/08-canvas.webp",
+  "canvas/09-canvas.webp",
+  "canvas/10-canvas.webp",
+  "svg/corner-crystal.svg",
+  "svg/icon-ability-bomb.svg",
+  "svg/icon-audio-note.svg",
+  "svg/icon-feather-quill.svg",
+  "svg/icon-gear.svg",
+  "svg/icon-grain-coin.svg",
+  "svg/icon-hp-heart.svg",
+  "svg/icon-jump.svg",
+  "svg/icon-node.svg",
+  "svg/icon-scene-book.svg",
+  "svg/icon-shield.svg",
+  "svg/ornament-top.svg",
+  "svg/ribbon-seal.svg"
+].map((relativePath) => {
+  const path = `/uix/${relativePath}`;
+  const id = `uix.${relativePath.replace(/\//g, ".").replace(/\.[^.]+$/, "")}`;
+
+  return {
+    id,
+    type: relativePath.startsWith("canvas/") ? "ui" : "icon",
+    path,
+    source: "generated",
+    sourceUrl: "",
+    author: "KURCZOKER",
+    license: "generated-owned",
+    attributionRequired: false,
+    ready: true,
+    notes: "Runtime UIX asset used by the playable shell."
+  };
+});
+
 export const ASSETS = PLANNED_ASSETS.map((asset) => ({
   ...asset,
   ready: false
-}));
+})).concat(UIX_ASSETS.map((asset) => ({ ...asset, ready: asset.ready ?? false })));

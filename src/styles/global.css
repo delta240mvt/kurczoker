@@ -1,5 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Lilita+One&family=Inter:wght@400;600;700;800;900&display=swap");
-
 :root {
   color-scheme: dark;
   --shell-face: #1d2746;
@@ -25,8 +23,8 @@
   --ink-cream: #f5e8c1;
   --ink-muted: #6b5e3a;
   --ink-on-red: #fffbe8;
-  --font-display: "Lilita One", "Bungee", "Bowlby One", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Arial Black", Impact, system-ui, sans-serif;
+  --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
   --shell-pad: clamp(14px, 1.6vw, 22px);
   --shell-radius: 14px;
   --pill-radius: 10px;

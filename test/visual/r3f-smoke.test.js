@@ -313,10 +313,30 @@ test("r3f game renders and advances through map and battle", { timeout: 90000 },
     const afterFire = await getCanvasShot(desktop);
     assertChangedPixels(beforeFire, afterFire, "aiming and firing");
 
-    const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
+    const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
     await mobile.goto(baseUrl, { waitUntil: "load" });
     await waitForCanvasReady(mobile, "mobile");
-    assertNonblankShot(await getCanvasShot(mobile), "mobile map");
+    const mobileMap = await getCanvasShot(mobile);
+    assertNonblankShot(mobileMap, "mobile map");
+
+    const mobileRoute = mobile.locator(".map-route-actions__btn").first();
+    await mobileRoute.waitFor({ state: "visible" });
+    await mobileRoute.click();
+    await mobile.waitForFunction(() => !document.querySelector(".map-route-actions__btn"));
+    await expectText(mobile, "[data-game-scene]", /Walka/);
+    await delay(500);
+    const mobileBattle = await getCanvasShot(mobile);
+    assertNonblankShot(mobileBattle, "mobile battle");
+    assertChangedPixels(mobileMap, mobileBattle, "mobile route transition");
+
+    const mobileCanvasBox = await mobile.locator(".kurczoker-r3f canvas").boundingBox();
+    assert.ok(mobileCanvasBox, "mobile battle canvas should have a bounding box");
+    await mobile.touchscreen.tap(
+      mobileCanvasBox.x + mobileCanvasBox.width * 0.74,
+      mobileCanvasBox.y + mobileCanvasBox.height * 0.36
+    );
+    await waitForPostFireOutcome(mobile);
+    assertChangedPixels(mobileBattle, await getCanvasShot(mobile), "mobile firing");
   } finally {
     await browser?.close();
     await stopStaticServer(server);
