@@ -18,6 +18,7 @@ test("projectileHitEnemy returns updated domain state without importing Rapier",
 
   assert.equal(next.scene, SCENES.BATTLE);
   assert.equal(nextEnemy.health, enemy.health - 1);
+  assert.equal(next.battle.phase, BATTLE_PHASES.ENEMY_TURN);
   assert.match(next.ui.message, /Trafienie/);
 });
 

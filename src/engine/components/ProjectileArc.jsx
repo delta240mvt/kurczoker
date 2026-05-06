@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { BufferGeometry, Float32BufferAttribute } from "three";
 
 export function ProjectileArc({ origin, aim, gravity = -5.8, steps = 28 }) {
@@ -19,6 +19,8 @@ export function ProjectileArc({ origin, aim, gravity = -5.8, steps = 28 }) {
     next.setAttribute("position", new Float32BufferAttribute(vertices, 3));
     return next;
   }, [aim.x, aim.y, gravity, origin, steps]);
+
+  useEffect(() => () => geometry.dispose(), [geometry]);
 
   return (
     <line geometry={geometry}>

@@ -86,13 +86,6 @@ function ProjectileBody({ projectile, enemy, onImpact, onTrail }) {
     const position = [translation.x, translation.y, translation.z];
     onTrail(position);
 
-    const enemyDistance = Math.hypot(translation.x - ENEMY_POSITION[0], translation.y - ENEMY_POSITION[1]);
-    if (enemy && enemyDistance < 0.58) {
-      resolvedRef.current = true;
-      onImpact({ type: "enemy", actorId: enemy.id, position });
-      return;
-    }
-
     if (translation.y < -2.35 || translation.x > 4.6 || translation.x < -4.2) {
       resolvedRef.current = true;
       onImpact({ type: "terrain", position });
@@ -116,7 +109,17 @@ function ProjectileBody({ projectile, enemy, onImpact, onTrail }) {
         onImpact({ type: "terrain", position: translation ? [translation.x, translation.y, translation.z] : projectile.origin });
       }}
     >
-      <BallCollider args={[0.14]} restitution={0.18} friction={0.82} />
+      <BallCollider
+        args={[0.14]}
+        restitution={0.18}
+        friction={0.82}
+        onIntersectionEnter={(payload) => {
+          if (resolvedRef.current || !enemy || payload.other.colliderObject?.name !== "enemy-hit-sensor") return;
+          const translation = bodyRef.current?.translation();
+          resolvedRef.current = true;
+          onImpact({ type: "enemy", actorId: enemy.id, position: translation ? [translation.x, translation.y, translation.z] : projectile.origin });
+        }}
+      />
       <mesh>
         <sphereGeometry args={[0.16, 24, 16]} />
         <meshStandardMaterial color="#fff1b5" roughness={0.34} metalness={0.04} emissive="#fb923c" emissiveIntensity={0.22} />
@@ -189,13 +192,13 @@ export function BattleScene({ game, aim, setAim, projectileHitEnemy, turnEnded }
         ))}
         {player ? (
           <RigidBody type="fixed" colliders={false} position={PLAYER_POSITION}>
-            <CuboidCollider args={[0.32, 0.48, 0.28]} sensor />
+            <CuboidCollider name="player-body-sensor" args={[0.32, 0.48, 0.28]} sensor />
             <BattleActor actor={player} active={playerTurn} side="left" />
           </RigidBody>
         ) : null}
         {enemy ? (
           <RigidBody type="fixed" colliders={false} position={ENEMY_POSITION}>
-            <CuboidCollider args={[0.34, 0.48, 0.28]} sensor />
+            <CuboidCollider name="enemy-hit-sensor" args={[0.34, 0.48, 0.28]} sensor />
             <BattleActor actor={enemy} side="right" />
           </RigidBody>
         ) : null}

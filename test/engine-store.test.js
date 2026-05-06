@@ -35,7 +35,7 @@ test("engine store reset advances from the active state seed", () => {
   assert.equal(secondReset.ui.message, "Nowa wyprawa gotowa.");
 });
 
-test("engine store applies battle projectile events through domain helpers", () => {
+test("engine store applies battle projectile hits and hands off surviving enemy turns", () => {
   const store = createEngineStore(1);
   store.setState({
     game: {
@@ -49,7 +49,5 @@ test("engine store applies battle projectile events through domain helpers", () 
   store.getState().projectileHitEnemy({ actorId: "enemy-1", damage: 1 });
   const damagedEnemy = store.getState().game.battle.actors.find((actor) => actor.id === "enemy-1");
   assert.equal(damagedEnemy.health, 1);
-
-  store.getState().turnEnded();
   assert.equal(store.getState().game.battle.phase, BATTLE_PHASES.ENEMY_TURN);
 });

@@ -7,9 +7,11 @@ export const DOMAIN_EVENTS = {
 };
 
 export function projectileHitEnemy(game, payload) {
+  const battle = applyDamageToActor(game.battle, payload.actorId, payload.damage);
+
   return {
     ...game,
-    battle: applyDamageToActor(game.battle, payload.actorId, payload.damage),
+    battle: { ...battle, phase: battle.phase === BATTLE_PHASES.WON ? BATTLE_PHASES.WON : BATTLE_PHASES.ENEMY_TURN },
     ui: { ...game.ui, message: `Trafienie za ${payload.damage}.` }
   };
 }
