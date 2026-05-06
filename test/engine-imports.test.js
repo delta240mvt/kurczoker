@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { parse } from "@babel/parser";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
 import test from "node:test";
@@ -33,29 +34,81 @@ function listClientFiles(dir) {
     .filter((path) => CLIENT_FILE_PATTERN.test(path));
 }
 
-function stripComments(source) {
-  return source
-    .replace(/<!--[\s\S]*?-->/g, "")
-    .replace(/\/\*[\s\S]*?\*\//g, "")
-    .replace(/(^|[^:])\/\/.*$/gm, "$1");
+function extractAstroScripts(source) {
+  const scripts = [];
+  const frontmatter = source.match(/^---\r?\n([\s\S]*?)\r?\n---/);
+  if (frontmatter) {
+    scripts.push(frontmatter[1]);
+  }
+
+  for (const match of source.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)) {
+    scripts.push(match[1]);
+  }
+
+  return scripts;
 }
 
 function extractImportSpecifiers(source) {
   const specifiers = new Set();
-  const code = stripComments(source);
-  const patterns = [
-    /^\s*import\s+(?:[^;]*?\s+from\s*)?["']([^"']+)["']/gm,
-    /^\s*export\s+[^;]*?\s+from\s*["']([^"']+)["']/gm,
-    /(?<!["'`])\bimport\s*\(\s*["']([^"']+)["']\s*\)/g
-  ];
+  const scripts = extractAstroScripts(source);
+  const parseTargets = scripts.length > 0 ? scripts : [source];
 
-  for (const pattern of patterns) {
-    for (const match of code.matchAll(pattern)) {
-      specifiers.add(match[1]);
-    }
+  for (const code of parseTargets) {
+    const ast = parse(code, {
+      sourceType: "module",
+      plugins: ["jsx", "typescript", "dynamicImport", "importMeta", "topLevelAwait"]
+    });
+    collectImportSpecifiers(ast, specifiers);
   }
 
   return [...specifiers];
+}
+
+function collectImportSpecifiers(node, specifiers) {
+  if (!node || typeof node !== "object") return;
+
+  if (
+    (node.type === "ImportDeclaration" ||
+      node.type === "ExportNamedDeclaration" ||
+      node.type === "ExportAllDeclaration") &&
+    node.source?.type === "StringLiteral"
+  ) {
+    specifiers.add(node.source.value);
+  }
+
+  if (node.type === "ImportExpression" && node.source?.type === "StringLiteral") {
+    specifiers.add(node.source.value);
+  }
+
+  if (
+    node.type === "CallExpression" &&
+    node.callee?.type === "Import" &&
+    node.arguments[0]?.type === "StringLiteral"
+  ) {
+    specifiers.add(node.arguments[0].value);
+  }
+
+  for (const [key, value] of Object.entries(node)) {
+    if (
+      key === "loc" ||
+      key === "start" ||
+      key === "end" ||
+      key === "comments" ||
+      key === "leadingComments" ||
+      key === "trailingComments" ||
+      key === "innerComments"
+    ) {
+      continue;
+    }
+
+    if (Array.isArray(value)) {
+      for (const child of value) {
+        collectImportSpecifiers(child, specifiers);
+      }
+    } else if (value && typeof value === "object") {
+      collectImportSpecifiers(value, specifiers);
+    }
+  }
 }
 
 function isForbiddenSpecifier(specifier, forbidden) {
@@ -73,9 +126,18 @@ test("import guard ignores forbidden words outside import specifiers", () => {
     // cloudflare stays in dev tooling notes only.
     // import cloudflare from "cloudflare";
     /* export { helper } from "wrangler"; */
-    <!-- import "threejs-devtools-mcp" -->
+    /* import "threejs-devtools-mcp"; */
     const label = "Open cloudflare docs before deploy";
     import { SceneLights } from "./components/SceneLights.jsx";
+  `;
+
+  assert.deepEqual(findForbiddenImportSpecifiers(source), []);
+});
+
+test("import guard ignores dynamic import syntax inside strings and comments", () => {
+  const source = `
+    // await import("fs");
+    const snippet = 'await import("fs")';
   `;
 
   assert.deepEqual(findForbiddenImportSpecifiers(source), []);

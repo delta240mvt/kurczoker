@@ -23,6 +23,7 @@
     "zustand": "^5.0.13"
   },
   "devDependencies": {
+    "@babel/parser": "^7.29.3",
     "@cloudflare/mcp-server-cloudflare": "^0.2.0",
     "threejs-devtools-mcp": "^0.4.1",
     "wrangler": "^4.14.1"
