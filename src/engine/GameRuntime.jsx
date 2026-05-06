@@ -1,5 +1,6 @@
 import { CameraRig } from "./components/CameraRig.jsx";
 import { SceneLights } from "./components/SceneLights.jsx";
+import { BattleScene } from "./scenes/BattleScene.jsx";
 import { MapScene } from "./scenes/MapScene.jsx";
 import { selectEngineScene } from "./runtime/sceneSelection.js";
 import { useGameStore } from "./store/useGameStore.js";
@@ -23,7 +24,11 @@ function ScenePlaceholder({ engineScene }) {
 
 export function GameRuntime() {
   const game = useGameStore((state) => state.game);
+  const aim = useGameStore((state) => state.input.aim);
+  const setAim = useGameStore((state) => state.setAim);
   const selectNode = useGameStore((state) => state.selectNode);
+  const projectileHitEnemy = useGameStore((state) => state.projectileHitEnemy);
+  const turnEnded = useGameStore((state) => state.turnEnded);
   const engineScene = selectEngineScene(game);
 
   return (
@@ -31,7 +36,11 @@ export function GameRuntime() {
       <color attach="background" args={["#7fc8f8"]} />
       <SceneLights />
       <CameraRig />
-      {engineScene === "map" ? <MapScene game={game} selectNode={selectNode} /> : <ScenePlaceholder engineScene={engineScene} />}
+      {engineScene === "map" ? <MapScene game={game} selectNode={selectNode} /> : null}
+      {engineScene === "battle" ? (
+        <BattleScene game={game} aim={aim} setAim={setAim} projectileHitEnemy={projectileHitEnemy} turnEnded={turnEnded} />
+      ) : null}
+      {engineScene !== "map" && engineScene !== "battle" ? <ScenePlaceholder engineScene={engineScene} /> : null}
     </>
   );
 }
