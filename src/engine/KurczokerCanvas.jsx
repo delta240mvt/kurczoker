@@ -1,5 +1,6 @@
 import { Canvas } from "@react-three/fiber";
 
+import { RewardOverlay } from "./components/RewardOverlay.jsx";
 import { GameRuntime } from "./GameRuntime.jsx";
 import { selectEngineScene } from "./runtime/sceneSelection.js";
 import { useGameStore } from "./store/useGameStore.js";
@@ -45,6 +46,7 @@ export function KurczokerCanvas() {
         <GameRuntime />
       </Canvas>
       <MapRouteActions />
+      <RewardOverlay />
     </>
   );
 }

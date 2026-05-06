@@ -590,20 +590,79 @@ button:disabled {
   line-height: 1.4;
 }
 
+.reward-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-content: center;
+  padding: clamp(16px, 3vw, 30px);
+  background:
+    linear-gradient(180deg, rgba(7, 12, 27, 0.2) 0%, rgba(7, 12, 27, 0.86) 100%),
+    radial-gradient(ellipse at 50% 30%, rgba(242, 193, 91, 0.16) 0%, transparent 58%);
+  pointer-events: none;
+}
+
+.reward-overlay__header {
+  justify-self: center;
+  display: grid;
+  gap: 4px;
+  width: min(680px, 100%);
+  padding: 12px 20px 14px;
+  border: 2px solid var(--shell-edge);
+  border-radius: 8px;
+  background:
+    linear-gradient(90deg, transparent 0%, rgba(242, 193, 91, 0.14) 18%, rgba(242, 193, 91, 0.2) 50%, rgba(242, 193, 91, 0.14) 82%, transparent 100%),
+    linear-gradient(180deg, rgba(29, 39, 70, 0.94) 0%, rgba(13, 19, 39, 0.96) 100%);
+  box-shadow: inset 0 0 0 1px var(--shell-gold-deep), 0 4px 0 var(--shell-edge);
+  color: var(--ink-cream);
+  text-align: center;
+}
+
+.reward-overlay__eyebrow {
+  color: var(--shell-gold-bright);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.reward-overlay__header h2 {
+  margin: 0;
+  color: var(--ink-cream);
+  font-family: var(--font-display);
+  font-size: clamp(1.45rem, 3vw, 2.3rem);
+  letter-spacing: 0;
+  line-height: 0.95;
+  text-shadow: 0 3px 0 var(--shell-edge);
+  text-transform: uppercase;
+}
+
+.reward-overlay__header p {
+  margin: 0;
+  color: rgba(245, 232, 193, 0.78);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 .reward-row,
 .shop-row {
-  position: absolute;
   z-index: 3;
-  inset: auto 0 18px;
   display: grid;
   gap: var(--gap);
-  padding: 0 24px;
+  align-self: center;
+  width: 100%;
+  pointer-events: none;
 }
 
 .reward-row {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.reward-overlay--shop .reward-row,
 .shop-row {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
@@ -611,36 +670,88 @@ button:disabled {
 
 .reward-card,
 .shop-card {
+  position: relative;
   min-width: 0;
+  overflow: hidden;
   border: 3px solid var(--shell-edge);
-  border-radius: var(--card-radius);
-  background: radial-gradient(ellipse at top, var(--paper-strong) 0%, var(--paper) 70%);
-  box-shadow: inset 0 0 0 2px var(--shell-gold-deep), inset 0 -4px 0 rgba(138, 99, 34, 0.35), var(--sh-card);
-  color: var(--ink);
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.06) 0%, transparent 36%),
+    linear-gradient(180deg, #202b4c 0%, #121a32 72%, #090d1b 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(242, 193, 91, 0.38),
+    inset 0 0 0 4px rgba(0, 0, 0, 0.28),
+    inset 0 -5px 0 rgba(0, 0, 0, 0.42),
+    0 6px 0 var(--shell-edge),
+    0 16px 26px rgba(0, 0, 0, 0.34);
+  color: var(--ink-cream);
   text-align: center;
+  pointer-events: auto;
 }
 
 .reward-card {
   display: grid;
-  grid-template-rows: auto auto auto 1fr auto;
+  grid-template-rows: 68px auto auto minmax(54px, 1fr) 34px;
   gap: 8px;
-  min-height: 205px;
-  padding: 14px 12px 10px;
-  transition: transform 0.12s ease-out;
+  min-height: 244px;
+  height: 100%;
+  padding: 18px 14px 14px;
+  transition: transform 0.14s ease-out, filter 0.14s ease-out, box-shadow 0.14s ease-out;
 }
 
 .reward-card:hover,
 .reward-card:focus-visible {
-  transform: translateY(-4px);
+  transform: translateY(-5px);
+  filter: brightness(1.08) saturate(1.1);
+  outline: 0;
 }
 
-.reward-card--selected {
-  background: radial-gradient(ellipse at top, #fff8d4 0%, #f6dc8e 70%);
-  box-shadow: inset 0 0 0 2px var(--shell-gold-bright), inset 0 -4px 0 rgba(138, 99, 34, 0.45), 0 0 0 4px rgba(242, 193, 91, 0.5), var(--sh-card);
+.reward-card--selected,
+.reward-card:hover,
+.reward-card:focus-visible {
+  box-shadow:
+    inset 0 0 0 1px var(--shell-gold-bright),
+    inset 0 0 0 4px rgba(0, 0, 0, 0.22),
+    inset 0 -5px 0 rgba(0, 0, 0, 0.42),
+    0 0 0 3px rgba(242, 193, 91, 0.56),
+    0 0 24px rgba(242, 193, 91, 0.38),
+    0 6px 0 var(--shell-edge),
+    0 16px 28px rgba(0, 0, 0, 0.38);
+}
+
+.reward-card--disabled {
+  filter: grayscale(0.55) brightness(0.72);
+}
+
+.reward-card--red { border-color: var(--accent-red-deep); }
+.reward-card--blue { border-color: var(--accent-blue-deep); }
+.reward-card--green { border-color: #275f35; }
+.reward-card--gold { border-color: var(--shell-gold-deep); }
+
+.reward-card--red .reward-card__value { background: linear-gradient(180deg, var(--accent-red-hi) 0%, var(--accent-red) 70%, var(--accent-red-deep) 100%); }
+.reward-card--blue .reward-card__value { background: linear-gradient(180deg, var(--accent-blue-hi) 0%, var(--accent-blue) 70%, var(--accent-blue-deep) 100%); }
+.reward-card--green .reward-card__value { background: linear-gradient(180deg, var(--accent-green-hi) 0%, var(--accent-green) 70%, #275f35 100%); }
+
+.reward-card__glow {
+  position: absolute;
+  inset: -24px;
+  opacity: 0.12;
+  background: radial-gradient(circle at 50% 18%, var(--shell-gold-bright), transparent 48%);
+  pointer-events: none;
+}
+
+.reward-card__glow--red { background: radial-gradient(circle at 50% 18%, var(--accent-red-hi), transparent 48%); }
+.reward-card__glow--blue { background: radial-gradient(circle at 50% 18%, var(--accent-blue-hi), transparent 48%); }
+.reward-card__glow--green { background: radial-gradient(circle at 50% 18%, var(--accent-green-hi), transparent 48%); }
+.reward-card__glow.is-selected,
+.reward-card:hover .reward-card__glow,
+.reward-card:focus-visible .reward-card__glow {
+  opacity: 0.3;
 }
 
 .reward-card__icon,
 .shop-card__icon {
+  position: relative;
   display: grid;
   place-items: center;
   width: 64px;
@@ -648,62 +759,92 @@ button:disabled {
   margin: 0 auto;
   border: 3px solid var(--shell-edge);
   border-radius: 50%;
-  background: radial-gradient(circle, var(--shell-gold-bright) 0%, var(--shell-gold) 70%);
-  box-shadow: inset 0 -3px 0 var(--shell-gold-deep);
-}
-
-.reward-card__name,
-.shop-card__name {
-  margin: 0;
-  color: var(--ink);
+  background:
+    radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.52) 0 8%, transparent 20%),
+    radial-gradient(circle, var(--shell-gold-bright) 0%, var(--shell-gold) 58%, var(--shell-gold-deep) 100%);
+  box-shadow: inset 0 -4px 0 rgba(0, 0, 0, 0.28), 0 3px 0 var(--shell-edge);
+  color: var(--shell-edge);
   font-family: var(--font-display);
-  font-size: 1.05rem;
+  font-size: 1.55rem;
   line-height: 1;
 }
 
+.reward-card__icon--red { background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.48) 0 8%, transparent 20%), linear-gradient(180deg, var(--accent-red-hi) 0%, var(--accent-red) 100%); color: var(--ink-on-red); }
+.reward-card__icon--blue { background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.48) 0 8%, transparent 20%), linear-gradient(180deg, var(--accent-blue-hi) 0%, var(--accent-blue) 100%); color: var(--ink-on-red); }
+.reward-card__icon--green { background: radial-gradient(circle at 34% 28%, rgba(255, 255, 255, 0.48) 0 8%, transparent 20%), linear-gradient(180deg, var(--accent-green-hi) 0%, var(--accent-green) 100%); color: var(--ink-on-red); }
+
+.reward-card__name,
+.shop-card__name {
+  position: relative;
+  margin: 0;
+  overflow-wrap: anywhere;
+  color: var(--ink-cream);
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  letter-spacing: 0;
+  line-height: 1.02;
+  text-shadow: 0 2px 0 var(--shell-edge);
+}
+
 .reward-card__type {
-  color: var(--accent-red);
-  font-size: 0.7rem;
-  font-weight: 800;
+  position: relative;
+  justify-self: center;
+  min-height: 22px;
+  padding: 4px 10px;
+  border: 1px solid rgba(242, 193, 91, 0.56);
+  border-radius: 6px;
+  background: rgba(10, 14, 28, 0.62);
+  color: var(--shell-gold-bright);
+  font-size: 0.66rem;
+  font-weight: 900;
   letter-spacing: 0.1em;
+  line-height: 1;
   text-transform: uppercase;
 }
 
 .reward-card__desc,
 .shop-card__desc {
+  position: relative;
+  align-self: start;
   margin: 0;
-  color: var(--ink-muted);
-  font-size: 0.76rem;
+  color: rgba(245, 232, 193, 0.78);
+  font-size: 0.74rem;
   font-weight: 650;
-  line-height: 1.3;
+  line-height: 1.32;
 }
 
 .reward-card__value,
 .shop-card__price {
+  position: relative;
   display: inline-grid;
   place-items: center;
-  min-height: 30px;
-  margin: 4px auto 0;
+  justify-self: center;
+  min-width: 88px;
+  min-height: 32px;
   padding: 0 14px;
   border: 2px solid var(--shell-edge);
   border-radius: 7px;
-  background: linear-gradient(180deg, #5a9fd4 0%, var(--accent-blue) 70%, var(--accent-blue-deep) 100%);
-  color: var(--ink-cream);
+  background: linear-gradient(180deg, var(--shell-gold-bright) 0%, var(--shell-gold) 70%, var(--shell-gold-deep) 100%);
+  color: var(--ink);
   font-family: var(--font-display);
-  font-size: 0.95rem;
-  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.3);
+  font-size: 0.9rem;
+  line-height: 1;
+  box-shadow: inset 0 -3px 0 rgba(0, 0, 0, 0.28), 0 2px 0 var(--shell-edge);
 }
 
 .reward-cta {
-  position: absolute;
   z-index: 4;
-  inset: auto 0 -14px;
   display: flex;
   justify-content: center;
+  pointer-events: auto;
 }
 
 .reward-cta .btn {
   min-width: 220px;
+}
+
+.reward-cta--skip {
+  margin-top: -6px;
 }
 
 .shop-card {
@@ -971,15 +1112,25 @@ button:disabled {
 
   .reward-row,
   .shop-row {
-    position: static;
     max-height: none;
     overflow: auto;
     grid-template-columns: 1fr;
+  }
+
+  .reward-overlay {
+    align-content: start;
+    overflow: auto;
     padding: 12px;
+  }
+
+  .reward-overlay--shop .reward-row,
+  .shop-row {
+    grid-template-columns: 1fr;
   }
 
   .shell--reward .shell__canvas,
   .shell--shop .shell__canvas,
+  .shell__canvas:has(.reward-overlay),
   .shell--game-over .shell__canvas,
   .shell--run-complete .shell__canvas {
     aspect-ratio: auto;
@@ -993,7 +1144,7 @@ button:disabled {
 
   .reward-card,
   .shop-card {
-    min-height: 0;
+    min-height: 188px;
   }
 
   .reward-card__icon,
@@ -1002,8 +1153,8 @@ button:disabled {
     height: 44px;
   }
 
-  .reward-cta {
-    bottom: 8px;
+  .reward-cta .btn {
+    width: min(100%, 260px);
   }
 
   .end-modal {
