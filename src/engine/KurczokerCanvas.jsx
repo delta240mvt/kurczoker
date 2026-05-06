@@ -74,7 +74,7 @@ export function KurczokerCanvas() {
         orthographic
         role="img"
         camera={{ position: [0, 0, 10], zoom: 72, near: 0.1, far: 100 }}
-        gl={{ antialias: false, alpha: true, preserveDrawingBuffer: true }}
+        gl={{ antialias: false, alpha: true }}
       >
         <GameRuntime />
       </Canvas>
