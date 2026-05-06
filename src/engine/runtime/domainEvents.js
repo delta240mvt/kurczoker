@@ -1,3 +1,4 @@
+import { applyDamageToActor } from "../../game/battle.js";
 import { BATTLE_PHASES } from "../../game/constants.js";
 
 export const DOMAIN_EVENTS = {
@@ -8,6 +9,7 @@ export const DOMAIN_EVENTS = {
 export function projectileHitEnemy(game, payload) {
   return {
     ...game,
+    battle: applyDamageToActor(game.battle, payload.actorId, payload.damage),
     ui: { ...game.ui, message: `Trafienie za ${payload.damage}.` }
   };
 }

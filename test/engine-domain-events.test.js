@@ -6,15 +6,18 @@ import { createEnemy, createPlayer } from "../src/game/actors.js";
 import { BATTLE_PHASES, SCENES } from "../src/game/constants.js";
 
 test("projectileHitEnemy returns updated domain state without importing Rapier", () => {
+  const enemy = createEnemy("grunt", { id: "enemy-1" });
   const game = {
     scene: SCENES.BATTLE,
-    battle: createBattleState({ actors: [createPlayer(), createEnemy("grunt", { id: "enemy-1" })] }),
+    battle: createBattleState({ actors: [createPlayer(), enemy] }),
     ui: { message: "" }
   };
 
   const next = projectileHitEnemy(game, { actorId: "enemy-1", damage: 1 });
+  const nextEnemy = next.battle.actors.find((actor) => actor.id === "enemy-1");
 
   assert.equal(next.scene, SCENES.BATTLE);
+  assert.equal(nextEnemy.health, enemy.health - 1);
   assert.match(next.ui.message, /Trafienie/);
 });
 
