@@ -22,6 +22,18 @@ test("engine store selects an offered node into a playable scene", () => {
   assert.ok([SCENES.BATTLE, SCENES.REWARD, SCENES.SHOP].includes(store.getState().game.scene));
 });
 
+test("engine store hydrates selected battle nodes with playable actors", () => {
+  const store = createEngineStore(1);
+  const nodeId = store.getState().game.run.offeredNodeIds[0];
+
+  store.getState().selectNode(nodeId);
+
+  assert.equal(store.getState().game.scene, SCENES.BATTLE);
+  assert.ok(store.getState().game.battle.actors.some((actor) => actor.id === "player"));
+  assert.ok(store.getState().game.battle.actors.some((actor) => actor.team === "enemy"));
+  assert.equal(store.getState().game.battle.phase, BATTLE_PHASES.PLAYER_TURN);
+});
+
 test("engine store reset advances from the active state seed", () => {
   const store = createEngineStore(1);
 

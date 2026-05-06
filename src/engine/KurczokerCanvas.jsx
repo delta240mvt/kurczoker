@@ -1,9 +1,42 @@
+import { useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 
 import { RewardOverlay } from "./components/RewardOverlay.jsx";
 import { GameRuntime } from "./GameRuntime.jsx";
 import { selectEngineScene } from "./runtime/sceneSelection.js";
 import { useGameStore } from "./store/useGameStore.js";
+import { SCENES } from "../game/constants.js";
+
+const SCENE_LABELS = {
+  [SCENES.MAP]: "Mapa",
+  [SCENES.BATTLE]: "Walka",
+  [SCENES.REWARD]: "Nagroda",
+  [SCENES.SHOP]: "Sklep",
+  [SCENES.GAME_OVER]: "Koniec",
+  [SCENES.RUN_COMPLETE]: "Zwyciestwo"
+};
+
+function setText(selector, value) {
+  const target = document.querySelector(selector);
+  if (target) {
+    target.textContent = value;
+  }
+}
+
+function ShellStatusSync() {
+  const game = useGameStore((state) => state.game);
+
+  useEffect(() => {
+    setText("[data-game-message]", game.ui?.message ?? "");
+    setText("[data-game-scene]", SCENE_LABELS[game.scene] ?? game.scene);
+    setText("[data-game-status-node]", game.run?.currentNodeId ?? "start");
+    setText("[data-game-node]", game.run?.currentNodeId ?? "start");
+    setText("[data-game-health]", `${game.run?.health ?? 0} / ${game.run?.maxHealth ?? 0}`);
+    setText("[data-game-status-health]", `${game.run?.health ?? 0} / ${game.run?.maxHealth ?? 0}`);
+  }, [game]);
+
+  return null;
+}
 
 function MapRouteActions() {
   const game = useGameStore((state) => state.game);
@@ -41,12 +74,13 @@ export function KurczokerCanvas() {
         orthographic
         role="img"
         camera={{ position: [0, 0, 10], zoom: 72, near: 0.1, far: 100 }}
-        gl={{ antialias: false, alpha: true }}
+        gl={{ antialias: false, alpha: true, preserveDrawingBuffer: true }}
       >
         <GameRuntime />
       </Canvas>
       <MapRouteActions />
       <RewardOverlay />
+      <ShellStatusSync />
     </>
   );
 }
