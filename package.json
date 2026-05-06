@@ -8,12 +8,20 @@
     "build": "astro build",
     "preview": "astro preview",
     "test": "node --test",
+    "blender:mcp": "powershell -ExecutionPolicy Bypass -File tools/blender-mcp/start-blender-mcp.ps1",
     "deploy": "npm run build && wrangler pages deploy dist --project-name delta240-com"
   },
   "dependencies": {
-    "astro": "^5.0.0"
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
+    "@react-three/rapier": "^2.2.0",
+    "astro": "^5.0.0",
+    "three": "^0.184.0",
+    "zustand": "^5.0.13"
   },
   "devDependencies": {
+    "@cloudflare/mcp-server-cloudflare": "^0.2.0",
+    "threejs-devtools-mcp": "^0.4.1",
     "wrangler": "^4.14.1"
   }
 }

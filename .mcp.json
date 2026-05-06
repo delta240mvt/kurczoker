@@ -1,0 +1,32 @@
+{
+  "mcpServers": {
+    "blender": {
+      "command": "cmd",
+      "args": ["/c", "uvx", "blender-mcp"],
+      "env": {
+        "BLENDER_HOST": "${BLENDER_HOST}",
+        "BLENDER_PORT": "${BLENDER_PORT}",
+        "DISABLE_TELEMETRY": "true",
+        "SKETCHFAB_API_TOKEN": "${SKETCHFAB_API_TOKEN}",
+        "HYPER3D_API_KEY": "${HYPER3D_API_KEY}"
+      }
+    },
+    "threejs-devtools": {
+      "command": "cmd",
+      "args": ["/c", "npx", "-y", "threejs-devtools-mcp"]
+    },
+    "cloudflare": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "mcp-server-cloudflare",
+        "run",
+        "${CLOUDFLARE_ACCOUNT_ID}"
+      ],
+      "env": {
+        "CLOUDFLARE_API_TOKEN": "${CLOUDFLARE_API_TOKEN}"
+      }
+    }
+  }
+}
+
