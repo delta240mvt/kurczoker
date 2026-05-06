@@ -162,3 +162,21 @@ test("client runtime does not import server-only MCP/API packages", () => {
     }
   }
 });
+
+test("game runtime keeps battle scene behind a dynamic import boundary", () => {
+  const source = readFileSync("src/engine/GameRuntime.jsx", "utf8");
+  const ast = parse(source, {
+    sourceType: "module",
+    plugins: ["jsx", "typescript", "dynamicImport", "importMeta", "topLevelAwait"]
+  });
+  const staticImports = new Set(
+    ast.program.body
+      .filter((node) => node.type === "ImportDeclaration")
+      .map((node) => node.source.value)
+  );
+  const allImports = new Set(extractImportSpecifiers(source));
+
+  assert.equal(staticImports.has("./scenes/MapScene.jsx"), true, "MapScene should remain statically available for first render");
+  assert.equal(staticImports.has("./scenes/BattleScene.jsx"), false, "BattleScene should not be in the initial GameRuntime import graph");
+  assert.equal(allImports.has("./scenes/BattleScene.jsx"), true, "BattleScene should still be loaded through a dynamic import");
+});
