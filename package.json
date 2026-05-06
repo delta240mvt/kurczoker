@@ -12,10 +12,13 @@
     "deploy": "npm run build && wrangler pages deploy dist --project-name delta240-com"
   },
   "dependencies": {
+    "@astrojs/react": "^5.0.4",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
     "@react-three/rapier": "^2.2.0",
     "astro": "^5.0.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5",
     "three": "^0.184.0",
     "zustand": "^5.0.13"
   },
