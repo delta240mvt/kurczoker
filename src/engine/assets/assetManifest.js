@@ -1,4 +1,4 @@
-export const ASSETS = [
+const PLANNED_ASSETS = [
   {
     id: "kurczoker.hero.idle",
     type: "sprite",
@@ -220,3 +220,8 @@ export const ASSETS = [
     notes: "MVP VFX placeholder."
   }
 ];
+
+export const ASSETS = PLANNED_ASSETS.map((asset) => ({
+  ...asset,
+  ready: false
+}));
