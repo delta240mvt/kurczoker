@@ -3,6 +3,7 @@ dist/
 .astro/
 .wrangler/
 .superpowers/
+.worktrees/
 
 .env
 .env.*
