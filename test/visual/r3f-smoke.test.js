@@ -90,22 +90,54 @@ async function runCommand(command, args) {
   });
 }
 
+async function runPowerShell(script) {
+  return runCommand("powershell.exe", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-Command", script]);
+}
+
+function windowsPreviewPidScript(port) {
+  return `
+$port = ${Number(port)};
+$pids = @();
+$listeners = Get-NetTCPConnection -LocalPort $port -State Listen -ErrorAction SilentlyContinue;
+if ($listeners) {
+  $pids += $listeners | Select-Object -ExpandProperty OwningProcess;
+}
+$portPattern = "--port\\s+$port(\\s|$)";
+$matchingProcesses = Get-CimInstance Win32_Process -ErrorAction SilentlyContinue | Where-Object {
+  $_.CommandLine -and
+  $_.CommandLine -match "astro\\.js" -and
+  $_.CommandLine -match "\\bpreview\\b" -and
+  $_.CommandLine -match $portPattern
+};
+if ($matchingProcesses) {
+  $pids += $matchingProcesses | Select-Object -ExpandProperty ProcessId;
+}
+$pids = @($pids | Where-Object { $_ -and $_ -ne 0 } | Select-Object -Unique);
+if ($pids.Count -eq 0) {
+  "[]";
+} else {
+  $pids | ConvertTo-Json -Compress;
+}
+`;
+}
+
+async function findWindowsPreviewPids(port) {
+  const result = await runPowerShell(windowsPreviewPidScript(port));
+  const output = result.stdout.trim();
+  if (!output) return [];
+
+  try {
+    const parsed = JSON.parse(output);
+    const pids = Array.isArray(parsed) ? parsed : [parsed];
+    return pids.map(Number).filter((pid) => Number.isInteger(pid) && pid > 0);
+  } catch (error) {
+    throw new Error(`Could not parse Windows preview PID list for port ${port}: ${output}`);
+  }
+}
+
 async function findListeningPids(port) {
   if (process.platform === "win32") {
-    const result = await runCommand("netstat", ["-ano"]);
-    const pids = new Set();
-
-    for (const line of result.stdout.split(/\r?\n/)) {
-      const columns = line.trim().split(/\s+/);
-      if (columns[0] !== "TCP") continue;
-      const [, localAddress, , state, pid] = columns;
-      if (state !== "LISTENING" || !localAddress?.endsWith(`:${port}`)) continue;
-      if (/^\d+$/.test(pid) && pid !== "0") {
-        pids.add(Number(pid));
-      }
-    }
-
-    return [...pids];
+    return findWindowsPreviewPids(port);
   }
 
   const lsof = await runCommand("lsof", ["-nP", `-iTCP:${port}`, "-sTCP:LISTEN", "-t"]);
@@ -146,19 +178,30 @@ async function killProcessTree(pid) {
   }
 }
 
-async function waitForPortClosed(port) {
+async function killPreviewPidsForPort(port) {
+  const pids = await findListeningPids(port);
+  await Promise.all(pids.map((pid) => killProcessTree(pid)));
+  return pids;
+}
+
+async function waitForPreviewStopped(port) {
   const started = Date.now();
 
   while (Date.now() - started < 10000) {
-    const pids = await findListeningPids(port);
+    const pids = await killPreviewPidsForPort(port);
     if (pids.length === 0) {
       return;
     }
-    await Promise.all(pids.map((pid) => killProcessTree(pid)));
     await delay(250);
   }
 
-  throw new Error(`preview port ${port} is still listening after cleanup`);
+  const remainingPids = await findListeningPids(port);
+  throw new Error(`preview port ${port} still has listener or astro preview process after cleanup: ${remainingPids.join(", ")}`);
+}
+
+async function assertPreviewStopped(port) {
+  const pids = await findListeningPids(port);
+  assert.deepEqual(pids, [], `preview port ${port} should not have listener or astro preview process after cleanup`);
 }
 
 async function stopPreview(preview, port) {
@@ -174,7 +217,8 @@ async function stopPreview(preview, port) {
     }
   }
 
-  await waitForPortClosed(port);
+  await waitForPreviewStopped(port);
+  await assertPreviewStopped(port);
 }
 
 async function getCanvasShot(page) {
