@@ -103,6 +103,7 @@ test("createUiModel returns reward, shop, game-over, and victory overlays", () =
   assert.equal(gameOver.canvasBackdrop, "09");
   assert.equal(gameOver.overlay.type, "end");
   assert.equal(gameOver.overlay.title, "KONIEC WYPRAWY");
+  assert.equal(gameOver.overlay.cta, "Nowa wyprawa");
   assert.equal(gameOver.ribbon.variant, "danger");
 
   const victory = createUiModel({
@@ -121,6 +122,7 @@ test("createUiModel returns reward, shop, game-over, and victory overlays", () =
 
   assert.equal(victory.canvasBackdrop, "10");
   assert.equal(victory.overlay.title, "WYPRAWA UKOŃCZONA");
+  assert.equal(victory.overlay.cta, "Nowa wyprawa");
   assert.equal(victory.ribbon.variant, "victory");
   assert.equal(victory.hints.length, 0);
 });

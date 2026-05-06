@@ -303,6 +303,7 @@ function getOverlay(state) {
       title: victory ? "WYPRAWA UKOŃCZONA" : "KONIEC WYPRAWY",
       eyebrow: victory ? "KURCZOKER pokonany" : "Kurza kronika zapisuje porażkę",
       variant: victory ? "victory" : "danger",
+      cta: "Nowa wyprawa",
       stats: [
         { key: "nodes", label: "Węzły", value: String(state.run?.completedNodeIds?.length ?? 0) },
         { key: "gold", label: "Ziarna", value: String(state.run?.gold ?? 0) },

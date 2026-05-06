@@ -12,7 +12,7 @@ import {
   skipShop,
   startRun
 } from "../../game/run.js";
-import { resetRun, setUiMessage } from "../../game/state.js";
+import { resetRun, setUiMessage, toggleMute as toggleMuteState } from "../../game/state.js";
 import { projectileHitEnemy, turnEnded } from "../runtime/domainEvents.js";
 
 function createEngineBattleState(game) {
@@ -110,6 +110,9 @@ export function createEngineStateInitializer(seed = 1) {
       };
 
       set({ game: stateAfterBattle(next) });
+    },
+    toggleMute() {
+      set({ game: toggleMuteState(get().game) });
     },
     reset() {
       set({ game: setUiMessage(resetRun(get().game), "Nowa wyprawa gotowa.") });

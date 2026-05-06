@@ -320,6 +320,17 @@ button:disabled {
   filter: saturate(1.08) contrast(1.02);
 }
 
+.shell__backdrop[data-backdrop="01"] { background-image: url("/uix/canvas/01-canvas.webp"); }
+.shell__backdrop[data-backdrop="02"] { background-image: url("/uix/canvas/02-canvas.webp"); }
+.shell__backdrop[data-backdrop="03"] { background-image: url("/uix/canvas/03-canvas.webp"); }
+.shell__backdrop[data-backdrop="04"] { background-image: url("/uix/canvas/04-canvas.webp"); }
+.shell__backdrop[data-backdrop="05"] { background-image: url("/uix/canvas/05-canvas.webp"); }
+.shell__backdrop[data-backdrop="06"] { background-image: url("/uix/canvas/06-canvas.webp"); }
+.shell__backdrop[data-backdrop="07"] { background-image: url("/uix/canvas/07-canvas.webp"); }
+.shell__backdrop[data-backdrop="08"] { background-image: url("/uix/canvas/08-canvas.webp"); }
+.shell__backdrop[data-backdrop="09"] { background-image: url("/uix/canvas/09-canvas.webp"); }
+.shell__backdrop[data-backdrop="10"] { background-image: url("/uix/canvas/10-canvas.webp"); }
+
 .shell__r3f {
   position: relative;
   z-index: 1;
@@ -330,6 +341,22 @@ button:disabled {
 .kurczoker-r3f {
   width: 100% !important;
   height: 100% !important;
+}
+
+.game-canvas-fallback {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 14px;
+  width: 100%;
+  height: 100%;
+  min-height: 240px;
+  padding: 24px;
+  background: rgba(19, 26, 48, 0.88);
+  color: var(--ink-cream);
+  text-align: center;
 }
 
 .map-route-actions {
@@ -847,6 +874,56 @@ button:disabled {
   margin-top: -6px;
 }
 
+.terminal-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 18px;
+  padding: clamp(18px, 4vw, 34px);
+  background: linear-gradient(180deg, rgba(10, 14, 28, 0.18), rgba(10, 14, 28, 0.72));
+  pointer-events: auto;
+}
+
+.terminal-overlay--victory {
+  background: linear-gradient(180deg, rgba(31, 78, 122, 0.16), rgba(10, 14, 28, 0.68));
+}
+
+.terminal-overlay__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 130px));
+  gap: 10px;
+  width: min(100%, 460px);
+}
+
+.terminal-overlay__stat {
+  display: grid;
+  gap: 4px;
+  justify-items: center;
+  min-width: 0;
+  padding: 12px;
+  border: 2px solid var(--shell-edge);
+  border-radius: 8px;
+  background: linear-gradient(180deg, var(--paper-strong) 0%, var(--paper) 100%);
+  box-shadow: var(--sh-pill);
+  color: var(--ink);
+  text-align: center;
+}
+
+.terminal-overlay__stat span {
+  color: var(--ink-muted);
+  font-size: 0.7rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.terminal-overlay__stat strong {
+  font-size: 1.45rem;
+  font-weight: 900;
+}
+
 .shop-card {
   display: grid;
   grid-template-rows: auto auto 1fr auto auto;
@@ -1126,6 +1203,11 @@ button:disabled {
   .reward-overlay--shop .reward-row,
   .shop-row {
     grid-template-columns: 1fr;
+  }
+
+  .terminal-overlay__stats {
+    grid-template-columns: 1fr;
+    max-width: 280px;
   }
 
   .shell--reward .shell__canvas,

@@ -171,7 +171,7 @@ export function BattleScene({ game, aim, setAim, projectileHitEnemy, turnEnded }
     setExplosion({ id: `boom-${Date.now()}`, position: impact.position });
     setTrail([]);
     if (impact.type === "enemy") {
-      projectileHitEnemy({ actorId: impact.actorId, damage: 1 });
+      projectileHitEnemy({ actorId: impact.actorId });
     } else {
       turnEnded();
     }

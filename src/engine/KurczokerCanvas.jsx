@@ -1,25 +1,36 @@
-import { useEffect } from "react";
+import { Component, useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Canvas } from "@react-three/fiber";
 
 import { RewardOverlay } from "./components/RewardOverlay.jsx";
 import { GameRuntime } from "./GameRuntime.jsx";
 import { selectEngineScene } from "./runtime/sceneSelection.js";
+import { bindShellControls, syncShellUiModel } from "./runtime/shellUiSync.js";
 import { useGameStore } from "./store/useGameStore.js";
-import { SCENES } from "../game/constants.js";
+import { createUiModel } from "../game/ui.js";
 
-const SCENE_LABELS = {
-  [SCENES.MAP]: "Mapa",
-  [SCENES.BATTLE]: "Walka",
-  [SCENES.REWARD]: "Nagroda",
-  [SCENES.SHOP]: "Sklep",
-  [SCENES.GAME_OVER]: "Koniec",
-  [SCENES.RUN_COMPLETE]: "Zwyciestwo"
-};
+class CanvasErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
-function setText(selector, value) {
-  const target = document.querySelector(selector);
-  if (target) {
-    target.textContent = value;
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidUpdate(previousProps) {
+    if (previousProps.resetKey !== this.props.resetKey && this.state.hasError) {
+      this.setState({ hasError: false });
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+
+    return this.props.children;
   }
 }
 
@@ -27,15 +38,54 @@ function ShellStatusSync() {
   const game = useGameStore((state) => state.game);
 
   useEffect(() => {
-    setText("[data-game-message]", game.ui?.message ?? "");
-    setText("[data-game-scene]", SCENE_LABELS[game.scene] ?? game.scene);
-    setText("[data-game-status-node]", game.run?.currentNodeId ?? "start");
-    setText("[data-game-node]", game.run?.currentNodeId ?? "start");
-    setText("[data-game-health]", `${game.run?.health ?? 0} / ${game.run?.maxHealth ?? 0}`);
-    setText("[data-game-status-health]", `${game.run?.health ?? 0} / ${game.run?.maxHealth ?? 0}`);
+    syncShellUiModel(document, createUiModel(game));
   }, [game]);
 
   return null;
+}
+
+function ShellControls() {
+  useEffect(() => bindShellControls(document, useGameStore), []);
+
+  return null;
+}
+
+function TerminalOverlay() {
+  const [target, setTarget] = useState(null);
+  const game = useGameStore((state) => state.game);
+  const reset = useGameStore((state) => state.reset);
+  const overlay = createUiModel(game).overlay;
+
+  useEffect(() => {
+    setTarget(document.querySelector("[data-game-overlay]"));
+  }, []);
+
+  if (!target || overlay?.type !== "end") {
+    return null;
+  }
+
+  return createPortal(
+    <div className={`terminal-overlay terminal-overlay--${overlay.variant}`} role="dialog" aria-label={overlay.title}>
+      <div className="reward-overlay__header">
+        <span className="reward-overlay__eyebrow">{overlay.eyebrow}</span>
+        <h2>{overlay.title}</h2>
+      </div>
+      <div className="terminal-overlay__stats" role="group" aria-label="Podsumowanie wyprawy">
+        {overlay.stats.map((stat) => (
+          <div key={stat.key} className="terminal-overlay__stat">
+            <span>{stat.label}</span>
+            <strong>{stat.value}</strong>
+          </div>
+        ))}
+      </div>
+      <div className="reward-cta">
+        <button className="btn btn--action" type="button" onClick={reset}>
+          {overlay.cta}
+        </button>
+      </div>
+    </div>,
+    target
+  );
 }
 
 function MapRouteActions() {
@@ -65,22 +115,40 @@ function MapRouteActions() {
   );
 }
 
+function CanvasFallback({ onReset }) {
+  return (
+    <div className="game-canvas-fallback" role="alert">
+      <strong>Scena nie mogla sie uruchomic.</strong>
+      <button className="btn btn--restart" type="button" onClick={onReset}>
+        Restart
+      </button>
+    </div>
+  );
+}
+
 export function KurczokerCanvas() {
+  const game = useGameStore((state) => state.game);
+  const reset = useGameStore((state) => state.reset);
+
   return (
     <>
-      <Canvas
-        aria-label="KURCZOKER game canvas"
-        className="kurczoker-r3f"
-        orthographic
-        role="img"
-        camera={{ position: [0, 0, 10], zoom: 72, near: 0.1, far: 100 }}
-        gl={{ antialias: false, alpha: true }}
-      >
-        <GameRuntime />
-      </Canvas>
+      <CanvasErrorBoundary resetKey={`${game.seed}:${game.scene}`} fallback={<CanvasFallback onReset={reset} />}>
+        <Canvas
+          aria-label="KURCZOKER game canvas"
+          className="kurczoker-r3f"
+          orthographic
+          role="img"
+          camera={{ position: [0, 0, 10], zoom: 72, near: 0.1, far: 100 }}
+          gl={{ antialias: false, alpha: true }}
+        >
+          <GameRuntime />
+        </Canvas>
+      </CanvasErrorBoundary>
       <MapRouteActions />
       <RewardOverlay />
+      <TerminalOverlay />
       <ShellStatusSync />
+      <ShellControls />
     </>
   );
 }

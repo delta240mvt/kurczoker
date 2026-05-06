@@ -158,6 +158,36 @@ async function getCanvasShot(page) {
   return PNG.sync.read(buffer);
 }
 
+async function waitForCanvasReady(page, label) {
+  const canvas = page.locator(".kurczoker-r3f canvas");
+  let lastError;
+
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    try {
+      await page.waitForLoadState("load", { timeout: 15000 });
+      await page.waitForLoadState("networkidle", { timeout: 15000 }).catch(() => {});
+      await canvas.waitFor({ state: "visible", timeout: 15000 });
+      await page.waitForFunction(
+        () => {
+          const canvasElement = document.querySelector(".kurczoker-r3f canvas");
+          const box = canvasElement?.getBoundingClientRect();
+          return Boolean(box && box.width > 8 && box.height > 8);
+        },
+        null,
+        { timeout: 15000 }
+      );
+      return;
+    } catch (error) {
+      lastError = error;
+      if (attempt === 0) {
+        await page.reload({ waitUntil: "load" });
+      }
+    }
+  }
+
+  throw new Error(`${label} canvas was not ready: ${lastError?.message ?? "unknown error"}`);
+}
+
 function sampledPixels(image) {
   const pixels = [];
   const stepX = Math.max(1, Math.floor(image.width / 24));
@@ -226,7 +256,7 @@ test("r3f game renders and advances through map and battle", { timeout: 90000 },
 
     const desktop = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     await desktop.goto(baseUrl, { waitUntil: "networkidle" });
-    await desktop.locator(".kurczoker-r3f canvas").waitFor({ state: "visible" });
+    await waitForCanvasReady(desktop, "desktop");
     assertNonblankShot(await getCanvasShot(desktop), "desktop map");
 
     const route = desktop.locator(".map-route-actions__btn").first();
@@ -251,8 +281,8 @@ test("r3f game renders and advances through map and battle", { timeout: 90000 },
     assertChangedPixels(beforeFire, afterFire, "aiming and firing");
 
     const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true });
-    await mobile.goto(baseUrl, { waitUntil: "networkidle" });
-    await mobile.locator(".kurczoker-r3f canvas").waitFor({ state: "visible" });
+    await mobile.goto(baseUrl, { waitUntil: "load" });
+    await waitForCanvasReady(mobile, "mobile");
     assertNonblankShot(await getCanvasShot(mobile), "mobile map");
   } finally {
     await browser?.close();
