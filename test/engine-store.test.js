@@ -18,3 +18,17 @@ test("engine store selects an offered node into a playable scene", () => {
 
   assert.ok([SCENES.BATTLE, SCENES.REWARD, SCENES.SHOP].includes(store.getState().game.scene));
 });
+
+test("engine store reset advances from the active state seed", () => {
+  const store = createEngineStore(1);
+
+  store.getState().reset();
+  const firstReset = store.getState().game;
+  store.getState().reset();
+  const secondReset = store.getState().game;
+
+  assert.equal(firstReset.seed, 2);
+  assert.equal(secondReset.seed, 3);
+  assert.equal(secondReset.scene, SCENES.MAP);
+  assert.equal(secondReset.ui.message, "Nowa wyprawa gotowa.");
+});

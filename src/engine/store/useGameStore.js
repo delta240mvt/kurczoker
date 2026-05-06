@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { createStore } from "zustand/vanilla";
 import { selectMapNode, startRun } from "../../game/run.js";
-import { setUiMessage } from "../../game/state.js";
+import { resetRun, setUiMessage } from "../../game/state.js";
 
 export function createEngineStateInitializer(seed = 1) {
   return (set, get) => ({
@@ -14,7 +14,7 @@ export function createEngineStateInitializer(seed = 1) {
       set({ input: { ...get().input, aim } });
     },
     reset() {
-      set({ game: setUiMessage(startRun(seed + 1), "Nowa wyprawa gotowa.") });
+      set({ game: setUiMessage(resetRun(get().game), "Nowa wyprawa gotowa.") });
     }
   });
 }
