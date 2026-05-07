@@ -3,29 +3,29 @@ import LandingSection from "./LandingSection.astro";
 
 const artifacts = [
   {
-    name: "Korona Grzebienia",
-    type: "Artifact",
-    text: "Stretches the player turn just enough for one bold angle."
+    name: "Pierscien Zlotego Ziarna",
+    type: "Artefakt",
+    text: "Dodaje sile jajobombom i sprawia, ze kolejna walka szybciej robi sie widowiskowa."
   },
   {
-    name: "Buty Kurnikowego Wiatru",
-    type: "Artifact",
-    text: "Adds lift and pace for awkward platforms and last-second escapes."
+    name: "Mapa Skrotow",
+    type: "Artefakt",
+    text: "Pokazuje ryzyko nastepnego rozwidlenia i pozwala planowac trase jak w wyprawie."
   },
   {
-    name: "Zgnile Jajo Chaosu",
-    type: "Artifact",
-    text: "Makes explosions nastier, with the kind of downside that starts stories."
+    name: "Skorupkowy Pancerz",
+    type: "Obrona",
+    text: "Zmniejsza obrazenia i daje wiecej miejsca na odwazne rzuty pod presja."
   },
   {
-    name: "Pisklak Straznik",
-    type: "Summon",
-    text: "Drops a temporary helper into battle for a brief, scrappy intervention."
+    name: "Strazniczka Kurka",
+    type: "Zdolnosc",
+    text: "Przywoluje wsparcie na chwile, kiedy przeciwnik odpowiada najmocniej."
   }
 ];
 ---
 
-<LandingSection eyebrow="Artifacts" title="Odd relics, simple choices, visible impact" tone="warm">
+<LandingSection eyebrow="Artefakty" title="Nagrody sa proste, ale od razu zmieniaja walke" tone="warm">
   <div class="artifact-grid">
     {
       artifacts.map((artifact) => (
