@@ -39,12 +39,12 @@ export function MapNode({ node, position, offered = false, active = false, compl
     >
       {(offered || active) && (
         <mesh position={[0, -0.02, -0.08]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.44, active ? 0.68 : 0.62, 36]} />
+          <ringGeometry args={[0.32, active ? 0.5 : 0.45, 36]} />
           <meshBasicMaterial color={glowColor} transparent opacity={active ? 0.48 : 0.34} />
         </mesh>
       )}
       <mesh position={[0, 0, -0.05]} rotation={[0.08, 0, 0]}>
-        <cylinderGeometry args={[0.38, 0.46, 0.18, 32]} />
+        <cylinderGeometry args={[0.26, 0.32, 0.14, 32]} />
         <meshStandardMaterial
           color={nodeColor}
           emissive={glowColor}
@@ -54,11 +54,11 @@ export function MapNode({ node, position, offered = false, active = false, compl
         />
       </mesh>
       <mesh position={[0, -0.02, -0.18]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[0.54, 32]} />
+        <circleGeometry args={[0.38, 32]} />
         <meshBasicMaterial color="#163c4a" transparent opacity={0.28} />
       </mesh>
-      <group position={[0, 0.32, 0.08]}>
-        <PixelBillboard type={node.type} active={active} offered={offered || active} scale={0.72} />
+      <group position={[0, 0.2, 0.08]}>
+        <PixelBillboard type={node.type} active={active} offered={offered || active} scale={0.46} />
       </group>
     </group>
   );

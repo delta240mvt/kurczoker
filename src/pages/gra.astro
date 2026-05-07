@@ -1,0 +1,138 @@
+---
+import HeroGame from "../components/HeroGame.astro";
+import LandingSection from "../components/LandingSection.astro";
+import ArtifactShowcase from "../components/ArtifactShowcase.astro";
+import "../styles/global.css";
+
+const featureCards = [
+  { icon: "/uix/svg/icon-scene-book.svg", title: "Mapa wyprawy", text: "Wybierasz rozgalezienia, ryzyko i nagrody bez przerywania tempa gry." },
+  { icon: "/uix/svg/icon-ability-bomb.svg", title: "Rzuty jajobomba", text: "Cel, kat i sila decyduja o trafieniu, zniszczeniu terenu i kolejnej turze." },
+  { icon: "/uix/svg/icon-grain-coin.svg", title: "Loot i sklep", text: "Ziarna, artefakty i ulepszenia zmieniaja kolejne walki widocznie od razu." },
+  { icon: "/uix/svg/icon-shield.svg", title: "Boss run", text: "Krotka wyprawa konczy sie arena z bossem i czytelnym ekranem zwyciestwa albo porazki." }
+];
+
+const screens = [
+  { src: "/uix/canvas/04-canvas.webp", title: "2.5D mapa", text: "Czytelne wezly, boss na horyzoncie i szybkie decyzje." },
+  { src: "/uix/canvas/03-canvas.webp", title: "Walka turowa", text: "Trajektoria, platformy, eksplozje i jeden mocny ruch." },
+  { src: "/uix/canvas/06-canvas.webp", title: "Nagrody", text: "Artefakty oraz zdolnosci z mocnym fantasy UI." },
+  { src: "/uix/canvas/08-canvas.webp", title: "Skarby", text: "Moment przerwy, blysk zlota i wybieralny lup." }
+];
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Graj w KURCZOKER — przeglądarkowa mini gra roguelite z mapą wyprawy, walkami, sklepem i bossem." />
+    <title>Graj — KURCZOKER</title>
+  </head>
+  <body>
+    <nav class="gra-topnav">
+      <a href="/" class="gra-topnav__back">← Strona główna</a>
+      <span class="gra-topnav__brand">KURCZOKER</span>
+    </nav>
+    <main>
+      <div id="gra">
+        <HeroGame />
+      </div>
+
+      <section class="landing-strip" aria-label="Najwazniejsze cechy Kurczokera">
+        <div class="landing-strip__inner">
+          <span>Browser native</span>
+          <span>R3F + Rapier</span>
+          <span>2.5D roguelite</span>
+          <span>Mobile friendly</span>
+        </div>
+      </section>
+
+      <LandingSection eyebrow="Game loop" title="Heroesowa wyprawa, wormsowa dynamika" tone="deep">
+        <div class="feature-grid" id="wyprawa">
+          {featureCards.map((card) => (
+            <article class="feature-card">
+              <span class="feature-card__icon">
+                <img src={card.icon} alt="" width="42" height="42" />
+              </span>
+              <h3>{card.title}</h3>
+              <p>{card.text}</p>
+            </article>
+          ))}
+        </div>
+      </LandingSection>
+
+      <LandingSection eyebrow="Screens" title="Kazda scena ma wyglad planszy premium" tone="light">
+        <div class="screen-grid">
+          {screens.map((screen) => (
+            <article class="screen-card">
+              <img src={screen.src} alt="" width="640" height="360" loading="lazy" />
+              <div class="screen-card__body">
+                <h3>{screen.title}</h3>
+                <p>{screen.text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </LandingSection>
+
+      <ArtifactShowcase />
+
+      <LandingSection eyebrow="Boss fight" title="Krotka sesja, pelny run, jasny final" tone="boss">
+        <div class="boss-landing">
+          <div class="boss-landing__media">
+            <img src="/uix/canvas/07-canvas.webp" alt="" width="960" height="540" loading="lazy" />
+          </div>
+          <div class="boss-landing__copy">
+            <p>Kurczoker nie jest statyczna makieta. To grywalny loop: mapa, walka, nagroda, sklep, skarb i finalowa arena.</p>
+            <a class="hero-cta hero-cta--primary" href="#gra">Wroc do gry</a>
+          </div>
+        </div>
+      </LandingSection>
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  .gra-topnav {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 20px;
+    background: rgba(10, 14, 28, 0.92);
+    border-bottom: 1px solid rgba(212, 160, 74, 0.2);
+    backdrop-filter: blur(8px);
+  }
+
+  .gra-topnav__back {
+    color: rgba(245, 232, 193, 0.65);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color 0.15s;
+  }
+
+  .gra-topnav__back:hover {
+    color: var(--shell-gold-bright);
+  }
+
+  .gra-topnav__brand {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--shell-gold-bright);
+    letter-spacing: 0.08em;
+    text-shadow: 0 2px 0 var(--shell-gold-deep);
+  }
+
+  @media (max-width: 700px) {
+    #gra .game-stage {
+      min-height: auto;
+      justify-content: flex-start;
+      padding-top: 6px;
+    }
+
+    #gra .game-stage__brand {
+      display: none;
+    }
+  }
+</style>

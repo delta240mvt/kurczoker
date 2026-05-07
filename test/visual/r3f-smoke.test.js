@@ -14,6 +14,7 @@ const PORT_START = 47631;
 const PORT_ATTEMPTS = 20;
 const DIST_DIR = resolve(process.cwd(), "dist");
 const EXTERNAL_BASE_URL = process.env.KURCZOKER_VISUAL_BASE_URL;
+const GAME_PATH = "/gra";
 const MIME_TYPES = new Map([
   [".css", "text/css; charset=utf-8"],
   [".html", "text/html; charset=utf-8"],
@@ -81,8 +82,15 @@ function staticFilePath(url) {
 }
 
 async function sendStaticFile(response, filePath) {
+  let actualPath = filePath;
+
   try {
-    const file = await stat(filePath);
+    let file = await stat(filePath);
+    if (file.isDirectory()) {
+      actualPath = resolve(filePath, "index.html");
+      file = await stat(actualPath);
+    }
+
     if (!file.isFile()) {
       response.writeHead(404);
       response.end("Not found");
@@ -90,10 +98,10 @@ async function sendStaticFile(response, filePath) {
     }
 
     response.writeHead(200, {
-      "content-type": MIME_TYPES.get(extname(filePath)) ?? "application/octet-stream",
+      "content-type": MIME_TYPES.get(extname(actualPath)) ?? "application/octet-stream",
       "cache-control": "no-store"
     });
-    response.end(await readFile(filePath));
+    response.end(await readFile(actualPath));
   } catch (error) {
     response.writeHead(404);
     response.end("Not found");
@@ -387,8 +395,16 @@ async function fireAt(page, xRatio = 0.82, yRatio = 0.36) {
     await waitForPlayerTurn(page);
     const canvasBox = await page.locator(".kurczoker-r3f canvas").boundingBox();
     assert.ok(canvasBox, "battle canvas should have a bounding box");
-    await page.mouse.move(canvasBox.x + canvasBox.width * xRatio, canvasBox.y + canvasBox.height * yRatio, { steps: 8 });
-    await page.mouse.click(canvasBox.x + canvasBox.width * xRatio, canvasBox.y + canvasBox.height * yRatio);
+    const x = canvasBox.x + canvasBox.width * xRatio;
+    const y = canvasBox.y + canvasBox.height * yRatio;
+    const hasTouch = await page.evaluate(() => window.innerWidth <= 700 && navigator.maxTouchPoints > 0);
+
+    if (hasTouch) {
+      await page.touchscreen.tap(x, y);
+    } else {
+      await page.mouse.move(x, y, { steps: 8 });
+      await page.mouse.click(x, y);
+    }
 
     try {
       await waitForPostFireOutcome(page);
@@ -470,7 +486,7 @@ test("r3f game renders and advances through map and battle", { timeout: 90000 },
     browser = await chromium.launch();
 
     const desktop = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-    await desktop.goto(baseUrl, { waitUntil: "networkidle" });
+    await desktop.goto(`${baseUrl}${GAME_PATH}`, { waitUntil: "networkidle" });
     await waitForCanvasReady(desktop, "desktop");
     await assertResponsiveLayout(desktop, "desktop map");
     assertNonblankShot(await getCanvasShot(desktop), "desktop map");
@@ -494,7 +510,7 @@ test("r3f game renders and advances through map and battle", { timeout: 90000 },
     assertChangedPixels(beforeFire, afterFire, "aiming and firing");
 
     const mobile = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
-    await mobile.goto(baseUrl, { waitUntil: "load" });
+    await mobile.goto(`${baseUrl}${GAME_PATH}`, { waitUntil: "load" });
     await waitForCanvasReady(mobile, "mobile");
     await assertResponsiveLayout(mobile, "mobile map");
     const mobileMap = await getCanvasShot(mobile);
@@ -535,7 +551,7 @@ test("all production game screens are reachable and playable", { timeout: 300000
     browser = await chromium.launch();
 
     const run = await browser.newPage({ viewport: { width: 1440, height: 900 } });
-    await run.goto(baseUrl, { waitUntil: "networkidle" });
+    await run.goto(`${baseUrl}${GAME_PATH}`, { waitUntil: "networkidle" });
     await waitForCanvasReady(run, "all-screens run");
     await assertPlayableScreen(run, "map", /Mapa/);
 
@@ -575,7 +591,7 @@ test("all production game screens are reachable and playable", { timeout: 300000
     await assertPlayableScreen(run, "victory", /Zwycięstwo/);
 
     const shop = await browser.newPage({ viewport: { width: 1280, height: 820 } });
-    await shop.goto(baseUrl, { waitUntil: "networkidle" });
+    await shop.goto(`${baseUrl}${GAME_PATH}`, { waitUntil: "networkidle" });
     await waitForCanvasReady(shop, "shop branch");
     await clickRoute(shop, "battle-1");
     await winCurrentBattle(shop, "shop setup battle");
@@ -588,7 +604,7 @@ test("all production game screens are reachable and playable", { timeout: 300000
     await shop.close();
 
     const defeat = await browser.newPage({ viewport: { width: 1280, height: 820 } });
-    await defeat.goto(baseUrl, { waitUntil: "networkidle" });
+    await defeat.goto(`${baseUrl}${GAME_PATH}`, { waitUntil: "networkidle" });
     await waitForCanvasReady(defeat, "defeat branch");
     await clickRoute(defeat, "battle-1");
     await assertPlayableScreen(defeat, "defeat battle", /Walka/);
@@ -614,7 +630,7 @@ test("mobile production game screens fit and remain playable", { timeout: 210000
     browser = await chromium.launch();
 
     const run = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
-    await run.goto(baseUrl, { waitUntil: "networkidle" });
+    await run.goto(`${baseUrl}${GAME_PATH}`, { waitUntil: "networkidle" });
     await waitForCanvasReady(run, "mobile all-screens run");
     await assertPlayableScreen(run, "mobile map", /Mapa/);
 
@@ -652,7 +668,7 @@ test("mobile production game screens fit and remain playable", { timeout: 210000
     await assertPlayableScreen(run, "mobile victory", /Zwycięstwo/);
 
     const shop = await browser.newPage({ viewport: { width: 360, height: 740 }, isMobile: true, hasTouch: true });
-    await shop.goto(baseUrl, { waitUntil: "networkidle" });
+    await shop.goto(`${baseUrl}${GAME_PATH}`, { waitUntil: "networkidle" });
     await waitForCanvasReady(shop, "small mobile shop branch");
     await assertPlayableScreen(shop, "small mobile map", /Mapa/);
     await clickRoute(shop, "battle-1");
@@ -666,7 +682,7 @@ test("mobile production game screens fit and remain playable", { timeout: 210000
     await shop.close();
 
     const defeat = await browser.newPage({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
-    await defeat.goto(baseUrl, { waitUntil: "networkidle" });
+    await defeat.goto(`${baseUrl}${GAME_PATH}`, { waitUntil: "networkidle" });
     await waitForCanvasReady(defeat, "mobile defeat branch");
     await clickRoute(defeat, "battle-1");
     await assertPlayableScreen(defeat, "mobile defeat battle", /Walka/);

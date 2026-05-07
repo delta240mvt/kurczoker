@@ -240,6 +240,8 @@ export function GameRuntime() {
   const game = useGameStore((state) => state.game);
   const aim = useGameStore((state) => state.input.aim);
   const setAim = useGameStore((state) => state.setAim);
+  const setMovement = useGameStore((state) => state.setMovement);
+  const setJump = useGameStore((state) => state.setJump);
   const selectNode = useGameStore((state) => state.selectNode);
   const projectileHitEnemy = useGameStore((state) => state.projectileHitEnemy);
   const turnEnded = useGameStore((state) => state.turnEnded);
@@ -307,6 +309,8 @@ export function GameRuntime() {
               game={game}
               aim={aim}
               setAim={setAim}
+              setMovement={setMovement}
+              setJump={setJump}
               projectileHitEnemy={projectileHitEnemy}
               turnEnded={turnEnded}
               onReady={markBattleRuntimeReady}

@@ -1,18 +1,17 @@
 import { Physics, RigidBody, CuboidCollider, BallCollider } from "@react-three/rapier";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { BATTLE_PHASES, ACTOR_TEAMS } from "../../game/constants.js";
 import { BattleActor } from "../components/BattleActor.jsx";
-import { ModelAsset, preloadModelAsset } from "../components/ModelAsset.jsx";
 import { ProjectileArc } from "../components/ProjectileArc.jsx";
 import { ExplosionFx } from "../fx/ExplosionFx.jsx";
 import { ProjectileTrail } from "../fx/ProjectileTrail.jsx";
 
-const PLAYER_POSITION = [-3.35, -1.1, 0.05];
-const ENEMY_POSITION = [3.15, -1.05, 0.05];
-const PROJECTILE_ORIGIN = [-2.9, -0.62, 0.12];
 const DEFAULT_AIM = { x: 1.4, y: 0.92 };
 const GRAVITY_Y = -5.8;
+const WORLD_WIDTH = 960;
+const WORLD_HEIGHT = 540;
+const ARENA_Y_OFFSET = 1.62;
 const TERRAIN = [
   { id: "ground", position: [0, -1.9, 0], size: [7.8, 0.42, 0.72], color: "#6f4d2f" },
   { id: "left-rise", position: [-2.75, -1.25, 0], size: [1.45, 0.32, 0.62], color: "#7a5735" },
@@ -28,6 +27,17 @@ function getLivingActor(actors, team) {
   return actors.find((actor) => actor.team === team && (actor.health ?? 0) > 0);
 }
 
+function actorToScene(actor, z = 0.05) {
+  if (!actor) return [0, 0, z];
+  const centerX = (actor.x ?? 0) + (actor.width ?? 0) / 2;
+  const bottomY = (actor.y ?? 0) + (actor.height ?? 0);
+  return [(centerX / WORLD_WIDTH) * 9.6 - 4.8, 2.7 - (bottomY / WORLD_HEIGHT) * 5.4 + 0.34 + ARENA_Y_OFFSET, z];
+}
+
+function playerProjectileOrigin(playerPosition) {
+  return [playerPosition[0] + 0.48, playerPosition[1] + 0.54, playerPosition[2] + 0.1];
+}
+
 function PaintedBattleBackdrop() {
   const sparks = [
     [-4.15, 1.45, 0.08, 0.06],
@@ -39,22 +49,6 @@ function PaintedBattleBackdrop() {
 
   return (
     <group position={[0, 0, -0.82]}>
-      <mesh position={[-3.42, -0.05, -0.08]}>
-        <boxGeometry args={[0.36, 1.8, 0.08]} />
-        <meshStandardMaterial color="#4a2a13" roughness={0.82} />
-      </mesh>
-      <mesh position={[-3.42, 0.72, -0.02]}>
-        <planeGeometry args={[0.95, 0.88]} />
-        <meshBasicMaterial color="#8f1e14" />
-      </mesh>
-      <mesh position={[3.62, -0.05, -0.08]}>
-        <boxGeometry args={[0.36, 1.8, 0.08]} />
-        <meshStandardMaterial color="#4a2a13" roughness={0.82} />
-      </mesh>
-      <mesh position={[3.62, 0.72, -0.02]}>
-        <planeGeometry args={[0.95, 0.88]} />
-        <meshBasicMaterial color="#8f1e14" />
-      </mesh>
       <mesh position={[0, -1.72, -0.04]}>
         <planeGeometry args={[8.6, 1.2]} />
         <meshBasicMaterial color="#342311" transparent opacity={0.38} />
@@ -63,8 +57,14 @@ function PaintedBattleBackdrop() {
         <planeGeometry args={[8.9, 0.42]} />
         <meshBasicMaterial color="#f9d783" transparent opacity={0.14} />
       </mesh>
-      <ModelAsset src="/game/assets/models/kurczoker-map-props.glb" scale={0.24} position={[2.55, -0.02, 0.02]} rotation={[0, -0.28, 0]} />
-      <ModelAsset src="/game/assets/models/kurczoker-diorama-props.glb" scale={0.18} position={[0.18, -0.38, 0.05]} rotation={[0, -0.16, 0]} />
+      <mesh position={[-3.62, -1.38, 0.05]} rotation={[-Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.22, 0.34, 0.12, 20]} />
+        <meshStandardMaterial color="#47523a" roughness={0.78} transparent opacity={0.58} />
+      </mesh>
+      <mesh position={[3.58, -1.35, 0.05]} rotation={[-Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.24, 0.38, 0.12, 20]} />
+        <meshStandardMaterial color="#4b3a2b" roughness={0.78} transparent opacity={0.5} />
+      </mesh>
       {sparks.map(([x, y, z, scale], index) => (
         <mesh key={`spark-${index}`} position={[x, y, z]} scale={scale}>
           <sphereGeometry args={[1, 12, 8]} />
@@ -79,23 +79,23 @@ function TerrainPlatform({ platform }) {
   return (
     <RigidBody type="fixed" colliders={false} position={platform.position}>
       <CuboidCollider args={[platform.size[0] / 2, platform.size[1] / 2, platform.size[2] / 2]} friction={1.2} restitution={0.08} />
-      <mesh>
+      <mesh visible={false}>
         <boxGeometry args={platform.size} />
-        <meshStandardMaterial color={platform.color} roughness={0.64} metalness={0.04} />
+        <meshStandardMaterial color={platform.color} roughness={0.64} metalness={0.04} transparent opacity={0.64} />
       </mesh>
-      <mesh position={[0, platform.size[1] / 2 + 0.025, 0.01]}>
+      <mesh position={[0, platform.size[1] / 2 + 0.025, 0.01]} visible={false}>
         <boxGeometry args={[platform.size[0] * 0.96, 0.05, platform.size[2] * 0.9]} />
-        <meshStandardMaterial color="#9dc46b" roughness={0.7} />
+        <meshStandardMaterial color="#9dc46b" roughness={0.7} transparent opacity={0.82} />
       </mesh>
-      <mesh position={[0, -platform.size[1] / 2 - 0.045, 0.025]}>
+      <mesh position={[0, -platform.size[1] / 2 - 0.045, 0.025]} visible={false}>
         <boxGeometry args={[platform.size[0] * 0.86, 0.09, platform.size[2] * 0.78]} />
-        <meshStandardMaterial color="#2b2117" roughness={0.86} />
+        <meshStandardMaterial color="#2b2117" roughness={0.86} transparent opacity={0.5} />
       </mesh>
     </RigidBody>
   );
 }
 
-function ProjectileBody({ projectile, enemy, onImpact, onTrail }) {
+function ProjectileBody({ projectile, enemy, enemyPosition, onImpact, onTrail }) {
   const bodyRef = useRef(null);
   const resolvedRef = useRef(false);
 
@@ -106,8 +106,8 @@ function ProjectileBody({ projectile, enemy, onImpact, onTrail }) {
     }
 
     if (enemy) {
-      const dx = position[0] - ENEMY_POSITION[0];
-      const dy = position[1] - ENEMY_POSITION[1];
+      const dx = position[0] - enemyPosition[0];
+      const dy = position[1] - enemyPosition[1];
       if (Math.hypot(dx, dy) <= 1.45) {
         onImpact({ type: "enemy", actorId: enemy.id, position });
         return;
@@ -163,33 +163,45 @@ function ProjectileBody({ projectile, enemy, onImpact, onTrail }) {
           onImpact({ type: "enemy", actorId: enemy.id, position: translation ? [translation.x, translation.y, translation.z] : projectile.origin });
         }}
       />
-      <mesh>
-        <sphereGeometry args={[0.16, 24, 16]} />
+      <mesh scale={[0.86, 1.14, 0.86]}>
+        <sphereGeometry args={[0.18, 28, 18]} />
         <meshStandardMaterial color="#fff1b5" roughness={0.34} metalness={0.04} emissive="#fb923c" emissiveIntensity={0.22} />
       </mesh>
       <mesh position={[0.05, 0.04, 0.09]}>
         <sphereGeometry args={[0.045, 10, 8]} />
         <meshBasicMaterial color="#ffffff" transparent opacity={0.76} />
       </mesh>
+      {[[-0.07, 0.06, 0.11], [0.08, -0.05, 0.12], [0.01, 0.11, 0.09]].map((spot, index) => (
+        <mesh key={`egg-spot-${index}`} position={spot}>
+          <sphereGeometry args={[0.035, 10, 8]} />
+          <meshStandardMaterial color="#4b8fd6" roughness={0.45} />
+        </mesh>
+      ))}
+      <pointLight color="#facc15" intensity={1.2} distance={1.6} />
     </RigidBody>
   );
 }
 
-export function BattleScene({ game, aim, setAim, projectileHitEnemy, turnEnded }) {
+export function BattleScene({ game, aim, setAim, setMovement, setJump, projectileHitEnemy, turnEnded }) {
+  const { gl } = useThree();
   const battle = game.battle;
   const player = useMemo(() => getLivingActor(battle?.actors ?? [], ACTOR_TEAMS.PLAYER), [battle?.actors]);
   const enemy = useMemo(() => getLivingActor(battle?.actors ?? [], ACTOR_TEAMS.ENEMY), [battle?.actors]);
   const [projectile, setProjectile] = useState(null);
   const [trail, setTrail] = useState([]);
   const [explosion, setExplosion] = useState(null);
+  const [gesture, setGesture] = useState(null);
   const playerTurn = battle?.phase === BATTLE_PHASES.PLAYER_TURN;
+  const playerPosition = useMemo(() => actorToScene(player), [player]);
+  const enemyPosition = useMemo(() => actorToScene(enemy), [enemy]);
+  const projectileOrigin = useMemo(() => playerProjectileOrigin(playerPosition), [playerPosition]);
   const activeAim = aim?.x ? aim : DEFAULT_AIM;
 
   function updateAimFromPoint(point) {
     if (!playerTurn || projectile) return;
     setAim({
-      x: clamp(point.x - PROJECTILE_ORIGIN[0], 0.75, 2.3),
-      y: clamp(point.y - PROJECTILE_ORIGIN[1], 0.32, 1.72)
+      x: clamp(point.x - projectileOrigin[0], 0.75, 3.15),
+      y: clamp(point.y - projectileOrigin[1], 0.28, 2.15)
     });
   }
 
@@ -197,18 +209,125 @@ export function BattleScene({ game, aim, setAim, projectileHitEnemy, turnEnded }
     if (!playerTurn || projectile) return;
     updateAimFromPoint(point);
     const nextAim = {
-      x: clamp(point.x - PROJECTILE_ORIGIN[0], 0.75, 2.3),
-      y: clamp(point.y - PROJECTILE_ORIGIN[1], 0.32, 1.72)
+      x: clamp(point.x - projectileOrigin[0], 0.75, 3.15),
+      y: clamp(point.y - projectileOrigin[1], 0.28, 2.15)
     };
     const length = Math.hypot(nextAim.x, nextAim.y) || 1;
+    const power = Math.min(1.35, Math.max(0.55, length / 2.2));
     setTrail([]);
     setProjectile({
       id: `egg-${Date.now()}`,
-      origin: PROJECTILE_ORIGIN,
-      impulse: { x: (nextAim.x / length) * 4.35, y: (nextAim.y / length) * 4.35 },
-      targetEnemy: point.x > 0.65
+      origin: projectileOrigin,
+      impulse: { x: (nextAim.x / length) * 4.35 * power, y: (nextAim.y / length) * 4.35 * power },
+      targetEnemy: point.x > enemyPosition[0] - 0.65
     });
   }
+
+  function isNearPlayer(point) {
+    return Math.hypot(point.x - playerPosition[0], point.y - (playerPosition[1] + 0.34)) < 0.92;
+  }
+
+  function updateMovementFromPoint(point) {
+    if (!playerTurn || projectile) return;
+    const deltaX = point.x - playerPosition[0];
+    setMovement(Math.abs(deltaX) < 0.18 ? 0 : deltaX > 0 ? 1 : -1);
+    setJump(point.y > playerPosition[1] + 0.82);
+  }
+
+  function pointFromClient(clientX, clientY) {
+    const rect = gl.domElement.getBoundingClientRect();
+    return {
+      x: ((clientX - rect.left) / rect.width) * 9.6 - 4.8,
+      y: 2.7 - ((clientY - rect.top) / rect.height) * 5.4,
+      z: 0
+    };
+  }
+
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.code === "ArrowLeft" || event.code === "KeyA") setMovement(-1);
+      if (event.code === "ArrowRight" || event.code === "KeyD") setMovement(1);
+      if (event.code === "ArrowUp" || event.code === "KeyW") setJump(true);
+    }
+
+    function handleKeyUp(event) {
+      if (event.code === "ArrowLeft" || event.code === "KeyA" || event.code === "ArrowRight" || event.code === "KeyD") setMovement(0);
+      if (event.code === "ArrowUp" || event.code === "KeyW") setJump(false);
+    }
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+      setMovement(0);
+      setJump(false);
+    };
+  }, [setJump, setMovement]);
+
+  useEffect(() => {
+    if (typeof navigator === "undefined" || navigator.maxTouchPoints <= 0) return undefined;
+
+    const canvas = gl.domElement;
+    let touchGesture = null;
+
+    function getTouchPoint(event) {
+      const touch = event.changedTouches?.[0] ?? event.touches?.[0];
+      return touch ? pointFromClient(touch.clientX, touch.clientY) : null;
+    }
+
+    function handleTouchStart(event) {
+      const point = getTouchPoint(event);
+      if (!point) return;
+      event.preventDefault();
+      touchGesture = isNearPlayer(point) ? "move" : "aim";
+      setGesture(touchGesture);
+      if (touchGesture === "move") updateMovementFromPoint(point);
+      else updateAimFromPoint(point);
+    }
+
+    function handleTouchMove(event) {
+      const point = getTouchPoint(event);
+      if (!point || !touchGesture) return;
+      event.preventDefault();
+      if (touchGesture === "move") updateMovementFromPoint(point);
+      else updateAimFromPoint(point);
+    }
+
+    function handleTouchEnd(event) {
+      const point = getTouchPoint(event);
+      if (!point || !touchGesture) return;
+      event.preventDefault();
+      if (touchGesture === "move") {
+        setMovement(0);
+        setJump(false);
+      } else {
+        fireProjectile(point);
+      }
+      touchGesture = null;
+      setGesture(null);
+    }
+
+    function handleTouchCancel(event) {
+      event.preventDefault();
+      touchGesture = null;
+      setGesture(null);
+      setMovement(0);
+      setJump(false);
+    }
+
+    canvas.addEventListener("touchstart", handleTouchStart, { passive: false });
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+    canvas.addEventListener("touchend", handleTouchEnd, { passive: false });
+    canvas.addEventListener("touchcancel", handleTouchCancel, { passive: false });
+
+    return () => {
+      canvas.removeEventListener("touchstart", handleTouchStart);
+      canvas.removeEventListener("touchmove", handleTouchMove);
+      canvas.removeEventListener("touchend", handleTouchEnd);
+      canvas.removeEventListener("touchcancel", handleTouchCancel);
+    };
+  }, [gl, playerTurn, projectile, playerPosition, projectileOrigin, enemyPosition, setAim, setMovement, setJump]);
 
   function resolveImpact(impact) {
     setProjectile(null);
@@ -223,10 +342,26 @@ export function BattleScene({ game, aim, setAim, projectileHitEnemy, turnEnded }
 
   return (
     <group
-      onPointerMove={(event) => updateAimFromPoint(event.point)}
-      onClick={(event) => {
+      onPointerDown={(event) => {
         event.stopPropagation();
-        fireProjectile(event.point);
+        const mode = isNearPlayer(event.point) ? "move" : "aim";
+        setGesture(mode);
+        if (mode === "move") updateMovementFromPoint(event.point);
+        else updateAimFromPoint(event.point);
+      }}
+      onPointerMove={(event) => {
+        if (gesture === "move") updateMovementFromPoint(event.point);
+        else updateAimFromPoint(event.point);
+      }}
+      onPointerUp={(event) => {
+        event.stopPropagation();
+        if (gesture === "move") {
+          setMovement(0);
+          setJump(false);
+        } else {
+          fireProjectile(event.point);
+        }
+        setGesture(null);
       }}
     >
       <mesh position={[0, 0, -0.76]} raycast={undefined}>
@@ -234,19 +369,18 @@ export function BattleScene({ game, aim, setAim, projectileHitEnemy, turnEnded }
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
       </mesh>
       <PaintedBattleBackdrop />
-      <ModelAsset src="/game/assets/models/kurczoker-terrain-kit.glb" scale={0.22} position={[0, -2.12, -0.02]} rotation={[0, 0, 0]} />
       <Physics gravity={[0, GRAVITY_Y, 0]} timeStep={1 / 60} interpolation={false}>
         {TERRAIN.map((platform) => (
           <TerrainPlatform key={platform.id} platform={platform} />
         ))}
         {player ? (
-          <RigidBody type="fixed" colliders={false} position={PLAYER_POSITION}>
+          <RigidBody type="fixed" colliders={false} position={playerPosition}>
             <CuboidCollider name="player-body-sensor" args={[0.32, 0.48, 0.28]} sensor />
             <BattleActor actor={player} active={playerTurn} side="left" />
           </RigidBody>
         ) : null}
         {enemy ? (
-          <RigidBody type="fixed" colliders={false} position={ENEMY_POSITION}>
+          <RigidBody type="fixed" colliders={false} position={enemyPosition}>
             <CuboidCollider name="enemy-hit-sensor" args={[0.34, 0.48, 0.28]} sensor />
             <BattleActor actor={enemy} side="right" />
           </RigidBody>
@@ -256,20 +390,15 @@ export function BattleScene({ game, aim, setAim, projectileHitEnemy, turnEnded }
             key={projectile.id}
             projectile={projectile}
             enemy={enemy}
+            enemyPosition={enemyPosition}
             onImpact={resolveImpact}
-            onTrail={(point) => setTrail((points) => [...points.slice(-9), point])}
+            onTrail={(point) => setTrail((points) => [...points.slice(-18), point])}
           />
         ) : null}
       </Physics>
-      {playerTurn && !projectile ? <ProjectileArc origin={PROJECTILE_ORIGIN} aim={activeAim} gravity={GRAVITY_Y} /> : null}
+      {playerTurn && !projectile ? <ProjectileArc origin={projectileOrigin} aim={activeAim} gravity={GRAVITY_Y} /> : null}
       {trail.length > 0 ? <ProjectileTrail points={trail} /> : null}
       {explosion ? <ExplosionFx key={explosion.id} position={explosion.position} onDone={() => setExplosion(null)} /> : null}
     </group>
   );
 }
-
-preloadModelAsset("/game/assets/models/kurczoker-hero-knight.glb");
-preloadModelAsset("/game/assets/models/kurczoker-enemy-grunt.glb");
-preloadModelAsset("/game/assets/models/kurczoker-boss-rooster.glb");
-preloadModelAsset("/game/assets/models/kurczoker-terrain-kit.glb");
-preloadModelAsset("/game/assets/models/kurczoker-diorama-props.glb");

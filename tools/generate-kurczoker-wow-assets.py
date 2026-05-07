@@ -68,6 +68,15 @@ def cube(name, loc, scale, material):
     return obj
 
 
+def bevel(obj, amount=0.035, segments=2):
+    modifier = obj.modifiers.new(f"{obj.name}_soft_edges", "BEVEL")
+    modifier.width = amount
+    modifier.segments = segments
+    modifier.affect = "EDGES"
+    obj.modifiers.new(f"{obj.name}_weighted_normals", "WEIGHTED_NORMAL")
+    return obj
+
+
 def sphere(name, loc, scale, material, segments=32, rings=16):
     bpy.ops.mesh.primitive_uv_sphere_add(segments=segments, ring_count=rings, location=loc)
     obj = bpy.context.object
@@ -123,19 +132,28 @@ def make_hero(path):
     setup_materials()
     sphere("hero_body_feathered", (0, 0, 0.75), (0.55, 0.42, 0.62), MAT["feather"])
     sphere("hero_belly_shadow", (0.04, -0.08, 0.58), (0.38, 0.25, 0.36), MAT["feather_shadow"], 24, 12)
+    for index, y in enumerate([-0.31, -0.18, -0.05, 0.08, 0.21, 0.34]):
+        sphere(f"hero_layered_feather_{index}", (0.18, y, 0.76 - abs(y) * 0.12), (0.14, 0.045, 0.23), MAT["feather_shadow"], 16, 8)
     sphere("hero_head", (0.05, 0, 1.35), (0.42, 0.36, 0.38), MAT["feather"])
     cone("hero_beak", (0.5, -0.01, 1.34), 0.16, 0.34, MAT["beak"], 24, (0, math.radians(90), 0))
     sphere("hero_eye_left", (0.36, -0.18, 1.46), (0.045, 0.045, 0.045), mat("hero black eye", (0.02, 0.015, 0.01, 1)), 12, 8)
     sphere("hero_eye_right", (0.36, 0.18, 1.46), (0.045, 0.045, 0.045), bpy.data.materials["hero black eye"], 12, 8)
     cyl("hero_helmet", (0.03, 0, 1.58), 0.42, 0.28, MAT["steel"], 32, (math.radians(90), 0, 0))
+    cyl("hero_helmet_rim", (0.17, 0, 1.5), 0.44, 0.06, MAT["gold"], 32, (math.radians(90), 0, 0))
     cone("hero_helmet_plume_1", (-0.12, 0, 1.84), 0.08, 0.34, MAT["red"], 12, (math.radians(-28), 0, 0))
     cone("hero_helmet_plume_2", (-0.02, 0.08, 1.82), 0.065, 0.3, MAT["red"], 12, (math.radians(-18), 0, math.radians(18)))
     cyl("hero_scarf", (0.08, 0, 1.02), 0.34, 0.12, MAT["red"], 32, (math.radians(90), 0, 0))
-    cube("hero_backpack", (-0.42, 0, 0.92), (0.22, 0.42, 0.44), MAT["leather"])
+    bevel(cube("hero_backpack", (-0.42, 0, 0.92), (0.22, 0.42, 0.44), MAT["leather"]), 0.025, 2)
+    sphere("hero_throwing_wing", (0.23, 0.44, 0.92), (0.16, 0.34, 0.13), MAT["feather"], 18, 8)
+    sphere("hero_egg_bomb_held", (0.5, 0.58, 1.03), (0.16, 0.13, 0.2), mat("blue spotted egg shell", (0.9, 0.85, 0.62, 1), 0.4), 20, 10)
+    for i, offset in enumerate([(-0.04, 0.03, 0.08), (0.05, -0.04, 0.06), (0.02, 0.05, -0.02)]):
+        sphere(f"hero_egg_bomb_spot_{i}", (0.5 + offset[0], 0.58 + offset[1], 1.03 + offset[2]), (0.035, 0.025, 0.035), MAT["blue"], 10, 6)
+    cyl("hero_bomb_fuse", (0.53, 0.6, 1.24), 0.012, 0.18, MAT["wood"], 8, (math.radians(18), 0, 0))
+    sphere("hero_bomb_spark", (0.56, 0.62, 1.34), (0.055, 0.055, 0.055), MAT["gold"], 12, 6)
     cyl("hero_left_leg", (0.04, -0.2, 0.15), 0.045, 0.32, MAT["beak"], 12)
     cyl("hero_right_leg", (0.04, 0.2, 0.15), 0.045, 0.32, MAT["beak"], 12)
-    cube("hero_left_foot", (0.15, -0.2, -0.03), (0.25, 0.08, 0.05), MAT["beak"])
-    cube("hero_right_foot", (0.15, 0.2, -0.03), (0.25, 0.08, 0.05), MAT["beak"])
+    bevel(cube("hero_left_foot", (0.15, -0.2, -0.03), (0.25, 0.08, 0.05), MAT["beak"]), 0.015, 1)
+    bevel(cube("hero_right_foot", (0.15, 0.2, -0.03), (0.25, 0.08, 0.05), MAT["beak"]), 0.015, 1)
     sphere("hero_shield", (0.1, -0.46, 0.75), (0.25, 0.08, 0.32), MAT["blue"], 24, 12)
     cube("hero_shield_trim", (0.1, -0.53, 0.75), (0.34, 0.035, 0.44), MAT["gold"])
     shade()
@@ -146,6 +164,8 @@ def make_grunt(path):
     clean()
     setup_materials()
     sphere("grunt_body_red", (0, 0, 0.72), (0.52, 0.4, 0.58), MAT["red"])
+    for index, y in enumerate([-0.32, -0.16, 0, 0.16, 0.32]):
+        sphere(f"grunt_dark_tail_{index}", (-0.42, y, 0.88 + abs(y) * 0.1), (0.12, 0.055, 0.3), MAT["dark_feather"], 16, 8)
     sphere("grunt_head", (0.08, 0, 1.28), (0.4, 0.32, 0.34), MAT["red"])
     cone("grunt_beak", (0.48, 0, 1.26), 0.14, 0.28, MAT["beak"], 20, (0, math.radians(90), 0))
     cone("grunt_plume", (-0.08, 0, 1.63), 0.12, 0.34, MAT["red"], 16, (math.radians(-20), 0, 0))
@@ -153,6 +173,9 @@ def make_grunt(path):
     sphere("grunt_eye_2", (0.35, 0.13, 1.38), (0.05, 0.05, 0.05), MAT["lava"], 12, 8)
     sphere("grunt_pauldron_l", (-0.05, -0.38, 0.95), (0.22, 0.16, 0.18), MAT["steel"], 16, 8)
     sphere("grunt_pauldron_r", (-0.05, 0.38, 0.95), (0.22, 0.16, 0.18), MAT["steel"], 16, 8)
+    sphere("grunt_round_shield", (0.28, -0.48, 0.74), (0.22, 0.06, 0.28), MAT["steel"], 20, 10)
+    cube("grunt_shield_cross", (0.29, -0.53, 0.74), (0.32, 0.025, 0.08), MAT["gold"])
+    cube("grunt_shield_cross_v", (0.29, -0.53, 0.74), (0.08, 0.025, 0.34), MAT["gold"])
     cyl("grunt_leg_l", (0.02, -0.18, 0.12), 0.045, 0.28, MAT["beak"], 12)
     cyl("grunt_leg_r", (0.02, 0.18, 0.12), 0.045, 0.28, MAT["beak"], 12)
     shade()
@@ -163,6 +186,8 @@ def make_boss(path):
     clean()
     setup_materials()
     sphere("boss_massive_body", (0, 0, 0.95), (0.92, 0.68, 0.92), MAT["dark_feather"], 40, 20)
+    for index, y in enumerate([-0.65, -0.4, -0.15, 0.15, 0.4, 0.65]):
+        sphere(f"boss_tail_blade_{index}", (-0.64, y, 1.08 + abs(y) * 0.18), (0.18, 0.08, 0.62), MAT["dark_feather"], 18, 8)
     sphere("boss_chest_glow", (0.28, 0, 0.92), (0.32, 0.2, 0.34), MAT["lava"], 24, 12)
     sphere("boss_head", (0.18, 0, 1.76), (0.58, 0.46, 0.52), MAT["dark_feather"], 32, 16)
     cone("boss_beak", (0.78, 0, 1.72), 0.2, 0.42, MAT["beak"], 24, (0, math.radians(90), 0))
@@ -173,6 +198,7 @@ def make_boss(path):
     for y in [-0.58, 0.58]:
         sphere(f"boss_gold_pauldron_{y}", (0.05, y, 1.24), (0.42, 0.22, 0.28), MAT["gold"], 24, 12)
         cone(f"boss_spike_{y}", (0.06, y * 1.17, 1.28), 0.08, 0.32, MAT["steel"], 12, (math.radians(90), 0, 0))
+    cyl("boss_belt_gem", (0.42, 0, 0.72), 0.18, 0.12, MAT["lava"], 24, (math.radians(90), 0, 0))
     for y in [-0.24, 0.24]:
         cyl(f"boss_leg_{y}", (0.1, y, 0.16), 0.07, 0.34, MAT["beak"], 12)
     shade()
@@ -183,18 +209,22 @@ def make_props(path):
     clean()
     setup_materials()
     # castle
-    cube("castle_keep", (0, 0, 0.75), (0.85, 0.7, 1.5), MAT["stone"])
+    bevel(cube("castle_keep", (0, 0, 0.75), (0.85, 0.7, 1.5), MAT["stone"]), 0.035, 2)
     for x in [-0.62, 0.62]:
         cyl(f"castle_tower_{x}", (x, 0, 0.85), 0.23, 1.7, MAT["stone"], 18)
         cone(f"castle_roof_{x}", (x, 0, 1.9), 0.32, 0.52, MAT["red"], 18)
+        cyl(f"castle_flag_pole_{x}", (x, 0, 2.35), 0.018, 0.48, MAT["gold"], 8)
+        cube(f"castle_flag_{x}", (x + 0.12, 0, 2.44), (0.24, 0.035, 0.16), MAT["banner"])
     cone("castle_roof_keep", (0, 0, 1.76), 0.5, 0.56, MAT["red"], 24)
-    cube("castle_gate", (0, -0.36, 0.28), (0.34, 0.06, 0.52), MAT["wood"])
+    bevel(cube("castle_gate", (0, -0.36, 0.28), (0.34, 0.06, 0.52), MAT["wood"]), 0.02, 2)
+    for i, x in enumerate([-0.24, 0, 0.24]):
+        cube(f"castle_window_{i}", (x, -0.37, 0.92), (0.08, 0.035, 0.18), MAT["blue"])
     # treasure
-    cube("treasure_chest_base", (2.2, 0, 0.28), (0.9, 0.52, 0.42), MAT["wood"])
+    bevel(cube("treasure_chest_base", (2.2, 0, 0.28), (0.9, 0.52, 0.42), MAT["wood"]), 0.04, 2)
     cyl("treasure_chest_lid", (2.2, 0, 0.54), 0.28, 0.92, MAT["gold"], 24, (math.radians(90), 0, math.radians(90)))
     cube("treasure_lock", (2.2, -0.29, 0.42), (0.18, 0.06, 0.22), MAT["gold"])
     # shop wagon
-    cube("shop_wagon", (-2.1, 0, 0.42), (1.12, 0.62, 0.72), MAT["wood"])
+    bevel(cube("shop_wagon", (-2.1, 0, 0.42), (1.12, 0.62, 0.72), MAT["wood"]), 0.035, 2)
     cyl("shop_wheel_l", (-2.55, -0.34, 0.12), 0.18, 0.08, MAT["steel"], 24, (math.radians(90), 0, 0))
     cyl("shop_wheel_r", (-1.65, -0.34, 0.12), 0.18, 0.08, MAT["steel"], 24, (math.radians(90), 0, 0))
     cube("shop_awning", (-2.1, -0.02, 0.88), (1.24, 0.68, 0.14), MAT["blue"])
@@ -209,8 +239,8 @@ def make_terrain(path):
     clean()
     setup_materials()
     for i, x in enumerate([-2.8, -1.5, -0.2, 1.1, 2.4]):
-        cube(f"moss_platform_{i}", (x, 0, 0.18 + (i % 2) * 0.08), (1.1, 0.72, 0.28), MAT["wood"])
-        cube(f"moss_top_{i}", (x, 0, 0.36 + (i % 2) * 0.08), (1.04, 0.68, 0.08), MAT["moss"])
+        bevel(cube(f"moss_platform_{i}", (x, 0, 0.18 + (i % 2) * 0.08), (1.1, 0.72, 0.28), MAT["wood"]), 0.055, 3)
+        bevel(cube(f"moss_top_{i}", (x, 0, 0.36 + (i % 2) * 0.08), (1.04, 0.68, 0.08), MAT["moss"]), 0.05, 2)
         for r in range(3):
             sphere(f"rock_{i}_{r}", (x - 0.35 + r * 0.32, -0.34, 0.52), (0.09, 0.07, 0.07), MAT["stone"], 12, 8)
     shade()
@@ -221,7 +251,7 @@ def make_diorama_props(path):
     clean()
     setup_materials()
     # left windmill and cottage, matching the battle reference.
-    cube("windmill_house", (-3.2, 0, 0.38), (0.86, 0.58, 0.64), MAT["wood"])
+    bevel(cube("windmill_house", (-3.2, 0, 0.38), (0.86, 0.58, 0.64), MAT["wood"]), 0.035, 2)
     cone("windmill_roof", (-3.2, 0, 0.92), 0.58, 0.48, MAT["red"], 4, (0, 0, math.radians(45)))
     cyl("windmill_mast", (-3.2, -0.33, 1.08), 0.045, 0.7, MAT["wood"], 10, (math.radians(90), 0, 0))
     for index, angle in enumerate([0, math.pi / 2, math.pi, math.pi * 1.5]):
@@ -231,14 +261,14 @@ def make_diorama_props(path):
     # boss altar and torches.
     cyl("boss_altar_base", (2.9, 0, 0.22), 0.62, 0.28, MAT["stone"], 32)
     cyl("boss_altar_top", (2.9, 0, 0.48), 0.78, 0.18, MAT["stone"], 32)
-    cube("boss_red_carpet", (2.9, -0.46, 0.58), (0.42, 0.58, 0.04), MAT["banner"])
+    bevel(cube("boss_red_carpet", (2.9, -0.46, 0.58), (0.42, 0.58, 0.04), MAT["banner"]), 0.015, 1)
     for x in [2.08, 3.72]:
         cyl(f"torch_pole_{x}", (x, -0.32, 0.65), 0.035, 1.08, MAT["wood"], 10)
         sphere(f"torch_fire_{x}", (x, -0.32, 1.26), (0.13, 0.13, 0.18), MAT["lava"], 16, 8)
 
     # treasure cave dressing.
-    cube("open_chest_base", (-0.15, 0.08, 0.26), (0.92, 0.56, 0.36), MAT["wood"])
-    cube("open_chest_lid", (-0.15, 0.32, 0.64), (0.92, 0.16, 0.44), MAT["gold"])
+    bevel(cube("open_chest_base", (-0.15, 0.08, 0.26), (0.92, 0.56, 0.36), MAT["wood"]), 0.035, 2)
+    bevel(cube("open_chest_lid", (-0.15, 0.32, 0.64), (0.92, 0.16, 0.44), MAT["gold"]), 0.03, 2)
     sphere("chest_light_core", (-0.15, -0.1, 0.56), (0.22, 0.16, 0.12), MAT["gold"], 18, 8)
     for i in range(9):
         sphere(f"coin_scatter_{i}", (-0.68 + i * 0.15, -0.48 + (i % 3) * 0.08, 0.08), (0.055, 0.055, 0.018), MAT["gold"], 14, 6)

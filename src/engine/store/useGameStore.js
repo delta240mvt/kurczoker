@@ -69,7 +69,7 @@ function stateAfterBattle(game) {
 export function createEngineStateInitializer(seed = 1) {
   return (set, get) => ({
     game: setUiMessage(startRun(seed), "Gotowy do wyprawy."),
-    input: { aim: { x: 0, y: 0 }, firing: false },
+    input: { aim: { x: 0, y: 0 }, moveX: 0, jump: false, firing: false },
     selectNode(nodeId) {
       set({ game: hydrateEngineBattle(selectMapNode(get().game, nodeId)) });
     },
@@ -91,6 +91,12 @@ export function createEngineStateInitializer(seed = 1) {
     setAim(aim) {
       set({ input: { ...get().input, aim } });
     },
+    setMovement(moveX = 0) {
+      set({ input: { ...get().input, moveX } });
+    },
+    setJump(jump = false) {
+      set({ input: { ...get().input, jump } });
+    },
     projectileHitEnemy(payload) {
       const next = projectileHitEnemy(get().game, payload);
       set({ game: stateAfterBattle(next) });
@@ -106,7 +112,7 @@ export function createEngineStateInitializer(seed = 1) {
 
       let next = {
         ...game,
-        battle: updateBattle(game.battle, {}, delta)
+        battle: updateBattle(game.battle, { moveX: get().input.moveX, jump: get().input.jump }, delta)
       };
 
       if (game.battle.phase !== BATTLE_PHASES.PLAYER_TURN && next.battle.phase === BATTLE_PHASES.PLAYER_TURN) {
