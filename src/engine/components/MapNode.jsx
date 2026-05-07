@@ -14,18 +14,16 @@ const NODE_STYLE = {
 export function MapNode({ node, position, offered = false, active = false, completed = false, onSelect }) {
   const [hovered, setHovered] = useState(false);
   const style = NODE_STYLE[node.type] ?? NODE_STYLE[NODE_TYPES.BATTLE];
-  const nodeColor = offered || active ? style.color : completed ? "#6b7280" : "#3d4d5d";
   const glowColor = active ? "#facc15" : style.emissive;
-  const glowIntensity = active ? 0.62 : offered ? 0.38 : 0;
   const scale = useMemo(() => {
-    if (hovered && offered) return 1.12;
-    if (active) return 1.08;
+    if (hovered && offered) return 1.08;
+    if (active) return 1.04;
     return 1;
   }, [active, hovered, offered]);
 
   return (
     <group
-      position={position}
+      position={[position[0], position[1], position[2] + 0.02]}
       scale={scale}
       onClick={(event) => {
         event.stopPropagation();
@@ -38,27 +36,13 @@ export function MapNode({ node, position, offered = false, active = false, compl
       onPointerOut={() => setHovered(false)}
     >
       {(offered || active) && (
-        <mesh position={[0, -0.02, -0.08]} rotation={[-Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[0.32, active ? 0.5 : 0.45, 36]} />
-          <meshBasicMaterial color={glowColor} transparent opacity={active ? 0.48 : 0.34} />
+        <mesh position={[0, -0.05, -0.12]} rotation={[-Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.19, 0.012, 8, 40]} />
+          <meshBasicMaterial color={glowColor} transparent opacity={active ? 0.9 : 0.58} />
         </mesh>
       )}
-      <mesh position={[0, 0, -0.05]} rotation={[0.08, 0, 0]}>
-        <cylinderGeometry args={[0.26, 0.32, 0.14, 32]} />
-        <meshStandardMaterial
-          color={nodeColor}
-          emissive={glowColor}
-          emissiveIntensity={glowIntensity}
-          roughness={0.42}
-          metalness={0.08}
-        />
-      </mesh>
-      <mesh position={[0, -0.02, -0.18]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[0.38, 32]} />
-        <meshBasicMaterial color="#163c4a" transparent opacity={0.28} />
-      </mesh>
-      <group position={[0, 0.2, 0.08]}>
-        <PixelBillboard type={node.type} active={active} offered={offered || active} scale={0.46} />
+      <group position={[0, -0.02, 0.02]}>
+        <PixelBillboard type={node.type} active={active} offered={offered || active} scale={0.34} />
       </group>
     </group>
   );

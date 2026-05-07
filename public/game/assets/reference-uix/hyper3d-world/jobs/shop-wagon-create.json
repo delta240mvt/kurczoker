@@ -1,0 +1,25 @@
+{
+  "createdAt": "2026-05-07T10:27:29",
+  "asset": "shop-wagon",
+  "image": "public\\game\\assets\\reference-uix\\hyper3d-world\\shop-wagon-ref.png",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Detailed stylized realistic fantasy shop wagon and merchant stall from the reference, warm wood, awning, crates, lanterns, cozy medieval adventure style. Isolated 3D prop, no character, no background, no text, game-ready GLB, PBR.",
+    "submit_time": "2026-05-07T08:27:30.846Z",
+    "uuid": "17fd7544-f909-4fd7-9b77-ba931825af09",
+    "jobs": {
+      "uuids": [
+        "27211957-1765-4206-94aa-6b7ac9c7a728",
+        "d7caa260-d5cc-45b7-9b0f-a2184023590f",
+        "677588ae-bf43-471e-a555-f2f5911b1ddc",
+        "d417b6e0-9f8b-48f5-b267-ab7a9c21408e",
+        "a8dbc42c-2221-480b-b60c-e4ad8147ec31",
+        "280a26d6-2d0f-4ca3-8aac-a9e82b11fdda"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

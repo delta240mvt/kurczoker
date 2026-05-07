@@ -1,0 +1,25 @@
+{
+  "createdAt": "2026-05-07T10:27:26",
+  "asset": "windmill-landmark",
+  "image": "public\\game\\assets\\reference-uix\\hyper3d-world\\windmill-ref.png",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Detailed stylized realistic medieval windmill cottage from the reference, stone and timber walls, red roof, four wooden blades, moss and small flowers. Isolated 3D prop, no background, no text, game-ready GLB, PBR.",
+    "submit_time": "2026-05-07T08:27:27.527Z",
+    "uuid": "54eb4c67-4f9b-47b1-889c-2199ae1669ae",
+    "jobs": {
+      "uuids": [
+        "c3b43f0a-b9ee-42d6-9221-1d4c9c5d4415",
+        "a2b679a3-3fb0-4967-a2d6-bc6efc551cc9",
+        "b2b6b272-61ba-422c-b85f-58786bd2408d",
+        "8859ae30-42ad-4fff-b950-cd9c40264e10",
+        "9a311e32-d4f0-4112-bb16-20ccbbfa3c3c",
+        "628a31cd-0b7a-4b0b-9ce8-c485d2a2c2ff"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

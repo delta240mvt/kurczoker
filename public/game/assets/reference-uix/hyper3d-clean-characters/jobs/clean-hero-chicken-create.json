@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-05-07T11:26:30",
+  "asset": "clean-hero-chicken",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Full volumetric 3D character model, NOT a flat relief, NOT a square card, NOT a billboard. A brave white chicken knight hero for a fantasy roguelite game: round white feather body, expressive yellow beak, small yellow feet, silver medieval helmet with red plume, red scarf, leather backpack, belt, holding a blue-spotted egg bomb. Isolated character, no background, no base plate, no text, no UI. Stylized realistic, high quality PBR, game-ready GLB, clean silhouette from all angles.",
+    "submit_time": "2026-05-07T09:26:31.413Z",
+    "uuid": "2152aac6-edb8-4586-b23c-4b5b886ad1f0",
+    "jobs": {
+      "uuids": [
+        "4bcf3cd7-2dc3-406f-a5e6-aea4f07d1da6",
+        "cbf48a3d-5743-4308-806c-8b52ff1bb7da",
+        "51711db7-c4d3-4d89-85a2-3f0f297e337c",
+        "5ed76e55-44aa-4560-8d71-f8ac52c57533",
+        "035985ca-ef41-4bd3-a7fb-718e1f6286d0",
+        "e8022b09-ccef-474a-b1a4-2fb6a565816b"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "statusCode": 201,
+  "response": {
+    "jobs": [
+      {
+        "uuid": "4bcf3cd7-2dc3-406f-a5e6-aea4f07d1da6",
+        "status": "Done"
+      },
+      {
+        "uuid": "cbf48a3d-5743-4308-806c-8b52ff1bb7da",
+        "status": "Done"
+      },
+      {
+        "uuid": "51711db7-c4d3-4d89-85a2-3f0f297e337c",
+        "status": "Done"
+      },
+      {
+        "uuid": "5ed76e55-44aa-4560-8d71-f8ac52c57533",
+        "status": "Done"
+      },
+      {
+        "uuid": "035985ca-ef41-4bd3-a7fb-718e1f6286d0",
+        "status": "Done"
+      },
+      {
+        "uuid": "e8022b09-ccef-474a-b1a4-2fb6a565816b",
+        "status": "Done"
+      }
+    ]
+  }
+}

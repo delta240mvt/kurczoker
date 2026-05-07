@@ -1,0 +1,23 @@
+{
+  "createdAt": "2026-05-07T10:02:53",
+  "asset": "kurczoker-battle-world",
+  "image": "public/game/assets/reference-uix/kurczoker-battle-world.png",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": " ",
+    "submit_time": "2026-05-07T08:02:54.468Z",
+    "uuid": "a14ff974-ca95-40d2-9547-ec408e3145b4",
+    "jobs": {
+      "uuids": [
+        "89c4eaf5-3af3-490b-99c4-28e18cf4358f",
+        "9a35faab-bd7c-457c-8b9b-061e508e6791",
+        "5a1a6a31-17ad-454a-bc58-d7e73ce5ddfe",
+        "2cf526e1-be23-49c9-a08d-053997148840",
+        "ff6f1d5e-d6a5-4a11-ac6e-02153af06e92",
+        "7a678dee-26c7-43bb-8632-fc353db8ca3a"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

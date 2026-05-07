@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-05-07T10:50:52",
+  "asset": "clean-castle",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Beautiful stylized realistic medieval fantasy castle landmark, pale stone towers, red roofs, tiny flags, clean heroic adventure game style, no text, no UI, isolated 3D prop, high quality PBR GLB.",
+    "submit_time": "2026-05-07T08:50:53.220Z",
+    "uuid": "81dc0af9-5210-485f-9afd-6849f5637732",
+    "jobs": {
+      "uuids": [
+        "daf4e3ed-6f5a-48e8-b5b8-c113c9cba4b9",
+        "bdeb0536-2295-4d84-8769-1f2bbf81ddd5",
+        "5c175c93-1731-47a8-b6da-d41d3375ba5e",
+        "1f02cad9-0e04-426b-b6a6-56989ab8b40d",
+        "fb8e88bb-8912-4111-9182-b1c19c9b2de5",
+        "f4753a16-d013-45da-951d-eb5fdf48c0a7"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

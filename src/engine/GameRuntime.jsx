@@ -2,7 +2,6 @@ import { Component, lazy, Suspense, useCallback, useEffect, useRef, useState } f
 import { useFrame } from "@react-three/fiber";
 import { CameraRig } from "./components/CameraRig.jsx";
 import { ModelAsset } from "./components/ModelAsset.jsx";
-import { SceneCanvasBackdrop } from "./components/SceneCanvasBackdrop.jsx";
 import { SceneLights } from "./components/SceneLights.jsx";
 import { MapScene } from "./scenes/MapScene.jsx";
 import { selectEngineScene } from "./runtime/sceneSelection.js";
@@ -286,9 +285,6 @@ export function GameRuntime() {
       <fog attach="fog" args={[engineScene === "battle" ? "#111a2e" : "#7fc8f8", 7, 14]} />
       <SceneLights />
       <CameraRig />
-      <Suspense fallback={null}>
-        <SceneCanvasBackdrop backdropId={backdropId} />
-      </Suspense>
       {engineScene === "map" ? (
         <BattleSceneErrorBoundary resetKey="map" fallback={<MapSceneFallback />}>
           <Suspense fallback={<ScenePlaceholder engineScene="reward" />}>

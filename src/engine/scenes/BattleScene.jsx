@@ -1,17 +1,20 @@
 import { Physics, RigidBody, CuboidCollider, BallCollider } from "@react-three/rapier";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { BATTLE_PHASES, ACTOR_TEAMS } from "../../game/constants.js";
 import { BattleActor } from "../components/BattleActor.jsx";
+import { ModelAsset } from "../components/ModelAsset.jsx";
 import { ProjectileArc } from "../components/ProjectileArc.jsx";
 import { ExplosionFx } from "../fx/ExplosionFx.jsx";
 import { ProjectileTrail } from "../fx/ProjectileTrail.jsx";
+import { aimToThrow, clampAim } from "../runtime/throwDynamics.js";
 
 const DEFAULT_AIM = { x: 1.4, y: 0.92 };
 const GRAVITY_Y = -5.8;
 const WORLD_WIDTH = 960;
 const WORLD_HEIGHT = 540;
 const ARENA_Y_OFFSET = 1.62;
+const WORLD_ASSET_BASE = "/game/assets/models/hyper3d-clean";
 const TERRAIN = [
   { id: "ground", position: [0, -1.9, 0], size: [7.8, 0.42, 0.72], color: "#6f4d2f" },
   { id: "left-rise", position: [-2.75, -1.25, 0], size: [1.45, 0.32, 0.62], color: "#7a5735" },
@@ -49,6 +52,14 @@ function PaintedBattleBackdrop() {
 
   return (
     <group position={[0, 0, -0.82]}>
+      <Suspense fallback={null}>
+        <group position={[0, -0.28, -0.16]} rotation={[-0.16, 0, 0]} scale={5.65}>
+          <ModelAsset src={`${WORLD_ASSET_BASE}/clean-battle-arena.glb`} scale={1} />
+        </group>
+        <ModelAsset src={`${WORLD_ASSET_BASE}/clean-windmill.glb`} scale={0.64} position={[-4.05, 0.45, -0.05]} rotation={[0, 0.18, 0]} />
+        <ModelAsset src={`${WORLD_ASSET_BASE}/clean-castle.glb`} scale={0.68} position={[4.05, 0.76, -0.08]} rotation={[0, -0.35, 0]} />
+        <ModelAsset src={`${WORLD_ASSET_BASE}/clean-platform.glb`} scale={1.12} position={[0.2, -0.55, 0.1]} rotation={[0, -0.1, 0]} />
+      </Suspense>
       <mesh position={[0, -1.72, -0.04]}>
         <planeGeometry args={[8.6, 1.2]} />
         <meshBasicMaterial color="#342311" transparent opacity={0.38} />
@@ -97,6 +108,7 @@ function TerrainPlatform({ platform }) {
 
 function ProjectileBody({ projectile, enemy, enemyPosition, onImpact, onTrail }) {
   const bodyRef = useRef(null);
+  const eggRef = useRef(null);
   const resolvedRef = useRef(false);
 
   function resolveProjectileImpact(position) {
@@ -120,7 +132,7 @@ function ProjectileBody({ projectile, enemy, enemyPosition, onImpact, onTrail })
   useEffect(() => {
     if (!bodyRef.current) return;
     bodyRef.current.applyImpulse({ x: projectile.impulse.x, y: projectile.impulse.y, z: 0 }, true);
-    bodyRef.current.applyTorqueImpulse({ x: 0, y: 0, z: -0.32 }, true);
+    bodyRef.current.applyTorqueImpulse({ x: 0, y: 0, z: -0.5 - projectile.charge * 0.72 }, true);
   }, [projectile.impulse.x, projectile.impulse.y]);
 
   useFrame(() => {
@@ -128,6 +140,10 @@ function ProjectileBody({ projectile, enemy, enemyPosition, onImpact, onTrail })
     const translation = bodyRef.current.translation();
     const position = [translation.x, translation.y, translation.z];
     onTrail(position);
+    if (eggRef.current) {
+      eggRef.current.rotation.z -= 0.18 + projectile.charge * 0.18;
+      eggRef.current.rotation.x += 0.05;
+    }
 
     if (translation.y < -2.35 || translation.x > 4.6 || translation.x < -4.2) {
       resolvedRef.current = true;
@@ -163,21 +179,27 @@ function ProjectileBody({ projectile, enemy, enemyPosition, onImpact, onTrail })
           onImpact({ type: "enemy", actorId: enemy.id, position: translation ? [translation.x, translation.y, translation.z] : projectile.origin });
         }}
       />
-      <mesh scale={[0.86, 1.14, 0.86]}>
-        <sphereGeometry args={[0.18, 28, 18]} />
-        <meshStandardMaterial color="#fff1b5" roughness={0.34} metalness={0.04} emissive="#fb923c" emissiveIntensity={0.22} />
-      </mesh>
-      <mesh position={[0.05, 0.04, 0.09]}>
-        <sphereGeometry args={[0.045, 10, 8]} />
-        <meshBasicMaterial color="#ffffff" transparent opacity={0.76} />
-      </mesh>
-      {[[-0.07, 0.06, 0.11], [0.08, -0.05, 0.12], [0.01, 0.11, 0.09]].map((spot, index) => (
-        <mesh key={`egg-spot-${index}`} position={spot}>
-          <sphereGeometry args={[0.035, 10, 8]} />
-          <meshStandardMaterial color="#4b8fd6" roughness={0.45} />
+      <group ref={eggRef} scale={1 + projectile.charge * 0.12}>
+        <mesh scale={[0.86, 1.18, 0.86]}>
+          <sphereGeometry args={[0.18, 32, 20]} />
+          <meshStandardMaterial color="#fff1b5" roughness={0.3} metalness={0.04} emissive="#fb923c" emissiveIntensity={0.18 + projectile.charge * 0.24} />
         </mesh>
-      ))}
-      <pointLight color="#facc15" intensity={1.2} distance={1.6} />
+        <mesh position={[0.05, 0.04, 0.09]}>
+          <sphereGeometry args={[0.045, 10, 8]} />
+          <meshBasicMaterial color="#ffffff" transparent opacity={0.76} />
+        </mesh>
+        {[[-0.07, 0.06, 0.11], [0.08, -0.05, 0.12], [0.01, 0.11, 0.09], [-0.03, -0.12, -0.02]].map((spot, index) => (
+          <mesh key={`egg-spot-${index}`} position={spot}>
+            <sphereGeometry args={[0.033, 10, 8]} />
+            <meshStandardMaterial color="#4b8fd6" roughness={0.45} />
+          </mesh>
+        ))}
+        <mesh position={[-0.16, 0, 0]} rotation={[0, 0, Math.PI / 2]}>
+          <coneGeometry args={[0.07, 0.22, 16]} />
+          <meshBasicMaterial color="#f97316" transparent opacity={0.42 + projectile.charge * 0.22} />
+        </mesh>
+      </group>
+      <pointLight color="#facc15" intensity={1.05 + projectile.charge * 0.7} distance={1.4 + projectile.charge * 0.6} />
     </RigidBody>
   );
 }
@@ -199,26 +221,19 @@ export function BattleScene({ game, aim, setAim, setMovement, setJump, projectil
 
   function updateAimFromPoint(point) {
     if (!playerTurn || projectile) return;
-    setAim({
-      x: clamp(point.x - projectileOrigin[0], 0.75, 3.15),
-      y: clamp(point.y - projectileOrigin[1], 0.28, 2.15)
-    });
+    setAim(clampAim({ x: point.x - projectileOrigin[0], y: point.y - projectileOrigin[1] }));
   }
 
   function fireProjectile(point) {
     if (!playerTurn || projectile) return;
     updateAimFromPoint(point);
-    const nextAim = {
-      x: clamp(point.x - projectileOrigin[0], 0.75, 3.15),
-      y: clamp(point.y - projectileOrigin[1], 0.28, 2.15)
-    };
-    const length = Math.hypot(nextAim.x, nextAim.y) || 1;
-    const power = Math.min(1.35, Math.max(0.55, length / 2.2));
+    const throwState = aimToThrow({ x: point.x - projectileOrigin[0], y: point.y - projectileOrigin[1] });
     setTrail([]);
     setProjectile({
       id: `egg-${Date.now()}`,
       origin: projectileOrigin,
-      impulse: { x: (nextAim.x / length) * 4.35 * power, y: (nextAim.y / length) * 4.35 * power },
+      impulse: throwState.impulse,
+      charge: throwState.charge,
       targetEnemy: point.x > enemyPosition[0] - 0.65
     });
   }
@@ -396,7 +411,7 @@ export function BattleScene({ game, aim, setAim, setMovement, setJump, projectil
           />
         ) : null}
       </Physics>
-      {playerTurn && !projectile ? <ProjectileArc origin={projectileOrigin} aim={activeAim} gravity={GRAVITY_Y} /> : null}
+      {playerTurn && !projectile ? <ProjectileArc origin={projectileOrigin} aim={activeAim} gravity={GRAVITY_Y} charging={gesture === "aim"} /> : null}
       {trail.length > 0 ? <ProjectileTrail points={trail} /> : null}
       {explosion ? <ExplosionFx key={explosion.id} position={explosion.position} onDone={() => setExplosion(null)} /> : null}
     </group>

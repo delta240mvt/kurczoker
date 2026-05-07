@@ -1,0 +1,22 @@
+{
+  "createdAt": "2026-05-07T10:02:15",
+  "asset": "kurczoker-hero",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": " ",
+    "submit_time": "2026-05-07T08:02:16.892Z",
+    "uuid": "444522ca-18e0-4490-88e9-712e1cffc6f3",
+    "jobs": {
+      "uuids": [
+        "b8637f3a-75ae-4f95-9f69-dc83ee9fb241",
+        "2e8641ea-98cf-4f0a-a010-6eca818e661c",
+        "ebd71371-d3ff-4020-90f2-08ac11af24f9",
+        "83593fa1-7957-4264-a352-124a9681ec29",
+        "378e2b12-ca1e-4e9b-9620-06e0cc91058b",
+        "cdeb9b56-ee9d-4b14-a128-b60b3343294a"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

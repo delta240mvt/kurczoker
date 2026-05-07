@@ -268,79 +268,165 @@ const GENERATED_MODEL_ASSETS = [
     id: "model.kurczoker.hero.knight",
     type: "model",
     path: "/game/assets/models/kurczoker-hero-knight.glb",
-    source: "blender-mcp-pipeline",
+    source: "hyper3d-rodin-uix",
     sourceUrl: "",
     author: "KURCZOKER",
     license: "generated-owned",
     attributionRequired: false,
     ready: true,
-    notes: "Blender-generated armored Kurczoker hero GLB, inspired by the approved UIX references."
+    notes: "Hyper3D/Rodin image-to-3D model generated from UIX battle reference and copied into the canonical hero GLB path."
   },
   {
     id: "model.kurczoker.enemy.grunt",
     type: "model",
     path: "/game/assets/models/kurczoker-enemy-grunt.glb",
-    source: "blender-mcp-pipeline",
+    source: "hyper3d-rodin-uix",
     sourceUrl: "",
     author: "KURCZOKER",
     license: "generated-owned",
     attributionRequired: false,
     ready: true,
-    notes: "Blender-generated red armored enemy rooster."
+    notes: "Hyper3D/Rodin image-to-3D red enemy rooster generated from UIX battle reference."
   },
   {
     id: "model.kurczoker.boss.rooster",
     type: "model",
     path: "/game/assets/models/kurczoker-boss-rooster.glb",
-    source: "blender-mcp-pipeline",
+    source: "hyper3d-rodin-uix",
     sourceUrl: "",
     author: "KURCZOKER",
     license: "generated-owned",
     attributionRequired: false,
     ready: true,
-    notes: "Blender-generated dark final boss rooster with molten glow accents."
+    notes: "Hyper3D/Rodin image-to-3D boss rooster generated from UIX final battle reference."
   },
   {
     id: "model.kurczoker.map.props",
     type: "model",
     path: "/game/assets/models/kurczoker-map-props.glb",
-    source: "blender-mcp-pipeline",
+    source: "hyper3d-rodin-uix",
     sourceUrl: "",
     author: "KURCZOKER",
     license: "generated-owned",
     attributionRequired: false,
     ready: true,
-    notes: "Blender-generated castle, chest, shop wagon, and banner props."
+    notes: "Hyper3D/Rodin image-to-3D adventure map world generated from UIX map reference."
   },
   {
     id: "model.kurczoker.terrain.kit",
     type: "model",
     path: "/game/assets/models/kurczoker-terrain-kit.glb",
-    source: "blender-mcp-pipeline",
+    source: "hyper3d-rodin-uix",
     sourceUrl: "",
     author: "KURCZOKER",
     license: "generated-owned",
     attributionRequired: false,
     ready: true,
-    notes: "Blender-generated mossy floating platform and rock kit for battle arenas."
+    notes: "Hyper3D/Rodin image-to-3D battle world generated from UIX battle arena reference."
   },
   {
     id: "model.kurczoker.diorama.props",
     type: "model",
     path: "/game/assets/models/kurczoker-diorama-props.glb",
-    source: "blender-mcp-pipeline",
+    source: "hyper3d-rodin-uix",
     sourceUrl: "",
     author: "KURCZOKER",
     license: "generated-owned",
     attributionRequired: false,
     ready: true,
-    notes: "Blender-generated windmill, boss altar, open chest, torch, coin, flower, and rock diorama props."
+    notes: "Hyper3D/Rodin image-to-3D battle diorama generated from UIX battle arena reference."
   }
 ];
+
+const HYPER3D_WORLD_ASSETS = [
+  "world-terrain",
+  "battle-arena",
+  "castle-landmark",
+  "windmill-landmark",
+  "shop-wagon",
+  "treasure-chest",
+  "boss-altar",
+  "forest-props",
+  "floating-platform",
+  "path-node"
+].map((name) => ({
+  id: `model.hyper3d.world.${name}`,
+  type: "model",
+  path: `/game/assets/models/hyper3d-world/${name}.glb`,
+  source: "hyper3d-rodin-uix",
+  sourceUrl: "",
+  author: "KURCZOKER",
+  license: "generated-owned",
+  attributionRequired: false,
+  ready: true,
+  notes: "Hyper3D/Rodin Regular Quad image-to-3D world asset generated from UIX reference crops for the in-game 3D map and battle scenes."
+}));
+
+const HYPER3D_CLEAN_WORLD_ASSETS = [
+  "clean-world-terrain",
+  "clean-battle-arena",
+  "clean-castle",
+  "clean-windmill",
+  "clean-shop",
+  "clean-treasure",
+  "clean-boss-altar",
+  "clean-forest",
+  "clean-platform",
+  "clean-map-node"
+].map((name) => ({
+  id: `model.hyper3d.clean.${name}`,
+  type: "model",
+  path: `/game/assets/models/hyper3d-clean/${name}.glb`,
+  source: "hyper3d-rodin-text",
+  sourceUrl: "",
+  author: "KURCZOKER",
+  license: "generated-owned",
+  attributionRequired: false,
+  ready: true,
+  notes: "Hyper3D/Rodin Regular Quad text-to-3D clean world asset generated to avoid carrying UI screenshot labels into the in-game 3D canvas."
+}));
+
+const HYPER3D_CLEAN_CHARACTER_ASSETS = [
+  "clean-hero-chicken",
+  "clean-enemy-rooster",
+  "clean-boss-rooster"
+].map((name) => ({
+  id: `model.hyper3d.clean.character.${name}`,
+  type: "model",
+  path: `/game/assets/models/hyper3d-clean-characters/${name}.glb`,
+  source: "hyper3d-rodin-text",
+  sourceUrl: "",
+  author: "KURCZOKER",
+  license: "generated-owned",
+  attributionRequired: false,
+  ready: true,
+  notes: "Hyper3D/Rodin text-to-3D volumetric character model generated to replace flat screenshot relief chickens in battle scenes."
+}));
+
+const TRUE_3D_CHARACTER_ASSETS = [
+  "true-hero-chicken",
+  "true-enemy-rooster",
+  "true-boss-rooster"
+].map((name) => ({
+  id: `model.true3d.character.${name}`,
+  type: "model",
+  path: `/game/assets/models/true-3d-characters/${name}.glb`,
+  source: "threejs-procedural-geometry",
+  sourceUrl: "",
+  author: "KURCZOKER",
+  license: "generated-owned",
+  attributionRequired: false,
+  ready: true,
+  notes: "Runtime battle actor built from real mesh primitives only. No screenshot texture cards, no billboard planes."
+}));
 
 export const ASSETS = PLANNED_ASSETS.map((asset) => ({
   ...asset,
   ready: false
 }))
   .concat(UIX_ASSETS.map((asset) => ({ ...asset, ready: asset.ready ?? false })))
-  .concat(GENERATED_MODEL_ASSETS);
+  .concat(GENERATED_MODEL_ASSETS)
+  .concat(HYPER3D_WORLD_ASSETS)
+  .concat(HYPER3D_CLEAN_WORLD_ASSETS)
+  .concat(HYPER3D_CLEAN_CHARACTER_ASSETS)
+  .concat(TRUE_3D_CHARACTER_ASSETS);

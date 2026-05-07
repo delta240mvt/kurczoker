@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-05-07T10:51:04",
+  "asset": "clean-boss-altar",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Beautiful stylized realistic volcanic boss altar, dark stone circular platform, red carpet, gold spikes, torches with warm fire, molten glow, no text, no UI, isolated 3D prop, high quality PBR GLB.",
+    "submit_time": "2026-05-07T08:51:06.044Z",
+    "uuid": "197a4159-c569-4bc2-9add-adcb8a17e895",
+    "jobs": {
+      "uuids": [
+        "d6d997ab-da32-49d1-9b10-11d9702f0053",
+        "9f284991-3d04-44f1-9d12-4e701f5da2ea",
+        "7c304cda-e48c-4325-ba9e-8f92066ec7a7",
+        "50056408-fdc4-402f-abf6-f3492b914225",
+        "78925a3b-b895-499f-9986-7b3116126cb2",
+        "fb1deb55-7ee7-4808-9c80-f93dd53f5e8a"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

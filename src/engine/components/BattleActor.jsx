@@ -1,3 +1,10 @@
+import { Suspense } from "react";
+import { ModelAsset } from "./ModelAsset.jsx";
+
+const HERO_MODEL = "/game/assets/models/true-3d-characters/true-hero-chicken.glb";
+const ENEMY_MODEL = "/game/assets/models/true-3d-characters/true-enemy-rooster.glb";
+const BOSS_MODEL = "/game/assets/models/true-3d-characters/true-boss-rooster.glb";
+
 function HealthPips({ health = 0, maxHealth = 0, team }) {
   const pips = Array.from({ length: Math.max(maxHealth, health, 1) });
   const filledColor = team === "enemy" ? "#ef4444" : "#46d58c";
@@ -124,6 +131,9 @@ function EnemyFigure({ boss = false }) {
 export function BattleActor({ actor, side = "left", active = false }) {
   const isEnemy = actor.team === "enemy" || side === "right";
   const isBoss = actor.type === "boss" || actor.id?.includes("boss");
+  const modelSrc = isEnemy ? (isBoss ? BOSS_MODEL : ENEMY_MODEL) : HERO_MODEL;
+  const modelScale = isBoss ? 0.98 : isEnemy ? 0.9 : 0.88;
+  const modelLift = isBoss ? 0.02 : 0.08;
 
   return (
     <group>
@@ -133,7 +143,11 @@ export function BattleActor({ actor, side = "left", active = false }) {
       </mesh>
       <group scale={isEnemy ? [-1, 1, 1] : [1, 1, 1]}>
         <group position={[0, -0.48, 0.02]}>
-          {isEnemy ? <EnemyFigure boss={isBoss} /> : <HeroFigure active={active} />}
+          <Suspense fallback={isEnemy ? <EnemyFigure boss={isBoss} /> : <HeroFigure active={active} />}>
+            <ModelAsset src={modelSrc} scale={modelScale} position={[0, modelLift, 1.75]} rotation={[-Math.PI / 2, 0, 0]} />
+          </Suspense>
+          {!isEnemy && active ? <pointLight position={[0.45, 0.42, 0.46]} color="#facc15" intensity={0.7} distance={1.35} /> : null}
+          {isBoss ? <pointLight position={[0.2, 0.48, 0.36]} color="#ef4444" intensity={1.35} distance={1.8} /> : null}
         </group>
         {active ? (
           <mesh position={[0, 0.48, -0.08]} rotation={[-Math.PI / 2, 0, 0]}>

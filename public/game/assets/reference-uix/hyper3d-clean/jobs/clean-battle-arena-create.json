@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-05-07T10:50:48",
+  "asset": "clean-battle-arena",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Beautiful stylized realistic 3D side-view battle arena diorama. Mossy stone platforms at different heights, broken rocky bridge, grassy ledges, small flowers, distant hills, no UI, no labels, no text, no flat screenshot plane. High quality PBR, Regular quality, game-ready GLB for Three.js.",
+    "submit_time": "2026-05-07T08:50:50.105Z",
+    "uuid": "302a81d4-1366-439e-9585-84a80676982d",
+    "jobs": {
+      "uuids": [
+        "d99ff272-346b-4e0a-98ae-cf037fd21571",
+        "82272649-19bd-4f22-a8db-b6f179b56bd7",
+        "43b0ed3e-e54b-4446-9c6c-129557c886f9",
+        "88b7b52b-aead-48d9-aa79-5eb671d0f99c",
+        "355f81b6-d8df-4de0-b644-f7e897429ffa",
+        "84ec1a1d-3495-455d-8b52-95cf922743f9"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

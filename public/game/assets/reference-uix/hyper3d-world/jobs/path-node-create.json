@@ -1,0 +1,25 @@
+{
+  "createdAt": "2026-05-07T10:27:49",
+  "asset": "path-node",
+  "image": "public\\game\\assets\\reference-uix\\hyper3d-world\\path-node-ref.png",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Stylized realistic 3D adventure map node prop from the reference: circular blue and purple node stones, small wooden labels, dirt path segment, medieval map marker style. Isolated 3D prop kit, no UI frame, no readable text, game-ready GLB, PBR.",
+    "submit_time": "2026-05-07T08:27:50.270Z",
+    "uuid": "74615dc7-573c-4e55-95d2-378fd5da5a3d",
+    "jobs": {
+      "uuids": [
+        "ed2a79a8-c0e3-477c-af16-d543b3bd8463",
+        "6463a27c-bc65-4375-b5c7-b499a643934e",
+        "7e4b7ece-7478-4c5f-86de-5f6de7b96a6a",
+        "eaa420c8-9f1f-4ffa-8b99-369433a42079",
+        "d4acee54-a956-4727-92d7-8512f217024e",
+        "aa46dee5-b619-4b99-86c6-3cdb0b97e10c"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

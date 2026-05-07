@@ -1,0 +1,23 @@
+{
+  "createdAt": "2026-05-07T10:02:45",
+  "asset": "kurczoker-enemy-grunt",
+  "image": "public/game/assets/reference-uix/kurczoker-enemy-grunt.png",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": " ",
+    "submit_time": "2026-05-07T08:02:46.100Z",
+    "uuid": "f58290f5-c67d-4417-88e2-e60ed4b12c62",
+    "jobs": {
+      "uuids": [
+        "7ac296c2-bc80-413a-8b34-6ed41bc137ad",
+        "c49d6b00-8c07-4f51-9bfc-7fe43fd48619",
+        "410b028a-a4f0-4990-b78d-60bf2bf376cd",
+        "18e72903-e025-4156-a11a-005e5fc2779c",
+        "22dabc13-ce0d-4500-ae27-a5cc49afd141",
+        "d2f691d4-cfba-4f50-b364-330f07d4ee8c"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

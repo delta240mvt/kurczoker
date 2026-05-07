@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-05-07T10:51:14",
+  "asset": "clean-map-node",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Beautiful stylized realistic magical map node marker: round blue glowing crystal socket set into mossy stone base, gold trim, no letters, no labels, no text, isolated 3D prop, high quality PBR GLB.",
+    "submit_time": "2026-05-07T08:51:15.814Z",
+    "uuid": "9f3bab71-1898-4c7f-99ae-8b077e248f29",
+    "jobs": {
+      "uuids": [
+        "cf5f853f-c8d0-4589-a986-36862dd269da",
+        "918bce9e-2112-4cfa-875e-5baf838942bf",
+        "fcbcee51-968d-4925-bf98-cd88b9dbd6cb",
+        "a1a3f095-1435-4e96-91c8-c45418eec293",
+        "c42569c8-2f00-4de1-89e7-04b0e2c8c301",
+        "98ea0be2-4e73-4ad8-8245-e294d0489f45"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

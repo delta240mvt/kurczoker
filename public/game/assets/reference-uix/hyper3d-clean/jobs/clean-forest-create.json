@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-05-07T10:51:08",
+  "asset": "clean-forest",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Beautiful stylized realistic forest prop cluster, leafy trees, bushes, mossy rocks, flowers, grass tufts, no signs, no text, isolated 3D prop kit, high quality PBR GLB.",
+    "submit_time": "2026-05-07T08:51:09.777Z",
+    "uuid": "3334c9d0-9959-48b8-9f83-7df25f35f1c0",
+    "jobs": {
+      "uuids": [
+        "6e3a6203-fa7b-416d-814b-17488756a69f",
+        "99d91299-da70-4767-95ea-2fe53d95e371",
+        "0dde986e-d6eb-42de-b07a-afb758a2c8a1",
+        "0b6f8748-33f7-4166-afb1-cf3ef874174c",
+        "776197b8-76a7-432c-9da8-c0ff3a89858b",
+        "cb804070-616f-4fd4-89b3-dc38c5cb21db"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

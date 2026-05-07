@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-05-07T10:50:45",
+  "asset": "clean-world-terrain",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Beautiful stylized realistic 3D fantasy overworld diorama for a chicken-knight roguelite map. Rolling green hills, mossy cliffs, winding dirt paths, a small river, flower meadows, layered depth, no text, no signs with letters, no UI, no flat image planes. High quality PBR, Regular quality, game-ready GLB for Three.js.",
+    "submit_time": "2026-05-07T08:50:46.935Z",
+    "uuid": "36cc5cfe-c18f-4c06-8988-9660700da052",
+    "jobs": {
+      "uuids": [
+        "444fa9a1-7040-48e2-b683-351286d82353",
+        "f549a5ac-0d9f-4fea-a364-670192b059d7",
+        "9c4ed7c0-570e-4076-9aa7-caa470b232dc",
+        "fe3d2a1f-3d5d-4367-b8c4-58b9d559f528",
+        "a7d6e3e1-3966-4ffd-b640-fc3f45802408",
+        "d4328d76-cf0b-44a3-99fe-2a7f18643f93"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

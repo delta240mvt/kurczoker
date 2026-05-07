@@ -1,0 +1,25 @@
+{
+  "createdAt": "2026-05-07T10:27:15",
+  "asset": "world-terrain",
+  "image": "public\\game\\assets\\reference-uix\\hyper3d-world\\world-map-terrain-ref.png",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "High quality stylized realistic 3D fantasy overworld terrain kit from the reference image: rolling green hills, raised cliffs, river/lake edge, dirt paths, small meadows. Must be true 3D geometry, no flat image plane, no UI frame, no text. Game-ready GLB for Three.js, PBR materials, modular diorama base, painterly medieval adventure style.",
+    "submit_time": "2026-05-07T08:27:16.678Z",
+    "uuid": "74ac4125-4f84-4c05-b755-d1043f4609d6",
+    "jobs": {
+      "uuids": [
+        "86641a35-0190-4d90-8944-2c0f2a5c080e",
+        "697f02d2-b9fc-499f-a188-47271d0fa194",
+        "49ed8bf5-54b0-40cb-9f11-4443eaf5f5fa",
+        "848881da-7b37-47eb-9a9b-e0e106bd5fad",
+        "7859e44e-9116-48ea-ba9e-538322dc2e58",
+        "c62bf98e-be88-4daf-bce7-8f03c548b660"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

@@ -1,36 +1,52 @@
 {
-  "generatedAt": "2026-05-07T01:07:24",
-  "runtimeAssetPolicy": "All listed runtime GLB assets are procedural Blender outputs generated locally by tools/generate-kurczoker-wow-assets.py. No third-party Sketchfab, Hyper3D, or Hunyuan3D model files were imported, downloaded, converted, or embedded.",
+  "generatedAt": "2026-05-07T09:50:34",
+  "runtimeAssetPolicy": "In-game canvas scenes use GLB models. UIX screenshots are not rendered as in-game canvas backdrops. The active runtime world uses clean Hyper3D text-to-3D assets; active chicken actors use real procedural mesh GLBs because the Hyper3D character pass produced flat card-like cutouts.",
   "tools": {
+    "hyper3d": {
+      "ok": true,
+      "mode": "MAIN_SITE_IMAGE_AND_TEXT_TO_3D",
+      "importedRuntimeAssets": true,
+      "characterAssetCount": 8,
+      "imageWorldAssetCount": 10,
+      "cleanTextWorldAssetCount": 10,
+      "worldTier": "Regular",
+      "worldMeshMode": "Quad",
+      "cleanTextCharacterAssetCount": 3
+    },
     "blender": {
       "ok": true,
-      "mode": "LOCAL_PROCEDURAL_GENERATION",
-      "sourceScript": "tools/generate-kurczoker-wow-assets.py"
+      "mode": "GLB_INSPECTION"
     },
     "sketchfab": {
-      "ok": true,
-      "mode": "API_CONNECTIVITY_AND_REFERENCE_SEARCH_ONLY",
-      "importedRuntimeAssets": false,
-      "licenseGate": "No Sketchfab result was used as a runtime asset; non-commercial results are explicitly excluded from import."
-    },
-    "hyper3d": {
       "ok": false,
-      "code": 500,
+      "mode": "NOT_USED_FOR_RUNTIME_ASSETS",
       "importedRuntimeAssets": false
     },
     "hunyuan3d": {
       "ok": false,
-      "reason": "Configured local endpoint was unavailable.",
-      "mode": "LOCAL_API",
+      "mode": "NOT_USED",
       "importedRuntimeAssets": false
+    },
+    "threejs": {
+      "ok": true,
+      "mode": "PROCEDURAL_MESH_GLB_EXPORT",
+      "importedRuntimeAssets": true,
+      "characterAssetCount": 3
     }
   },
-  "assets": [
-    "models/kurczoker-hero-knight.glb",
-    "models/kurczoker-enemy-grunt.glb",
-    "models/kurczoker-boss-rooster.glb",
-    "models/kurczoker-map-props.glb",
-    "models/kurczoker-terrain-kit.glb",
-    "models/kurczoker-diorama-props.glb"
-  ]
+  "runtimeAssets": [
+    "models/true-3d-characters/true-hero-chicken.glb",
+    "models/true-3d-characters/true-enemy-rooster.glb",
+    "models/true-3d-characters/true-boss-rooster.glb",
+    "models/hyper3d-clean/clean-world-terrain.glb",
+    "models/hyper3d-clean/clean-battle-arena.glb",
+    "models/hyper3d-clean/clean-castle.glb",
+    "models/hyper3d-clean/clean-windmill.glb",
+    "models/hyper3d-clean/clean-shop.glb",
+    "models/hyper3d-clean/clean-treasure.glb",
+    "models/hyper3d-clean/clean-boss-altar.glb",
+    "models/hyper3d-clean/clean-forest.glb",
+    "models/hyper3d-clean/clean-platform.glb"
+  ],
+  "notes": "Hyper3D remains active for world assets. The Hyper3D character outputs are archived but no longer used in battle because they looked like cut-out square cards. Active chickens are GLBs generated from explicit Three.js mesh geometry: bodies, heads, beaks, wings, legs, armor, combs, shields, and bombs."
 }

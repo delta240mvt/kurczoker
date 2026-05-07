@@ -1,0 +1,25 @@
+{
+  "createdAt": "2026-05-07T10:27:44",
+  "asset": "floating-platform",
+  "image": "public\\game\\assets\\reference-uix\\hyper3d-world\\floating-platform-ref.png",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Stylized realistic grassy floating stone platform kit from the reference: mossy top, rocky underside, chunky stones, fantasy battle arena style. Isolated 3D prop, no UI, no text, game-ready GLB, PBR.",
+    "submit_time": "2026-05-07T08:27:45.513Z",
+    "uuid": "db5e394a-a69b-4f6b-9426-c476a7fb2da6",
+    "jobs": {
+      "uuids": [
+        "949009f5-a583-4479-9263-5ee5c14d8d8a",
+        "c70893c2-ce2b-402b-8cef-ef278f4c77a5",
+        "e692ea26-3edd-45f9-920e-9551d05dacfe",
+        "75bec198-cb8a-4b80-a9e0-3ce43f23134e",
+        "395ea681-b9eb-4a2e-baf2-5bd525e8756c",
+        "54ef5955-a206-4e83-9e8e-1373b2d1c133"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

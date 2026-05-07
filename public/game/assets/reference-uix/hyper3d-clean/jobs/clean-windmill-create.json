@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-05-07T10:50:55",
+  "asset": "clean-windmill",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Beautiful stylized realistic medieval windmill cottage, timber and stone, red tiled roof, four wooden blades, moss and flowers, no text, isolated 3D prop, high quality PBR GLB.",
+    "submit_time": "2026-05-07T08:50:56.488Z",
+    "uuid": "0228b19c-502c-4376-ae9a-89349296954d",
+    "jobs": {
+      "uuids": [
+        "f635d42e-86e1-48ce-8447-f63ec550c300",
+        "59d18f57-cb15-4496-9c50-7fb3d413b17b",
+        "8a560e64-7133-43a1-aa3f-37b5ab48e9b2",
+        "45c71521-b042-48c3-ba9e-0ba4bde89bc7",
+        "3d3c1422-a909-4efd-bba6-a07231bc50a9",
+        "bd5c51c6-c6ed-455f-929b-4a91d3efb009"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

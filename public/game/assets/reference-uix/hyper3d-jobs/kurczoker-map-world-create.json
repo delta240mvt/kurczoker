@@ -1,0 +1,23 @@
+{
+  "createdAt": "2026-05-07T10:02:57",
+  "asset": "kurczoker-map-world",
+  "image": "public/game/assets/reference-uix/kurczoker-map-world.png",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": " ",
+    "submit_time": "2026-05-07T08:02:58.197Z",
+    "uuid": "6adedfb7-2455-4f08-b12a-cf08da1794be",
+    "jobs": {
+      "uuids": [
+        "74ecd873-ba83-4d3f-bde9-24346e7ec28f",
+        "2762aec2-84d6-4a97-8293-86bcb06094c3",
+        "e36830c6-458e-48e0-a0d9-646cf95c7e00",
+        "27f0ac9c-768e-4f18-b567-3f3b325ec392",
+        "5b8fa287-349e-4dc7-ba70-02c67f3546cf",
+        "1ee801dd-9f6e-49d4-9be1-10c26b123822"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

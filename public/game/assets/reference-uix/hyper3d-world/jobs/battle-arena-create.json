@@ -1,0 +1,25 @@
+{
+  "createdAt": "2026-05-07T10:27:19",
+  "asset": "battle-arena",
+  "image": "public\\game\\assets\\reference-uix\\hyper3d-world\\battle-arena-ref.png",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "High quality stylized realistic 3D side-view battle arena from the reference: grassy stone floating platforms, broken rocky bridge, layered hills, small props. True 3D geometry, no flat screenshot plane, no UI, no text. Game-ready GLB, PBR, optimized for web/mobile.",
+    "submit_time": "2026-05-07T08:27:20.948Z",
+    "uuid": "70b81aab-8db2-47d5-b936-8925b5a1e84d",
+    "jobs": {
+      "uuids": [
+        "0e0bbfee-7ed4-4d6b-9e05-cc6aaba81d76",
+        "6352024d-8ab7-4e03-98e7-f078a16b0884",
+        "85fa6817-3804-425b-a456-c7960bd3e691",
+        "e853d00f-deb8-4bee-92f2-b92afdcf42fd",
+        "c46b9037-aa5b-4be9-a1e3-d32d8005ecf0",
+        "48c1d1f4-59d3-43c6-8c67-25615e4b99ce"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

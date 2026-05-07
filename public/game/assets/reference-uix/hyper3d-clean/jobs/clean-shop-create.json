@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-05-07T10:50:58",
+  "asset": "clean-shop",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Beautiful stylized realistic fantasy merchant wagon shop, warm carved wood, cloth awning, crates, lantern, sacks, no text, no UI, isolated 3D prop, high quality PBR GLB.",
+    "submit_time": "2026-05-07T08:50:59.448Z",
+    "uuid": "da505d97-6977-459f-bbe8-8157280fe4c3",
+    "jobs": {
+      "uuids": [
+        "012e2963-3f7c-4067-83be-867b11216478",
+        "1bdb490a-4f4c-4c8c-a134-bf3883189c7c",
+        "ee93007c-6a64-40fc-8230-9c4b871fed22",
+        "2ece6c6a-9c2a-4cf1-abcd-5d83219d3f71",
+        "673001cb-e05e-4374-8443-1140a70a5996",
+        "c79deb93-bdb7-432f-bead-65cf5659aff9"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-05-07T11:26:36",
+  "asset": "clean-boss-rooster",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Full volumetric 3D character model, NOT a flat relief, NOT a square card, NOT a billboard. A huge dark final boss rooster: black and crimson feathers, massive feather mane, golden spiked armor, glowing orange chest gem, heavy claws, volcanic fantasy mood. Isolated character, no background, no base plate, no text, no UI. Stylized realistic, high quality PBR, game-ready GLB, clean silhouette from all angles.",
+    "submit_time": "2026-05-07T09:26:38.038Z",
+    "uuid": "41ddc4e4-ca8e-4517-998e-f4ca8009a4f1",
+    "jobs": {
+      "uuids": [
+        "4b2f18af-ee63-4950-a50b-5e7f02381063",
+        "7d7505d8-be67-4a8b-8c20-08bfca8e8360",
+        "4a388ee8-19d6-404b-a643-8d7a4685ad09",
+        "e4d4a954-2639-442a-82f4-1cc7b56299f6",
+        "5d84825d-e96d-4fb2-93e6-71777f6aedf6",
+        "e72bd0d8-9c61-48a4-856f-223bc6721249"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

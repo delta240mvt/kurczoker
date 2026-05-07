@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-05-07T11:26:33",
+  "asset": "clean-enemy-rooster",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Full volumetric 3D character model, NOT a flat relief, NOT a square card, NOT a billboard. A red enemy rooster warrior: red feathers, angry eyes, yellow beak and claws, black shoulder armor, small round shield, fantasy battle enemy style. Isolated character, no background, no base plate, no text, no UI. Stylized realistic, high quality PBR, game-ready GLB, clean silhouette from all angles.",
+    "submit_time": "2026-05-07T09:26:34.660Z",
+    "uuid": "c34e2901-f41f-4172-b83f-75d82ac9fd77",
+    "jobs": {
+      "uuids": [
+        "f6810368-c048-423b-9e5e-b8a8ffe6b3b2",
+        "04a7b338-da8e-4cc6-8b47-4dac9c6bb457",
+        "d470f25a-05e9-4e23-bfc8-dd65bd8fe696",
+        "6e5f99b2-47bf-4380-a5c5-a4bf730e127c",
+        "c720a755-eb25-4f32-b5d0-c4d6870cb9fc",
+        "c0d762d1-5c23-4e13-8f0d-9619bc37217e"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "createdAt": "2026-05-07T10:27:37",
+  "asset": "boss-altar",
+  "image": "public\\game\\assets\\reference-uix\\hyper3d-world\\boss-altar-ref.png",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Detailed stylized realistic volcanic boss arena altar from the reference: dark stone platform, red carpet, torches, molten glow, ominous medieval fantasy. Isolated 3D environment prop, no character, no UI, no text, game-ready GLB, PBR.",
+    "submit_time": "2026-05-07T08:27:38.220Z",
+    "uuid": "95ff5c92-5cb1-4169-96b9-edd116ac6709",
+    "jobs": {
+      "uuids": [
+        "233de89b-cac5-4c3f-b3e3-1054afa03e80",
+        "06651eeb-f564-4977-8333-2fe23194da8b",
+        "bbfc8fa6-8f5c-4c0a-aa33-ffafd4f53ff8",
+        "ee6b5e21-2d34-4295-98cd-796ab9dd56a5",
+        "696235dc-78eb-4a82-abc0-7e78f39bb340",
+        "77f98527-4059-4db5-8261-ed403e11d8ad"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

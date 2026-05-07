@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-05-07T10:51:01",
+  "asset": "clean-treasure",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Beautiful stylized realistic open treasure chest, ornate wood and gold metal, glowing coins and gems, no text, isolated 3D prop, high quality PBR GLB.",
+    "submit_time": "2026-05-07T08:51:02.779Z",
+    "uuid": "05cfd6d7-888b-46bd-bcb1-fcc358b87e9f",
+    "jobs": {
+      "uuids": [
+        "50b4b6f6-8d42-403f-a2ac-99c8d37cb8d3",
+        "30b3e7d7-6e40-48b3-8e2b-8bc78f330f4e",
+        "3dfb3ab2-ee31-4b19-813e-cca32cd9cd7e",
+        "4c73d6f3-562a-4743-93f1-8111cfff2a98",
+        "abee17e8-f4e8-42c7-982f-082fee858285",
+        "a2dc3da2-9462-4b34-9fc9-32f86cc27aa5"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "createdAt": "2026-05-07T10:27:40",
+  "asset": "forest-props",
+  "image": "public\\game\\assets\\reference-uix\\hyper3d-world\\forest-props-ref.png",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Stylized realistic forest prop cluster from the reference: leafy trees, shrubs, flowers, mossy stones, small sign, lush fantasy map style. Isolated 3D prop kit, no UI, no text, game-ready GLB, PBR.",
+    "submit_time": "2026-05-07T08:27:41.860Z",
+    "uuid": "aaa5cf68-3d28-473b-a773-be229fe5fbfd",
+    "jobs": {
+      "uuids": [
+        "37d231f7-e7d8-464a-84e8-a4aa0b02affb",
+        "727ef07e-a229-4a53-83b0-28eb8f9e71ce",
+        "ecc53814-cae0-4bb1-a268-25875ace3b95",
+        "9d211b33-1c52-4c73-933f-7da9214bd430",
+        "bd2113d5-2611-4400-8121-935511080acd",
+        "71af398a-cca7-4808-9e47-39655c7e7f87"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "statusCode": 201,
+  "response": {
+    "list": [
+      {
+        "url": "[redacted]",
+        "name": "base_basic_pbr.glb"
+      },
+      {
+        "url": "[redacted]",
+        "name": "preview.webp"
+      }
+    ]
+  }
+}

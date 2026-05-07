@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-05-07T10:51:11",
+  "asset": "clean-platform",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Beautiful stylized realistic floating grassy stone platform, moss top, chunky rock underside, small flowers, no text, isolated 3D prop, high quality PBR GLB.",
+    "submit_time": "2026-05-07T08:51:12.620Z",
+    "uuid": "e7f3a0c5-0998-4ce8-bb9f-fc9683286219",
+    "jobs": {
+      "uuids": [
+        "0ae3af8e-c931-4851-9255-ff2b2e91942c",
+        "9717d080-d254-49dd-a1b8-71aa5b11b2a8",
+        "7c5fe9a0-b681-45f8-aeae-4b6b169135c3",
+        "74f3db54-781c-481f-aed4-806ccf0b1dc1",
+        "d560b337-6471-4687-8b8f-d9e74fb72a70",
+        "db635283-bc4a-4ab2-8dd4-0cef1e986db4"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}

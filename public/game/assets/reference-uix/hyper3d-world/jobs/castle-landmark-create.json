@@ -1,0 +1,25 @@
+{
+  "createdAt": "2026-05-07T10:27:23",
+  "asset": "castle-landmark",
+  "image": "public\\game\\assets\\reference-uix\\hyper3d-world\\castle-ref.png",
+  "tier": "Regular",
+  "meshMode": "Quad",
+  "statusCode": 201,
+  "response": {
+    "message": "Submitted. Please check progress via /api/v2/status and get download link via /api/v2/download",
+    "prompt": "Detailed stylized realistic medieval castle landmark from the reference, red roofs, pale stone towers, small flags, heroic fantasy painterly style. Isolated 3D prop with clean base, no background, no text, game-ready GLB, PBR.",
+    "submit_time": "2026-05-07T08:27:24.402Z",
+    "uuid": "f0f2a50d-395e-4dec-86d2-c60f9ff984a8",
+    "jobs": {
+      "uuids": [
+        "232a7e63-ee18-4138-bb08-98f173005e56",
+        "3f2250d5-a54b-406e-9855-1ab90350ca69",
+        "5d8df5b1-5a5e-4d8c-9a7f-a32c47cc840f",
+        "5744cf77-67a4-4cd8-95f5-a53e992c5c04",
+        "6aff7f08-1af6-4865-8882-49ed94e00ed5",
+        "6b197cae-a19e-4a23-91b8-8c2b0da9b430"
+      ],
+      "subscription_key": "[redacted]"
+    }
+  }
+}
