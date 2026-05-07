@@ -6,24 +6,28 @@ const steps = [
   {
     num: "1",
     icon: "/uix/svg/icon-node.svg",
+    thumb: "/uix/screeny/s02.png",
     title: "Wybierz Ścieżkę",
     text: "Odkryj nowe rozwidlenia, sklepy i wyzwania. Każda decyzja prowadzi do nowych przygód i wyjątkowych nagród."
   },
   {
     num: "2",
     icon: "/uix/svg/icon-ability-bomb.svg",
+    thumb: "/uix/screeny/s03.png",
     title: "Walcz",
     text: "Rzucaj jajobombami i strategicznie osłabiaj przeciwników w dynamicznych, turowych bitwach."
   },
   {
     num: "3",
     icon: "/uix/svg/icon-grain-coin.svg",
+    thumb: "/uix/screeny/s07.png",
     title: "Zdobywaj Nagrody",
     text: "Zbieraj złoto, artefakty i zdolności. Wzmacniaj bohatera, by sprostać kolejnym wyzwaniom."
   },
   {
     num: "4",
     icon: "/uix/svg/icon-shield.svg",
+    thumb: "/uix/screeny/s04.png",
     title: "Pokonaj Bossa",
     text: "Staw czoła finalnemu bossowi i wróć zwycięski po chwałę i skarby Kurczokera!"
   }
@@ -32,21 +36,25 @@ const steps = [
 const features = [
   {
     icon: "/uix/svg/icon-ability-bomb.svg",
+    thumb: "/uix/screeny/s03.png",
     title: "Taktyczne Bitwy",
     text: "Worms spotyka Heroes. Kąt, siła i wybuchowe efekty decydują o losie każdej tury."
   },
   {
     icon: "/uix/svg/icon-scene-book.svg",
+    thumb: "/uix/screeny/s05.png",
     title: "Eksploracja Mapy",
     text: "Liczne lokalizacje, rozgałęzienia, sklepy i ukryte skarby — odkrywaj bogatą mapę Kurczokera."
   },
   {
     icon: "/uix/svg/icon-grain-coin.svg",
+    thumb: "/uix/screeny/s06.png",
     title: "Sklep i Ulepszenia",
     text: "Kupuj zdolności i artefakty pomiędzy walkami. Każdy zakup zmienia styl rozgrywki."
   },
   {
     icon: "/uix/svg/icon-shield.svg",
+    thumb: "/uix/screeny/s08.png",
     title: "Artefakty i Nagrody",
     text: "Zdobywaj wyjątkowe przedmioty po każdym zwycięstwie i odkrywaj rzadkie skarby."
   }
@@ -100,6 +108,9 @@ const faqs = [
     <meta name="description" content="KURCZOKER — przeglądarkowa gra roguelite łącząca taktykę Heroes III z dynamiką Worms. Wybierz ścieżkę, walcz, zdobywaj nagrody i pokonaj bossa!" />
     <title>KURCZOKER — Mały Kurczak, Wielka Misja</title>
     <link rel="preload" as="image" href="/uix/screeny/s01.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700;900&display=swap" rel="stylesheet" />
   </head>
   <body>
 
@@ -276,6 +287,7 @@ const faqs = [
           <div class="lp-section-title__text">
             <span class="lp-section-title__eyebrow">Instrukcja</span>
             <h2 id="howto-title">JAK GRAĆ?</h2>
+            <div class="lp-section-title__ornament">◆ ✦ ◆</div>
           </div>
           <div class="lp-section-title__line lp-section-title__line--r"></div>
         </header>
@@ -283,6 +295,7 @@ const faqs = [
         <div class="lp-steps">
           {steps.map((step) => (
             <article class="lp-step">
+              <img src={step.thumb} class="lp-card-thumb" alt="" width="640" height="360" loading="lazy" />
               <div class="lp-step__header">
                 <span class="lp-step__num">{step.num}</span>
                 <img src={step.icon} class="lp-step__icon" alt="" width="34" height="34" loading="lazy" />
@@ -303,6 +316,7 @@ const faqs = [
           <div class="lp-section-title__text">
             <span class="lp-section-title__eyebrow">Co oferujemy</span>
             <h2 id="features-title">NAJWAŻNIEJSZE FUNKCJE</h2>
+            <div class="lp-section-title__ornament">◆ ✦ ◆</div>
           </div>
           <div class="lp-section-title__line lp-section-title__line--r"></div>
         </header>
@@ -310,6 +324,7 @@ const faqs = [
         <div class="lp-features-grid">
           {features.map((feat) => (
             <article class="lp-feature">
+              <img src={feat.thumb} class="lp-card-thumb" alt="" width="640" height="360" loading="lazy" />
               <div class="lp-feature__icon-wrap">
                 <img src={feat.icon} class="lp-feature__icon" alt="" width="36" height="36" loading="lazy" />
               </div>
@@ -329,6 +344,7 @@ const faqs = [
           <div class="lp-section-title__text">
             <span class="lp-section-title__eyebrow">Gameplay</span>
             <h2 id="action-title">ZOBACZ KURCZOKERA W AKCJI</h2>
+            <div class="lp-section-title__ornament">◆ ✦ ◆</div>
           </div>
           <div class="lp-section-title__line lp-section-title__line--r"></div>
         </header>
@@ -396,6 +412,14 @@ const faqs = [
                 Zdobądź legendarne nagrody za zwycięstwo
               </li>
             </ul>
+            <img
+              src="/uix/screeny/s09.png"
+              alt=""
+              width="640"
+              height="360"
+              loading="lazy"
+              style="width:100%;border-radius:8px;border:2px solid var(--shell-edge);margin-top:4px;"
+            />
             <div>
               <a href="/gra" class="lp-btn-primary">ZMIERZ SIĘ Z BOSSEM</a>
             </div>
@@ -412,6 +436,7 @@ const faqs = [
           <div class="lp-section-title__text">
             <span class="lp-section-title__eyebrow">Progresja</span>
             <h2 id="rewards-title">NAGRODY I PROGRES</h2>
+            <div class="lp-section-title__ornament">◆ ✦ ◆</div>
           </div>
           <div class="lp-section-title__line lp-section-title__line--r"></div>
         </header>
@@ -438,6 +463,7 @@ const faqs = [
           <div class="lp-section-title__text">
             <span class="lp-section-title__eyebrow">Pytania i odpowiedzi</span>
             <h2 id="faq-title">FAQ</h2>
+            <div class="lp-section-title__ornament">◆ ✦ ◆</div>
           </div>
           <div class="lp-section-title__line lp-section-title__line--r"></div>
         </header>

@@ -59,6 +59,7 @@
 .lp-nav__links a {
   padding: 6px 13px;
   color: rgba(245, 232, 193, 0.76);
+  font-family: var(--font-heading);
   font-size: 0.83rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -83,6 +84,7 @@
   background: linear-gradient(180deg, var(--accent-red-hi) 0%, var(--accent-red) 60%, var(--accent-red-deep) 100%);
   box-shadow: inset 0 -3px 0 rgba(0,0,0,0.28), 0 3px 0 var(--shell-edge);
   color: #fff;
+  font-family: var(--font-heading);
   font-size: 0.78rem;
   font-weight: 900;
   letter-spacing: 0.1em;
@@ -115,7 +117,8 @@
   position: absolute;
   inset: 0;
   background: url("/uix/screeny/s01.png") center 30% / cover no-repeat;
-  opacity: 0.04;
+  opacity: 0.07;
+  filter: saturate(0.7);
   z-index: 0;
   pointer-events: none;
 }
@@ -147,6 +150,7 @@
   border-radius: 22px;
   background: rgba(212, 160, 74, 0.09);
   color: var(--shell-gold-bright);
+  font-family: var(--font-heading);
   font-size: 0.7rem;
   font-weight: 900;
   letter-spacing: 0.16em;
@@ -519,11 +523,19 @@
 }
 
 .lp-section-title__eyebrow {
+  font-family: var(--font-heading);
   font-size: 0.63rem;
   font-weight: 900;
   color: var(--shell-gold);
   letter-spacing: 0.22em;
   text-transform: uppercase;
+}
+
+.lp-section-title__eyebrow::before,
+.lp-section-title__eyebrow::after {
+  content: " ◆ ";
+  font-size: 0.55em;
+  opacity: 0.7;
 }
 
 .lp-section-title__text h2 {
@@ -544,6 +556,20 @@
   align-items: center;
   color: var(--shell-gold);
   font-size: 0.7em;
+  opacity: 0.75;
+  letter-spacing: 0.15em;
+}
+
+/* --- CARD THUMBNAILS -------------------------------------- */
+.lp-card-thumb {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  display: block;
+  border-bottom: 2px solid var(--shell-edge);
+  filter: saturate(1.05) contrast(1.02);
+  margin: -24px -18px 16px;
+  width: calc(100% + 36px);
+  border-radius: 10px 10px 0 0;
 }
 
 /* --- SECTION BACKGROUNDS ---------------------------------- */
@@ -1047,7 +1073,8 @@
   position: absolute;
   inset: 0;
   background: url("/uix/screeny/s10.png") center 60% / cover no-repeat;
-  opacity: 0.05;
+  opacity: 0.12;
+  filter: saturate(0.6);
   z-index: 0;
   pointer-events: none;
 }
@@ -1217,6 +1244,28 @@
   background: rgba(212, 160, 74, 0.14);
   border-color: var(--shell-gold);
   color: var(--shell-gold-bright);
+}
+
+/* --- ORNAMENTAL EXTRAS ------------------------------------ */
+.lp-footer::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent 0%, var(--shell-gold-deep) 30%, var(--shell-gold-bright) 50%, var(--shell-gold-deep) 70%, transparent 100%);
+  z-index: 3;
+}
+
+.lp-boss-img-wrap::before {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(196, 62, 44, 0.35);
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 2;
 }
 
 /* === RESPONSIVE =========================================== */

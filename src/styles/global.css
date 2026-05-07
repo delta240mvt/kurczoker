@@ -23,7 +23,8 @@
   --ink-cream: #f5e8c1;
   --ink-muted: #6b5e3a;
   --ink-on-red: #fffbe8;
-  --font-display: "Arial Black", Impact, system-ui, sans-serif;
+  --font-display: "Cinzel Decorative", "Arial Black", Impact, system-ui, sans-serif;
+  --font-heading: "Cinzel", "Arial Black", Impact, system-ui, sans-serif;
   --font-body: system-ui, -apple-system, "Segoe UI", sans-serif;
   --shell-pad: clamp(14px, 1.6vw, 22px);
   --shell-radius: 14px;
