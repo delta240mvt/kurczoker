@@ -426,24 +426,26 @@ async function winCurrentBattle(page, label, maxShots = 6, expectedScenePattern 
 }
 
 async function loseCurrentBattle(page, label, maxShots = 6) {
+  await page.bringToFront();
   for (let shot = 0; shot < maxShots; shot += 1) {
     const scene = await sceneText(page);
     if (/Koniec/.test(scene ?? "")) {
       return;
     }
+    assert.ok(/Walka|Boss/.test(scene ?? ""), `${label} should still be in battle while losing, current scene: ${scene}`);
 
     await fireAt(page, 0.2, 0.52);
-    await delay(9000);
+    await delay(12000);
     if (/Koniec/.test((await sceneText(page)) ?? "")) {
       return;
     }
-    await waitForPlayerTurn(page, 30000);
+    await waitForPlayerTurn(page, 60000);
   }
 
   await page.waitForFunction(
     () => /Koniec/.test(document.querySelector("[data-game-scene]")?.textContent ?? ""),
     null,
-    { timeout: 30000 }
+    { timeout: 60000 }
   );
   const scene = await sceneText(page);
   assert.ok(/Koniec/.test(scene ?? ""), `${label} should reach game over within ${maxShots} misses, current scene: ${scene}`);

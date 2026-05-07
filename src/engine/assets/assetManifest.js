@@ -323,6 +323,18 @@ const GENERATED_MODEL_ASSETS = [
     attributionRequired: false,
     ready: true,
     notes: "Blender-generated mossy floating platform and rock kit for battle arenas."
+  },
+  {
+    id: "model.kurczoker.diorama.props",
+    type: "model",
+    path: "/game/assets/models/kurczoker-diorama-props.glb",
+    source: "blender-mcp-pipeline",
+    sourceUrl: "",
+    author: "KURCZOKER",
+    license: "generated-owned",
+    attributionRequired: false,
+    ready: true,
+    notes: "Blender-generated windmill, boss altar, open chest, torch, coin, flower, and rock diorama props."
   }
 ];
 

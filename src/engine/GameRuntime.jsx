@@ -1,10 +1,13 @@
 import { Component, lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { CameraRig } from "./components/CameraRig.jsx";
+import { ModelAsset } from "./components/ModelAsset.jsx";
+import { SceneCanvasBackdrop } from "./components/SceneCanvasBackdrop.jsx";
 import { SceneLights } from "./components/SceneLights.jsx";
 import { MapScene } from "./scenes/MapScene.jsx";
 import { selectEngineScene } from "./runtime/sceneSelection.js";
 import { useGameStore } from "./store/useGameStore.js";
+import { createUiModel } from "../game/ui.js";
 
 function createBattleSceneLazy() {
   return lazy(() => import("./scenes/BattleScene.jsx").then((module) => ({ default: module.BattleScene })));
@@ -166,6 +169,36 @@ function MapSceneFallback() {
   );
 }
 
+function TerminalSceneDecor({ engineScene, backdropId }) {
+  const victory = backdropId === "10";
+  const danger = backdropId === "09";
+
+  return (
+    <group position={[0, -0.1, -0.15]}>
+      <ModelAsset
+        src="/game/assets/models/kurczoker-diorama-props.glb"
+        scale={engineScene === "end" ? 0.34 : 0.3}
+        position={[0, danger ? -0.8 : -0.62, 0.02]}
+        rotation={[0, victory ? -0.22 : 0.1, 0]}
+      />
+      <mesh position={[0, 1.45, 0.05]}>
+        <planeGeometry args={[6.4, 0.58]} />
+        <meshBasicMaterial color={victory ? "#facc15" : danger ? "#7f1d1d" : "#f8d36c"} transparent opacity={victory ? 0.18 : 0.12} />
+      </mesh>
+      {Array.from({ length: victory ? 18 : 10 }).map((_, index) => {
+        const x = -4.1 + index * 0.48;
+        const y = victory ? 1.75 - (index % 3) * 0.28 : -1.35 + (index % 2) * 0.22;
+        return (
+          <mesh key={index} position={[x, y, 0.12]} scale={victory ? 0.035 : 0.055}>
+            <sphereGeometry args={[1, 8, 6]} />
+            <meshBasicMaterial color={victory ? (index % 2 ? "#f97316" : "#facc15") : "#1f2937"} transparent opacity={victory ? 0.78 : 0.42} />
+          </mesh>
+        );
+      })}
+    </group>
+  );
+}
+
 class BattleSceneErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -212,6 +245,7 @@ export function GameRuntime() {
   const turnEnded = useGameStore((state) => state.turnEnded);
   const tickBattle = useGameStore((state) => state.tickBattle);
   const engineScene = selectEngineScene(game);
+  const backdropId = createUiModel(game).canvasBackdrop;
   const battleSceneKey = engineScene === "battle" ? `${game.battle?.nodeId ?? "battle"}:${game.battle?.encounterId ?? "encounter"}` : "idle";
   const [readyBattleKey, setReadyBattleKey] = useState(null);
   const [battleSceneRetry, setBattleSceneRetry] = useState(0);
@@ -250,6 +284,9 @@ export function GameRuntime() {
       <fog attach="fog" args={[engineScene === "battle" ? "#111a2e" : "#7fc8f8", 7, 14]} />
       <SceneLights />
       <CameraRig />
+      <Suspense fallback={null}>
+        <SceneCanvasBackdrop backdropId={backdropId} />
+      </Suspense>
       {engineScene === "map" ? (
         <BattleSceneErrorBoundary resetKey="map" fallback={<MapSceneFallback />}>
           <Suspense fallback={<ScenePlaceholder engineScene="reward" />}>
@@ -277,7 +314,11 @@ export function GameRuntime() {
           </Suspense>
         </BattleSceneErrorBoundary>
       ) : null}
-      {engineScene !== "map" && engineScene !== "battle" ? <ScenePlaceholder engineScene={engineScene} /> : null}
+      {engineScene !== "map" && engineScene !== "battle" ? (
+        <Suspense fallback={<ScenePlaceholder engineScene={engineScene} />}>
+          <TerminalSceneDecor engineScene={engineScene} backdropId={backdropId} />
+        </Suspense>
+      ) : null}
     </>
   );
 }

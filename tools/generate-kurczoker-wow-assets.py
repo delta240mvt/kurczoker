@@ -217,12 +217,50 @@ def make_terrain(path):
     export_selected(path)
 
 
+def make_diorama_props(path):
+    clean()
+    setup_materials()
+    # left windmill and cottage, matching the battle reference.
+    cube("windmill_house", (-3.2, 0, 0.38), (0.86, 0.58, 0.64), MAT["wood"])
+    cone("windmill_roof", (-3.2, 0, 0.92), 0.58, 0.48, MAT["red"], 4, (0, 0, math.radians(45)))
+    cyl("windmill_mast", (-3.2, -0.33, 1.08), 0.045, 0.7, MAT["wood"], 10, (math.radians(90), 0, 0))
+    for index, angle in enumerate([0, math.pi / 2, math.pi, math.pi * 1.5]):
+        blade = cube(f"windmill_blade_{index}", (-3.2, -0.72, 1.08), (0.1, 0.04, 0.78), MAT["stone"])
+        blade.rotation_euler[1] = angle
+
+    # boss altar and torches.
+    cyl("boss_altar_base", (2.9, 0, 0.22), 0.62, 0.28, MAT["stone"], 32)
+    cyl("boss_altar_top", (2.9, 0, 0.48), 0.78, 0.18, MAT["stone"], 32)
+    cube("boss_red_carpet", (2.9, -0.46, 0.58), (0.42, 0.58, 0.04), MAT["banner"])
+    for x in [2.08, 3.72]:
+        cyl(f"torch_pole_{x}", (x, -0.32, 0.65), 0.035, 1.08, MAT["wood"], 10)
+        sphere(f"torch_fire_{x}", (x, -0.32, 1.26), (0.13, 0.13, 0.18), MAT["lava"], 16, 8)
+
+    # treasure cave dressing.
+    cube("open_chest_base", (-0.15, 0.08, 0.26), (0.92, 0.56, 0.36), MAT["wood"])
+    cube("open_chest_lid", (-0.15, 0.32, 0.64), (0.92, 0.16, 0.44), MAT["gold"])
+    sphere("chest_light_core", (-0.15, -0.1, 0.56), (0.22, 0.16, 0.12), MAT["gold"], 18, 8)
+    for i in range(9):
+        sphere(f"coin_scatter_{i}", (-0.68 + i * 0.15, -0.48 + (i % 3) * 0.08, 0.08), (0.055, 0.055, 0.018), MAT["gold"], 14, 6)
+
+    # foreground flowers and stones for the map.
+    for i, x in enumerate([-4.2, -3.7, -1.2, 0.9, 2.2, 3.8]):
+        sphere(f"flower_head_{i}", (x, -1.1 + (i % 2) * 0.18, 0.22), (0.05, 0.05, 0.05), MAT["gold"], 10, 6)
+        cyl(f"flower_stem_{i}", (x, -1.1 + (i % 2) * 0.18, 0.11), 0.01, 0.18, MAT["moss"], 6)
+    for i, x in enumerate([-4.4, -2.8, -0.8, 1.4, 3.1, 4.0]):
+        sphere(f"foreground_rock_{i}", (x, -1.58 + (i % 2) * 0.1, 0.11), (0.16, 0.1, 0.08), MAT["stone"], 12, 8)
+
+    shade()
+    export_selected(path)
+
+
 def main():
     make_hero(OUT / "kurczoker-hero-knight.glb")
     make_grunt(OUT / "kurczoker-enemy-grunt.glb")
     make_boss(OUT / "kurczoker-boss-rooster.glb")
     make_props(OUT / "kurczoker-map-props.glb")
     make_terrain(OUT / "kurczoker-terrain-kit.glb")
+    make_diorama_props(OUT / "kurczoker-diorama-props.glb")
 
 
 if __name__ == "__main__":

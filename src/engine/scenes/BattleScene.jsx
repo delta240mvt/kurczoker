@@ -38,23 +38,7 @@ function PaintedBattleBackdrop() {
   ];
 
   return (
-    <group position={[0, 0, -1]}>
-      <mesh position={[0, 0, -0.32]}>
-        <planeGeometry args={[9.6, 5.4]} />
-        <meshBasicMaterial color="#111a2e" />
-      </mesh>
-      <mesh position={[0, 1.18, -0.28]}>
-        <planeGeometry args={[9.6, 2.2]} />
-        <meshBasicMaterial color="#234a78" transparent opacity={0.82} />
-      </mesh>
-      <mesh position={[-2.5, 0.55, -0.2]} rotation={[0, 0, -0.08]}>
-        <planeGeometry args={[5.8, 1.3]} />
-        <meshBasicMaterial color="#405f8a" transparent opacity={0.72} />
-      </mesh>
-      <mesh position={[2.7, 0.52, -0.18]} rotation={[0, 0, 0.08]}>
-        <planeGeometry args={[4.8, 1.05]} />
-        <meshBasicMaterial color="#1d3647" transparent opacity={0.72} />
-      </mesh>
+    <group position={[0, 0, -0.82]}>
       <mesh position={[-3.42, -0.05, -0.08]}>
         <boxGeometry args={[0.36, 1.8, 0.08]} />
         <meshStandardMaterial color="#4a2a13" roughness={0.82} />
@@ -73,13 +57,14 @@ function PaintedBattleBackdrop() {
       </mesh>
       <mesh position={[0, -1.72, -0.04]}>
         <planeGeometry args={[8.6, 1.2]} />
-        <meshBasicMaterial color="#342311" transparent opacity={0.82} />
+        <meshBasicMaterial color="#342311" transparent opacity={0.38} />
       </mesh>
       <mesh position={[0, 1.55, 0]}>
         <planeGeometry args={[8.9, 0.42]} />
-        <meshBasicMaterial color="#f9d783" transparent opacity={0.2} />
+        <meshBasicMaterial color="#f9d783" transparent opacity={0.14} />
       </mesh>
       <ModelAsset src="/game/assets/models/kurczoker-map-props.glb" scale={0.24} position={[2.55, -0.02, 0.02]} rotation={[0, -0.28, 0]} />
+      <ModelAsset src="/game/assets/models/kurczoker-diorama-props.glb" scale={0.18} position={[0.18, -0.38, 0.05]} rotation={[0, -0.16, 0]} />
       {sparks.map(([x, y, z, scale], index) => (
         <mesh key={`spark-${index}`} position={[x, y, z]} scale={scale}>
           <sphereGeometry args={[1, 12, 8]} />
@@ -244,6 +229,10 @@ export function BattleScene({ game, aim, setAim, projectileHitEnemy, turnEnded }
         fireProjectile(event.point);
       }}
     >
+      <mesh position={[0, 0, -0.76]} raycast={undefined}>
+        <planeGeometry args={[9.6, 5.4]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
       <PaintedBattleBackdrop />
       <ModelAsset src="/game/assets/models/kurczoker-terrain-kit.glb" scale={0.22} position={[0, -2.12, -0.02]} rotation={[0, 0, 0]} />
       <Physics gravity={[0, GRAVITY_Y, 0]} timeStep={1 / 60} interpolation={false}>
@@ -283,3 +272,4 @@ preloadModelAsset("/game/assets/models/kurczoker-hero-knight.glb");
 preloadModelAsset("/game/assets/models/kurczoker-enemy-grunt.glb");
 preloadModelAsset("/game/assets/models/kurczoker-boss-rooster.glb");
 preloadModelAsset("/game/assets/models/kurczoker-terrain-kit.glb");
+preloadModelAsset("/game/assets/models/kurczoker-diorama-props.glb");

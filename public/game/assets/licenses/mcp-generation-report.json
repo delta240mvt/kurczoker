@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-05-06T22:44:49",
+  "generatedAt": "2026-05-07T01:07:24",
   "runtimeAssetPolicy": "All listed runtime GLB assets are procedural Blender outputs generated locally by tools/generate-kurczoker-wow-assets.py. No third-party Sketchfab, Hyper3D, or Hunyuan3D model files were imported, downloaded, converted, or embedded.",
   "tools": {
     "blender": {
@@ -30,6 +30,7 @@
     "models/kurczoker-enemy-grunt.glb",
     "models/kurczoker-boss-rooster.glb",
     "models/kurczoker-map-props.glb",
-    "models/kurczoker-terrain-kit.glb"
+    "models/kurczoker-terrain-kit.glb",
+    "models/kurczoker-diorama-props.glb"
   ]
 }
