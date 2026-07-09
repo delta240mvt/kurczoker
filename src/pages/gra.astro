@@ -2,6 +2,7 @@
 import HeroGame from "../components/HeroGame.astro";
 import LandingSection from "../components/LandingSection.astro";
 import ArtifactShowcase from "../components/ArtifactShowcase.astro";
+import UmamiAnalytics from "../components/UmamiAnalytics.astro";
 import "../styles/global.css";
 
 const featureCards = [
@@ -26,11 +27,13 @@ const screens = [
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content="Graj w KURCZOKER — przeglądarkowa mini gra roguelite z mapą wyprawy, walkami, sklepem i bossem." />
     <title>Graj — KURCZOKER</title>
+    <UmamiAnalytics />
   </head>
   <body>
     <nav class="gra-topnav">
       <a href="/" class="gra-topnav__back">← Strona główna</a>
       <span class="gra-topnav__brand">KURCZOKER</span>
+      <a href="/polityka-prywatnosci" class="gra-topnav__privacy">Prywatność</a>
     </nav>
     <main>
       <div id="gra">
@@ -122,6 +125,20 @@ const screens = [
     color: var(--shell-gold-bright);
     letter-spacing: 0.08em;
     text-shadow: 0 2px 0 var(--shell-gold-deep);
+  }
+
+  .gra-topnav__privacy {
+    margin-left: auto;
+    color: rgba(245, 232, 193, 0.58);
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-decoration: none;
+    letter-spacing: 0.04em;
+    transition: color 0.15s;
+  }
+
+  .gra-topnav__privacy:hover {
+    color: var(--shell-gold-bright);
   }
 
   @media (max-width: 700px) {

@@ -1,0 +1,202 @@
+---
+import UmamiAnalytics from "../components/UmamiAnalytics.astro";
+import "../styles/global.css";
+---
+
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Polityka prywatności serwisu KURCZOKER, w tym informacje o bezciasteczkowej analityce Umami." />
+    <title>Polityka prywatności — KURCZOKER</title>
+    <UmamiAnalytics />
+  </head>
+  <body>
+    <nav class="privacy-nav" aria-label="Nawigacja">
+      <a href="/" class="privacy-nav__brand">KURCZOKER</a>
+      <div class="privacy-nav__links">
+        <a href="/">Strona główna</a>
+        <a href="/gra">Gra</a>
+      </div>
+    </nav>
+
+    <main class="privacy-page">
+      <article class="privacy-document">
+        <p class="privacy-kicker">Ostatnia aktualizacja: 9 lipca 2026</p>
+        <h1>Polityka prywatności</h1>
+        <p class="privacy-lead">
+          KURCZOKER jest przeglądarkową grą, która nie wymaga zakładania konta,
+          logowania ani podawania danych osobowych. Sama rozgrywka działa lokalnie
+          w przeglądarce użytkownika.
+        </p>
+
+        <section>
+          <h2>Jakie dane przetwarzamy</h2>
+          <p>
+            Nie zbieramy danych podawanych w formularzach, bo serwis nie posiada
+            rejestracji, panelu użytkownika ani formularza kontaktowego. Możemy
+            przetwarzać standardowe dane techniczne niezbędne do wyświetlenia
+            strony, takie jak żądany adres URL, data i godzina połączenia oraz
+            informacje techniczne przekazywane przez przeglądarkę.
+          </p>
+        </section>
+
+        <section>
+          <h2>Analityka Umami</h2>
+          <p>
+            Korzystamy z Umami do podstawowej analityki ruchu na stronie.
+            Przeglądarka pobiera skrypt analityczny z adresu
+            <code>https://umami-blue-ten-84.vercel.app/script.js</code>.
+          </p>
+          <p>
+            Umami działa bez plików cookie. Według dokumentacji Umami narzędzie
+            zbiera anonimowe statystyki, takie jak liczba odsłon, adresu strony
+            odsyłającej lub referrer, typ przeglądarki, systemu operacyjnego,
+            typu urządzenia oraz kraju pochodzenia ruchu. Te informacje służą do
+            zrozumienia, które części serwisu są odwiedzane i czy strona działa
+            poprawnie na popularnych urządzeniach.
+          </p>
+          <p>
+            Więcej informacji o sposobie działania Umami znajduje się w oficjalnym
+            FAQ:
+            <a href="https://umami.is/docs/faq" rel="noopener noreferrer">https://umami.is/docs/faq</a>.
+          </p>
+        </section>
+
+        <section>
+          <h2>Pliki cookie i pamięć lokalna</h2>
+          <p>
+            Skrypt Umami używany na tej stronie nie zapisuje plików cookie. Gra może
+            korzystać z pamięci przeglądarki wyłącznie do działania interfejsu i
+            lokalnej rozgrywki, bez tworzenia konta użytkownika.
+          </p>
+        </section>
+
+        <section>
+          <h2>Zmiany polityki</h2>
+          <p>
+            Jeżeli zakres analityki lub sposób działania serwisu zmieni się w
+            przyszłości, ta polityka prywatności zostanie zaktualizowana.
+          </p>
+        </section>
+      </article>
+    </main>
+  </body>
+</html>
+
+<style>
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at top left, rgba(212, 160, 74, 0.16), transparent 34rem),
+      linear-gradient(180deg, #111827 0%, #080b14 100%);
+    color: rgba(245, 232, 193, 0.86);
+  }
+
+  .privacy-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 16px clamp(18px, 4vw, 48px);
+    border-bottom: 1px solid rgba(212, 160, 74, 0.2);
+    background: rgba(8, 11, 20, 0.82);
+  }
+
+  .privacy-nav a {
+    color: rgba(245, 232, 193, 0.72);
+    text-decoration: none;
+  }
+
+  .privacy-nav a:hover {
+    color: var(--shell-gold-bright);
+  }
+
+  .privacy-nav__brand {
+    font-family: var(--font-display);
+    font-weight: 900;
+    letter-spacing: 0.08em;
+  }
+
+  .privacy-nav__links {
+    display: flex;
+    gap: 18px;
+    font-size: 0.86rem;
+    font-weight: 700;
+  }
+
+  .privacy-page {
+    width: min(880px, calc(100% - 32px));
+    margin: 0 auto;
+    padding: clamp(44px, 8vw, 84px) 0;
+  }
+
+  .privacy-document {
+    display: grid;
+    gap: 28px;
+  }
+
+  .privacy-kicker {
+    margin: 0;
+    color: var(--shell-gold-bright);
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  h1,
+  h2,
+  p {
+    margin: 0;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 7vw, 4.5rem);
+    line-height: 0.95;
+    color: #fff4c9;
+    text-shadow: 0 3px 0 rgba(96, 54, 22, 0.72);
+  }
+
+  h2 {
+    margin-bottom: 12px;
+    font-family: var(--font-display);
+    font-size: clamp(1.15rem, 3vw, 1.55rem);
+    color: var(--shell-gold-bright);
+  }
+
+  .privacy-lead,
+  section p {
+    color: rgba(245, 232, 193, 0.76);
+    font-size: 1rem;
+    line-height: 1.75;
+  }
+
+  section {
+    padding-top: 24px;
+    border-top: 1px solid rgba(212, 160, 74, 0.18);
+  }
+
+  section p + p {
+    margin-top: 14px;
+  }
+
+  code {
+    font-size: 0.92em;
+    color: #fff4c9;
+    overflow-wrap: anywhere;
+  }
+
+  a {
+    color: var(--shell-gold-bright);
+  }
+
+  @media (max-width: 560px) {
+    .privacy-nav {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+  }
+</style>
