@@ -38,7 +38,9 @@ class BattleSimulation {
       health:spawn.health??(options.map?45:hp),maxHealth:spawn.maxHealth??(options.map?45:hp)}));
     this.enemy=this.enemies[0];
     this.actors=[this.player,...this.enemies];
-    this.rope=createRope({world:this.world,playerBody:this.player.body,terrain:this.terrain});
+    this.rope=createRope({world:this.world,playerBody:this.player.body,terrain:this.terrain,onRelease:reason=>{
+      if(!this.disposed)this.events.push({id:`rope-${this.time}-${this.events.length}`,type:'rope-release',time:this.time,payload:{reason}});
+    }});
     this.phase = "player";
     this.turn = 1;
     this.time = 0;

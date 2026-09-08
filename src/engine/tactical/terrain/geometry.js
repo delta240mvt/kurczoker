@@ -34,3 +34,18 @@ export function buildTerrainBoxes(snapshot, chunkIds) {
   }
   return boxes;
 }
+
+/** Offset visible contour corners into free space, avoiding collider seams. */
+export function boundaryCorners({columns,rows,cellSize,cells}) {
+  const filled=(x,y)=>x>=0&&y>=0&&x<columns&&y<rows&&cells[y*columns+x]!==0;
+  const corners=[],offset=cellSize*.22;
+  for(let y=0;y<=rows;y++) for(let x=0;x<=columns;x++) {
+    const quadrants=[[-1,-1,filled(x-1,y-1)],[1,-1,filled(x,y-1)],
+      [-1,1,filled(x-1,y)],[1,1,filled(x,y)]];
+    const count=quadrants.filter(q=>q[2]).length;
+    if(count!==1 && count!==3) continue;
+    const q=quadrants.find(q=>count===1?q[2]:!q[2]),sign=count===1?-1:1;
+    corners.push({x:x*cellSize+q[0]*offset*sign,y:y*cellSize+q[1]*offset*sign});
+  }
+  return corners;
+}

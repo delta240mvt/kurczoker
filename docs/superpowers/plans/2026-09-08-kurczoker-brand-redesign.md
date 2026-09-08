@@ -83,7 +83,7 @@ W `contracts.js` zapisać JSDoc poniższych struktur; nie wprowadzać TypeScript
 //   phase:'player'|'resolve'|'enemy'|'finished',paused,outcome:null|'won'|'lost',
 //   actors,projectiles,mines,rope,terrain,inventory,upgrades,toolUsed,enemyQueue,
 //   phaseElapsed,enemyPlan,enemyIndex,boss,selectedWeaponId,aim:{angleDeg,power},nextEventId,nextEntityId}
-// RopeState = null | {anchor:Vec2,pivots:Vec2[],length:number,reelRate:number}
+// RopeState = null | {anchor:Vec2,normal:Vec2,pivots:Vec2[],length:number,reelRate:number}
 // Projectile = {id,ownerId,weaponId,x,y,vx,vy,age,fuse:number|null,bounces}
 // Event = {id:string,type:string,time:number,payload:object}
 // Command = {type:'move',direction:-1|0|1} | {type:'jump'}
@@ -320,7 +320,7 @@ rope.length = Math.max(1.2,Math.min(18,rope.length + rope.reelRate*4*dt));
 
 **Interfaces:** `traceRopePath({anchor,player,pivots,terrain}):Vec2[]` w rope.js, lista w kolejności anchor→player; Terrain geometry eksportuje `boundaryCorners(snapshot):Vec2[]` tylko odsłoniętych narożników. Limit12 pivotów chroni przed pętlą; przy braku legalnej trasy puszczenie z eventem, nie przenikanie.
 
-- [ ] Test czystej geometrii:
+- [x] Test czystej geometrii:
 
 ```js
 import test from 'node:test';
@@ -338,8 +338,8 @@ test('prowadzenie omija ścianę i znika po wycięciu przeszkody',()=>{
 });
 ```
 
-- [ ] `node --test test/brand-rope-obstacles.test.js` → RED.
-- [ ] Dodaj narożnik pierwszej przeszkody z minimalną legalną długością i zachowaniem strony owijania. Zwalniaj pivot, gdy poprzedni i następny punkt widzą się z marginesem. Długość dostępna dla ostatniego odcinka:
+- [x] `node --test test/brand-rope-obstacles.test.js` → RED.
+- [x] Dodaj narożnik pierwszej przeszkody z minimalną legalną długością i zachowaniem strony owijania. Zwalniaj pivot, gdy poprzedni i następny punkt widzą się z marginesem. Długość dostępna dla ostatniego odcinka:
 
 ```js
 let used=0, previous=rope.anchor;
@@ -347,8 +347,8 @@ for (const p of rope.pivots) {used+=Math.hypot(p.x-previous.x,p.y-previous.y);pr
 const freeLength=Math.max(.2,rope.length-used);
 ```
 
-- [ ] Przy rewizji terenu sprawdź kotwicę i wszystkie pivoty. Testuj usunięcie kotwicy, granice fragmentów, powrót tą samą drogą i deterministyczny limit; oba testy liny PASS.
-- [ ] Commit: `feat: route grapple around destructible terrain corners`.
+- [x] Przy rewizji terenu sprawdź kotwicę i wszystkie pivoty. Testuj usunięcie kotwicy, granice fragmentów, powrót tą samą drogą i deterministyczny limit; oba testy liny PASS.
+- [x] Commit: `feat: route grapple around destructible terrain corners`.
 
 ## Task 07 (M1): Jajooka i podgląd wspólnej trajektorii
 

@@ -45,3 +45,11 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - GREEN: 3 testy lassa PASS, na dynamicznym ciele Rapiera i natywnym rope joint.
 - Zwijanie rzeczywiście unosi bohatera; puszczenie zachowuje obie składowe prędkości. Sprawdzone granice długości 1.2–18, przesłonięty/pusty/odległy/niepoprawny zaczep i brak przenikania przez belkę.
 - Długość jointa zmieniana przez odtworzenie constraintu, ponieważ RopeImpulseJoint w zainstalowanym API nie udostępnia setLimits. Nie przestawiamy pozycji bohatera w celu naciągnięcia liny.
+
+## Task 06 — narożniki i zniszczone zaczepy
+
+- RED: brak routingu narożników, zwolnienia usuniętego zaczepu; osobny RED dla zdarzenia informującego o zerwaniu.
+- GREEN: 9 testów liny i kolizji PASS.
+- Każdy odcinek przetestowanej trasy omija materiał. Strona owijania jest zachowywana, dopóki odcinki są legalne; po usunięciu ściany lina prostuje się.
+- Kontur i widoczność między narożnikami cache'owane według rewizji terenu. Limit 12 pivotów i 128 kandydatów; niemożliwy przebieg odczepia z przyczyną, bez teleportowania.
+- Długość constraintu uwzględnia odcinki przed ostatnim pivotem. Zniszczony zaczep zwalnia constraint i emituje rope-release/anchor-destroyed.
