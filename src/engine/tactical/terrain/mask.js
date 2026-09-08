@@ -1,7 +1,7 @@
 import {MATERIAL} from '../config.js';
 
 /** @param {import('../contracts.js').MapDef} map */
-export function createTerrain(map) {
+export function createTerrain(map,saved=null) {
   const {width,height,cellSize,chunkCells=32}=map;
   if (![width,height,cellSize].every(n=>Number.isFinite(n)&&n>0) ||
       !Number.isInteger(chunkCells) || chunkCells<1) throw new Error('Invalid terrain dimensions');
@@ -27,6 +27,10 @@ export function createTerrain(map) {
     for(let row=r.bottom;row<r.top;row++) {
       for(let col=r.left;col<r.right;col++) cells[row*columns+col]=shape.material;
     }
+  }
+  if(saved){
+    if(saved.width!==width||saved.height!==height||saved.cellSize!==cellSize||saved.cells?.length!==cells.length||!saved.cells.every(n=>Number.isInteger(n)&&n>=0&&n<=3))throw new Error('Invalid saved terrain');
+    cells.set(saved.cells);revision=saved.revision;
   }
 
   function materialAt(x,y) {

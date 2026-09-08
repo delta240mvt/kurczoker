@@ -51,3 +51,9 @@ export function prepareNextStage(game){
  }else routes=[route(3,'fortress','boss')];
  return {...game,scene:'map',rngState,routes,selectedRouteId:routes[0].id,encounterId:null,battleStart:null,rewardChoices:[],offers:[]};
 }
+
+export function useSecondChance(game){
+ if(game.scene!=='retry'||game.secondChanceUsed||!game.battleStart)return game;
+ const hero=game.battleStart.actors.find(a=>a.team==='player');if(!hero||hero.health<=0)return game;
+ return {...game,scene:'battle',status:'active',health:hero.health,maxHealth:hero.maxHealth,inventory:structuredClone(game.battleStart.inventory),upgrades:[...game.battleStart.upgrades],secondChanceUsed:true};
+}

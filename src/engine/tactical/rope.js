@@ -76,6 +76,13 @@ export function createRope({world,playerBody,terrain,onRelease=()=>{}}) {
     if(wasAttached)onRelease(reason);
   }
   return {
+    restore(saved){
+      release();if(!saved)return;
+      state=structuredClone(saved);let used=0,previous=state.anchor;
+      for(const pivot of state.pivots){used+=distance(previous,pivot);previous=pivot;}
+      anchorBody=world.createRigidBody(R.RigidBodyDesc.fixed().setTranslation(previous.x,previous.y,0));
+      constrain(Math.max(MIN_LENGTH,state.length-used));
+    },
     attach(point) {
       if(!point || ![point.x,point.y].every(Number.isFinite)) return {accepted:false,reason:'invalid'};
       const p=playerBody.translation(),dx=point.x-p.x,dy=point.y-p.y,length=Math.hypot(dx,dy);

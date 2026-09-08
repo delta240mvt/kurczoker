@@ -51,8 +51,8 @@ export function Chicken({
   );
   useFrame(({ clock }, dt) => {
     if (sim?.disposed) return;
-    const state = sim?.snapshot(),
-      a = state?.[side];
+    const state = sim?.snapshot({includeTerrain:false}),
+      a = actorId ? state?.actors.find(actor=>actor.id===actorId) : state?.[side];
     const t = state?.time ?? clock.elapsedTime;
     if (root.current && a) root.current.position.set(a.x, a.y - 0.55, a.z??0);
     const speed =

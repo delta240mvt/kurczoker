@@ -4,6 +4,7 @@ import {
   GRAVITY,
   arenaFor,
   addTerrain,
+  getMap,
 } from "./arena.js";
 import { clamp, launchVelocity } from "./ballistics.js";
 import {createCharacter,findSafeReturn,isSafePosition} from './character.js';
@@ -14,6 +15,7 @@ import {createSegmentCaster,stepProjectile,predictTrajectory,spawnClusterFragmen
 import {WEAPONS,projectileDefinition,nextRandom} from './config.js';
 import {explode,useTool,executeWeapon,coneRays,performKick} from './weapons.js';
 import {nextPhase as resolveTurn} from './turns.js';
+import {validateBattleSnapshot} from './checkpointValidation.js';
 import {planEnemyAction} from './enemyAI.js';
 import {announceBoss,startBossAction,stepBossCharge,resolveBossChargeHit} from './boss.js';
 
@@ -24,14 +26,35 @@ export async function createBattleSimulation(options = {}) {
   return new BattleSimulation(options);
 }
 
+export async function restoreBattleSimulation(snapshot,{map}={}){
+ const reason=validateBattleSnapshot(snapshot,map);if(reason)throw new Error('Niepoprawna walka: '+reason);
+ initialization??=R.init();await initialization;
+ const hero=snapshot.actors.find(a=>a.team==='player'),options={map:map??getMap(snapshot.mapId),mode:snapshot.mode,seed:snapshot.seed,encounterId:snapshot.encounterId,
+  player:{health:hero.health,maxHealth:hero.maxHealth,inventory:snapshot.inventory,upgrades:snapshot.upgrades},enemies:snapshot.actors.filter(a=>a.team==='enemy')};
+ const sim=new BattleSimulation(options,snapshot.terrain);
+ try{
+  for(const saved of snapshot.actors){const actor=sim.actors.find(a=>a.id===saved.id);if(!actor)throw new Error('Unknown actor');
+   actor.body.setTranslation({x:saved.x,y:saved.y,z:0},true);actor.body.setLinvel({x:saved.vx,y:saved.vy,z:0},true);actor.body.setEnabled(saved.health>0);
+   actor.health=saved.health;actor.maxHealth=saved.maxHealth;actor.grounded=saved.grounded;actor.hitAt=saved.hitAt;actor.lastSafe=saved.lastSafe?{...saved.lastSafe}:null;actor.guardAvailable=saved.guardAvailable;
+  }
+  sim.world.propagateModifiedBodyPositionsToColliders();
+  for(const key of ['time','turn','phase','phaseTime','accumulator','paused','outcome','toolUsed','activeEnemyId','selectedWeaponId','facing','guard','boost','rngState'])sim[key]=snapshot[key];
+  sim.inventory=structuredClone(snapshot.inventory);sim.enemyQueue=[...snapshot.enemyQueue];sim.enemyPlan=structuredClone(snapshot.enemyPlan);sim.boss=structuredClone(snapshot.boss);
+  sim.projectiles=structuredClone(snapshot.projectiles);sim.projectile=sim.projectiles[0]??null;sim.mines=structuredClone(snapshot.mines);sim.shotId=snapshot.nextEntityId;sim.resolvedExplosions=new Set(snapshot.resolvedExplosions);
+  sim.angle=snapshot.aim.angleDeg;sim.power=snapshot.aim.power;sim.direction=0;
+  sim.rope.restore(snapshot.rope);if(sim.phase==='player')sim.rope.reel(0);
+  sim.events=[];sim.trajectoryCache=null;return sim;
+ }catch(e){sim.dispose();throw e}
+}
+
 class BattleSimulation {
-  constructor(options) {
+  constructor(options,savedTerrain=null) {
     this.options = options;
     this.arena = options.map ?? arenaFor(options.type, options.encounterId);
     this.world = new R.World({ x: 0, y: GRAVITY, z: 0 });
     this.world.timestep = STEP;
     this.queue = new R.EventQueue(true);
-    this.terrain=options.map?createTerrain(this.arena):null;
+    this.terrain=options.map?createTerrain(this.arena,savedTerrain):null;
     this.terrainRegistry=new Map();
     if(this.terrain) syncTerrainColliders({R,world:this.world,terrain:this.terrain,registry:this.terrainRegistry});
     else addTerrain(R, this.world, this.arena);
@@ -365,6 +388,8 @@ class BattleSimulation {
     });
     return {
       schemaVersion:2,
+      mapId:this.arena.id??null,mapVersion:this.arena.version??null,encounterId:this.options.encounterId??'legacy',mode:this.options.mode??'quick',seed:this.options.seed??1,
+      phaseTime:this.phaseTime,accumulator:this.accumulator,enemyQueue:[...this.enemyQueue],nextEntityId:this.shotId,resolvedExplosions:[...this.resolvedExplosions],upgrades:[...(this.options.player?.upgrades??[])],
       boss:this.boss?structuredClone(this.boss):null,
       actors:this.actors.map(a=>a.snapshot()),
       terrain:includeTerrain?(this.terrain?.snapshot()??null):null,

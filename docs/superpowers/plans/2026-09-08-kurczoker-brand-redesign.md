@@ -831,7 +831,7 @@ return charge?{type:'charge',shots:0,label:'Jajokról szykuje szarżę'}:
 
 **Interfaces:** async `encodeCheckpoint({game,battle,battleStart}):Promise<string>` i `decodeCheckpoint(text):Promise<{ok:true,value}|{ok:false,reason}>`; envelope `{version:2,payload:string,checksum:string}`. `createSaveStorage(indexedDB):Promise<{read(),write(encoded),close()}>`; read zwraca latest/previous; write jedna transakcja. `useSecondChance(game):Expedition` tylko scene retry i niewykorzystana szansa; przywraca battleStart, znacznik true.
 
-- [ ] Test roundtrip i integralności:
+- [x] Test roundtrip i integralności:
 
 ```js
 import test from 'node:test';
@@ -855,8 +855,8 @@ test('checkpoint zachowuje wycięty teren i odrzuca zmianę payloadu',async()=>{
 });
 ```
 
-- [ ] `node --test test/brand-checkpoint.test.js` → RED.
-- [ ] Hash SHA-256 przez `crypto.subtle` Web/Node, checksum integralności bez obietnicy antycheat. Waliduj schemat, znane ID map/weapon/role, zakresy liczb, długość maski, max8MiB tekstu, brak duplikatów actorID. Nie zapisuj collider handles. `restoreBattleSimulation` odbudowuje maskę/kolizje/postacie/miny/prędkości/rope/PRNG, nie losuje mapy od nowa.
+- [x] `node --test test/brand-checkpoint.test.js` → RED.
+- [x] Hash SHA-256 przez `crypto.subtle` Web/Node, checksum integralności bez obietnicy antycheat. Waliduj schemat, znane ID map/weapon/role, zakresy liczb, długość maski, max8MiB tekstu, brak duplikatów actorID. Nie zapisuj collider handles. `restoreBattleSimulation` odbudowuje maskę/kolizje/postacie/miny/prędkości/rope/PRNG, nie losuje mapy od nowa.
 
 ```js
 const bytes=new TextEncoder().encode(payload);
@@ -864,9 +864,9 @@ const digest=await crypto.subtle.digest('SHA-256',bytes);
 const checksum=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
 ```
 
-- [ ] IndexedDB `kurczoker-v2`, store `saves`, keys latest/previous. W jednej transakcji read latest→put previous→put new latest; czekaj na transaction.complete, nie tylko request.success. Test browser: write/read/abort, quota failure pokazuje błąd, latest pozostaje poprawny. Stary localStorage zachowaj jako kopię i pokaż wiadomość o nowej wyprawie, nie kasuj automatycznie.
-- [ ] Druga szansa: zbuduj stan z battleStart + secondChanceUsed=true, zapisz razem, potem oddaj sterowanie. Przy write failure gracz może grać w pamięci z ostrzeżeniem; nie udawaj trwałego zapisu. Dodaj test ponowienia dwa razy oraz restore i dokładności lotu po zapisanej prędkości.
-- [ ] Test checkpoint + browser storage PASS; commit `feat: persist terrain and retry state atomically`.
+- [x] IndexedDB `kurczoker-v2`, store `saves`, keys latest/previous. W jednej transakcji read latest→put previous→put new latest; czekaj na transaction.complete, nie tylko request.success. Test browser: write/read/abort, quota failure pokazuje błąd, latest pozostaje poprawny. Stary localStorage zachowaj jako kopię i pokaż wiadomość o nowej wyprawie, nie kasuj automatycznie.
+- [x] Druga szansa: zbuduj stan z battleStart + secondChanceUsed=true, zapisz razem, potem oddaj sterowanie. Przy write failure gracz może grać w pamięci z ostrzeżeniem; nie udawaj trwałego zapisu. Dodaj test ponowienia dwa razy oraz restore i dokładności lotu po zapisanej prędkości.
+- [x] Test checkpoint + browser storage PASS; commit `feat: persist terrain and retry state atomically`.
 
 ## Task 21 (M3): Integracja kampanii, zapisów i ekranów
 
@@ -874,7 +874,7 @@ const checksum=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0
 
 **Interfaces:** store exports `createBrandStore(seed,{storage}={})` dla testu i hook aktywnej aplikacji. Stan `{mode,game,quick,saving,saveError}`; akcje `startExpedition(seed)`, `selectRoute(id)`, `enterEncounter()`, `finishEncounter(result)`, `chooseReward(id)`, `buy(id)`, `leaveShop()`, async `retryEncounter()`, async `resume()`, `startQuick(mapId,seed)`. Kontrakt storage wstrzykiwany jako `{read,write}` do testów; UI wykonuje jedną akcję, nie dwa reducery.
 
-- [ ] Test mostu i izolacji:
+- [x] Test mostu i izolacji:
 
 ```js
 import test from 'node:test';
@@ -890,8 +890,8 @@ test('przejście do quick nie zmienia aktywnej wyprawy',()=>{
 });
 ```
 
-- [ ] `node --test test/brand-campaign-bridge.test.js` → RED.
-- [ ] Odepnij aktywną ścieżkę od `updateBattle`, `tickBattle` i syntetycznego projectileHitEnemy. Wynik trafia tylko z runtime:
+- [x] `node --test test/brand-campaign-bridge.test.js` → RED.
+- [x] Odepnij aktywną ścieżkę od `updateBattle`, `tickBattle` i syntetycznego projectileHitEnemy. Wynik trafia tylko z runtime:
 
 ```js
 finishEncounter(result){
@@ -902,9 +902,9 @@ finishEncounter(result){
 // import {finishEncounter as finishExpeditionEncounter} from '../../game/expedition.js'
 ```
 
-- [ ] Zainstaluj lifecycle: anulowanie async inicjalizacji zwalnia nieużywany world, jeden advance i jeden listener, zapis player phase przed decyzją. Menu pokazuje Wznów przy poprawnym checkpoint. Nowa wyprawa pyta tylko o nadpisanie istniejącego postępu.
-- [ ] Browser test przechodzi przez prawdziwe UI mapy→battle→reward→shop→boss→result; osobny defeat→retry→defeat. Seed testowy może stabilizować mapy/nagrody, nie wolno dopisywać HP/wyniku do store, żeby „wygrać”. Odśwież przed drugim strzałem, porównaj widoczny teren/zapas.
-- [ ] Testy campaign/expedition/checkpoint + browser PASS; commit `feat: connect expedition screens to the authoritative runtime`.
+- [x] Zainstaluj lifecycle: anulowanie async inicjalizacji zwalnia nieużywany world, jeden advance i jeden listener, zapis player phase przed decyzją. Menu pokazuje Wznów przy poprawnym checkpoint. Nowa wyprawa pyta tylko o nadpisanie istniejącego postępu.
+- [x] Browser test przechodzi przez prawdziwe UI mapy→battle→reward→shop→boss→result; osobny defeat→retry→defeat. Seed testowy może stabilizować mapy/nagrody, nie wolno dopisywać HP/wyniku do store, żeby „wygrać”. Odśwież przed drugim strzałem, porównaj widoczny teren/zapas.
+- [x] Testy campaign/expedition/checkpoint + browser PASS; commit `feat: connect expedition screens to the authoritative runtime`.
 
 ## Task 22 (M4): Docelowe modele, animacje i budżet renderingu
 

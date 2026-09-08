@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { startRun, selectMapNode } from "../src/game/run.js";
 const { encodeCheckpoint, decodeCheckpoint } = await import(
-  "../src/engine/tactical/checkpoint.js"
+  "../src/engine/tactical/legacyCheckpoint.js"
 ).catch(() => ({}));
 test("a safe checkpoint roundtrips and combat is not serialized", () => {
   assert.equal(typeof encodeCheckpoint, "function");

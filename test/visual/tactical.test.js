@@ -4,7 +4,7 @@ import { chromium } from "playwright";
 import { mkdir, writeFile } from "node:fs/promises";
 import { serveBuild } from "./server.js";
 import { startRun } from "../../src/game/run.js";
-import { encodeCheckpoint } from "../../src/engine/tactical/checkpoint.js";
+import { encodeCheckpoint } from "../../src/engine/tactical/legacyCheckpoint.js";
 
 let host;
 const base =

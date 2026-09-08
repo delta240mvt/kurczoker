@@ -154,3 +154,23 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - Testy przeprowadzają salwy obu faz, przejście do następnej zapowiedzi, szarżę przez rzeczywistą fizykę i jej zatrzymanie. Fixture500HP izoluje zachowanie szarży od wcześniejszej porażki; nie stanowi dowodu balansu wyprawy. Odbiór bossa przez UI z produkcyjnym100HP i końcami wyprawy należy do task21/25.
 - ResultPanel ma oba zakończenia i wejścia do nowej wyprawy/potyczki. Pełne połączenie ekranów w task21.
 - Artefakty: .superpowers/brand-boss-red.log, brand-boss-tests.log, brand-boss-final-tests-2.log.
+
+## M3 — Task20: pełny checkpoint i transakcje
+
+- V2 SHA-256, limit8MiB, walidacja map/aktorów/ekwipunku/faz, odbudowanie Rapiera bez serializacji uchwytów. Legacy codec pozostaje dla historycznych danych; nie kasujemy localStorage.
+- Odtworzenie krateru, granatu w locie, miny, liny, prędkości, PRNG i osłony: porównanie pełnego stanu i dalszego lotu.
+- IndexedDB latest/previous w jednej transakcji. Test rzeczywistej przeglądarki wstrzykuje QuotaExceededError po zakolejkowaniu zapisu previous: transakcja cofa oba zapisy, reopen zachowuje poprawne D/C. Poprawiono utratę pierwotnego błędu przy abort.
+- Druga szansa odtwarza battleStart i zapisuje secondChanceUsed przed zwrotem sterowania; awaria zapisu zostawia grę w pamięci z błędem. Most store potwierdza brak drugiej próby ponowienia.
+- PASS: .superpowers/brand-storage-tests.log (1/1), .superpowers/brand-m3-checkpoint-regression.log (92/92), .superpowers/brand-m3-state-tests.log (11/11). Build .superpowers/brand-m3-build-2.log PASS po poprawieniu granicy SSR/przeglądarka.
+- Task20 i21 są integrowane w jednym commicie: nowy codec, store i aktywna ścieżka UI muszą zostać przełączone razem. Task21 nadal w odbiorze.
+
+## M3 — Task21: aktywna wyprawa i ekrany
+
+- Jeden BrandStore steruje mapą, nagrodami, sklepem, wynikiem oraz runtime. Usunięto nieaktywny stary komponent KurczokerCanvas; aktywna ścieżka nie importuje starego updateBattle/tickBattle ani syntetycznych wyników. Historyczne testy codec zachowują osobny legacyCheckpoint.
+- Checkpoint przy wejściu, przed atakiem, przy pauzie i na początku kolejnej tury. Async inicjalizacja zwalnia anulowane światy; jeden GameRuntime na encounter. Menu odczytuje poprawny zapis, nowa wyprawa potwierdza zastąpienie postępu. Quick zachowuje game i nie zapisuje wyprawy.
+- Naprawiono renderowanie wielu przeciwników: Chicken odczytuje actorId zamiast pierwszego enemy i nie kopiuje maski terenu w każdej klatce.
+- PASS: .superpowers/brand-expedition-browser-3.log: pełne zwycięstwo Podwórze→Wzgórza→Młyn→Jajokról z 100HP startu, prawdziwe ruchy/skoki/ataki, nagrody i dwa sklepy; osobny reload zachowuje faktyczny krater i drugą turę. 2/2 PASS.
+- PASS: .superpowers/brand-expedition-errors-browser.log: defeat→retry→reload→defeat bez drugiej próby oraz rzeczywisty QuotaExceededError z komunikatem i możliwością walki. 2/2 PASS.
+- Bot nie dopisuje HP ani wyników do runtime/store. Czyta widoczne diagnostyki aktorów i używa klawiatury oraz przycisków. Pierwsze próby FAIL wynikały z celowego samouszkodzenia w teście zapisu i strzelania zza krawędzi krateru; rozdzielono scenariusze oraz poprawiono ruch testowego gracza. Balansu nie zmieniano, żeby zaliczyć test.
+- Codex IAB: trasa390×844, walka/startowe2bronie, strzał i odpowiedź, pauza/menu/Wznów, odtworzony krater +75HP/tura2, obrót844×390. Brak overflow HUD; viewport zresetowany, karta zamknięta. Screenshots automatów expedition-1..4.png oraz expedition-failure.png w .superpowers/makeover-qa.
+- Pełna wygrana automatu361s. Nie jest to pomiar osoby35–65 ani potwierdzenie docelowych10–15min; trzy pomiary gry i szerszy balans należą do25.
