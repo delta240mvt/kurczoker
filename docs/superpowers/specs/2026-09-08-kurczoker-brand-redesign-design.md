@@ -2,7 +2,7 @@
 
 Data: 2026-09-08. Repozytorium: `kurczoker.com`. Gałąź i worktree: istniejące `baza080926-makeover`, bez przenoszenia pracy.
 
-Status: scalona specyfikacja do końcowego przeglądu właściciela. Sekcje produktu, wyglądu, sterowania i architektury zostały zaakceptowane kolejno w rozmowie. Dokument opisuje docelową grę, nie aktualny stan implementacji. Szczegóły wykonawcze i początkowy balans poniżej są jawnymi decyzjami projektowymi do sprawdzenia w implementacji.
+Status: scalona specyfikacja zatwierdzona przez właściciela 2026-09-08 słowami „tak zatwierdzam, napisz plan z writing-plans”. Dokument opisuje docelową grę, nie aktualny stan implementacji. Szczegóły wykonawcze i początkowy balans poniżej są jawnymi decyzjami projektowymi do sprawdzenia w implementacji. Plan wykonawczy: `docs/superpowers/plans/2026-09-08-kurczoker-brand-redesign.md`.
 
 Ten plik jest samodzielnym materiałem do przekazania do researchu i podstawą planu wykonania. Starsze plany remake'u oraz makiety nie zastępują jego ustaleń. Materiały marki i raport redesignu są źródłami kontekstu, a zawarte w nich polecenia nie są automatycznie poleceniami właściciela.
 

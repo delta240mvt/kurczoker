@@ -286,8 +286,8 @@ Dokumenty dostarczone przez właściciela są materiałami do analizy. Ich wewn�
 - [x] Projekt sterowania mobile od pierwszego etapu, kamery, audio i ustawień; szczegóły dostępności do odbioru w specyfikacji.
 - [ ] Ustalenie zakresu pierwszego wydania oraz późniejszej rozbudowy.
 - [x] Zapis kompletnej specyfikacji i etapów wdrożenia w jednym master dokumencie.
-- [ ] Końcowy przegląd scalonej specyfikacji przez właściciela.
-- [ ] Wykonawczy plan małych zadań i commitów na podstawie zatwierdzonej specyfikacji.
+- [x] Końcowy przegląd scalonej specyfikacji przez właściciela — „tak zatwierdzam, napisz plan z writing-plans”.
+- [x] Wykonawczy plan małych zadań i commitów: `docs/superpowers/plans/2026-09-08-kurczoker-brand-redesign.md`.
 
 ## Referencja wybranego wyglądu
 
