@@ -81,3 +81,10 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - Osobne identyfikatory klawiatury i dotyku; skok nie zwalnia biegu. Żaden pointer release ani klawisz ruchu nie wywołuje ataku.
 - Menu, utrata okna, widoczność i obrót czyszczą ruch/zwijanie; cleanup usuwa listenery. Formularze i repeat nie uruchamiają akcji.
 - Podłączono również przejściowy Controls; test fizycznego multi-touch i nowego HUD odbędzie się w zadaniu 12.
+
+## Task 11 — kamera
+
+- RED: brak modułu kamery; dodatkowy RED po rzeczywistym sprawdzeniu telefonu: kurczak w kraterze chował się pod panelem celowania.
+- GREEN: 4 testy kamery PASS. Cel kamery uwzględnia przestrzeń zajętą przez HUD, także nisko pod powierzchnią terenu.
+- Przegląd, powrót do kurczaka, zoom i drag podłączone w nowym HUD/scenie (integrowane w task12). Codex IAB: chodzenie, fizyczne zwijanie lassa i śledzenie uniesionego kurczaka; obrót 390×844 → 844×390 zachował HP71 i turę2.
+- Kamera nie ściska całej areny w pionie; full-map tylko w osobnym przeglądzie.

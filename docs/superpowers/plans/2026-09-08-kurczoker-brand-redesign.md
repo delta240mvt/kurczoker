@@ -502,7 +502,7 @@ test('puszczenie skoku nie puszcza trzymanego ruchu i nie strzela',()=>{
 
 **Interfaces:** `cameraTarget({viewport,bounds,actor,projectile,rope,mode,overviewCenter,dt,previous}):{x,y,visibleHeight,zoom}`; kamera ortograficzna XY, zoom=viewport.height/visibleHeight. Normalna wysokość10, rope do18; overview dopasowuje bounds z marginesem.
 
-- [ ] Test:
+- [x] Test:
 
 ```js
 import test from 'node:test';
@@ -517,16 +517,16 @@ test('pion zachowuje rozmiar bohatera zamiast wciskać 72 jednostki mapy',()=>{
 });
 ```
 
-- [ ] `node --test test/brand-camera.test.js` → RED.
-- [ ] Zastąp `FitCamera` tylko w bitwie; mapa wyprawy ma osobny kadr. Smoothing zależny od czasu:
+- [x] `node --test test/brand-camera.test.js` → RED.
+- [x] Zastąp `FitCamera` tylko w bitwie; mapa wyprawy ma osobny kadr. Smoothing zależny od czasu:
 
 ```js
 const alpha=1-Math.exp(-8*dt);
 const smooth=(from,to)=>from+(to-from)*alpha;
 ```
 
-- [ ] Podłącz „Mapa” i „Do kurczaka”, zoom oraz drag tylko w overview. Kamera śledzi aktywny pocisk, po efekcie wraca do aktora. Test portrait/landscape, krawędzi mapy i obrotu bez skoku stanu PASS.
-- [ ] Commit: `feat: follow movement and shots with a portrait-first camera`.
+- [x] Podłącz „Mapa” i „Do kurczaka”, zoom oraz drag tylko w overview. Kamera śledzi aktywny pocisk, po efekcie wraca do aktora. Test portrait/landscape, krawędzi mapy i obrotu bez skoku stanu PASS.
+- [x] Commit: `feat: follow movement and shots with a portrait-first camera`.
 
 ## Task 12 (M1): Pierwsza kompletna arena w aplikacji
 

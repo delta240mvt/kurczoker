@@ -3,6 +3,7 @@ import { useThree } from "@react-three/fiber";
 const BattleScene = lazy(() =>
   import("./scenes/BattleScene.jsx").then((m) => ({ default: m.BattleScene })),
 );
+import {BattleCamera} from './tactical/BattleCamera.jsx';
 import { MapScene } from "./scenes/MapScene.jsx";
 function FitCamera() {
   const { camera, size } = useThree();
@@ -20,13 +21,14 @@ export function GameRuntime({
   quality,
   selectNode,
   menu,
+  view,
   ...events
 }) {
   return (
     <>
-      <FitCamera />
+      {sim?.terrain?<BattleCamera sim={sim} view={view}/>:<FitCamera />}
       {sim ? (
-        <BattleScene sim={sim} quality={quality} {...events} />
+        <BattleScene sim={sim} quality={quality} view={view} {...events} />
       ) : (
         <MapScene
           game={game}
