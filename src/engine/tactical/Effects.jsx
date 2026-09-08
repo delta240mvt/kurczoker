@@ -3,7 +3,7 @@ import { useRef, useMemo, useEffect } from "react";
 import { Vector3, BufferGeometry, Object3D, Color } from "three";
 import { Html } from "@react-three/drei";
 
-export function ShotVisual({ sim, showAim=true }) {
+export function ShotVisual({ sim, showAim=true, reducedMotion=false }) {
   const object=useMemo(()=>new Object3D(),[]);
   const egg = useRef(),
     trail = useRef(),
@@ -30,14 +30,14 @@ export function ShotVisual({ sim, showAim=true }) {
     const s = sim.snapshot({includeTerrain:false});
     egg.current.count=s.projectiles.length;
     s.projectiles.forEach((p,i)=>{
-      object.position.set(p.x,p.y,.1);object.rotation.z=s.time*8;
+      object.position.set(p.x,p.y,.1);object.rotation.z=reducedMotion?0:s.time*8;
       const scale=p.weaponId==='fragment'?.11:.18;
       object.scale.set(scale,scale*1.2,scale);object.updateMatrix();egg.current.setMatrixAt(i,object.matrix);
       egg.current.setColorAt(i,new Color(({granajko:'#A6D97A',cluster:'#8F5BFF',fragment:'#F2E500'})[p.weaponId]??'#FFF0CB'));
     });
     egg.current.instanceMatrix.needsUpdate=true;
     if(egg.current.instanceColor)egg.current.instanceColor.needsUpdate=true;
-    trail.current.visible = !!s.projectile;
+    trail.current.visible = !reducedMotion && !!s.projectile;
     line.current.visible = showAim && s.phase === "player" && !s.paused;
     if (s.projectile) {
       const p = s.projectile;
@@ -67,7 +67,7 @@ export function ShotVisual({ sim, showAim=true }) {
   return (
     <>
       <instancedMesh ref={egg} args={[null,null,32]} frustumCulled={false}>
-        <sphereGeometry args={[1,12,8]}/><meshStandardMaterial roughness={.5}/>
+        <sphereGeometry args={[1,12,8]}/><meshLambertMaterial/>
       </instancedMesh>
       <line ref={trail} geometry={trailGeometry} frustumCulled={false}>
         <lineBasicMaterial color="#f8cf78" transparent opacity={0.75} />
@@ -79,7 +79,7 @@ export function ShotVisual({ sim, showAim=true }) {
   );
 }
 
-export function ImpactVisual({ event, sim }) {
+export function ImpactVisual({ event, sim, reducedMotion=false }) {
   const label=useRef();
   const root = useRef(),
     materials = useRef([]);
@@ -90,8 +90,8 @@ export function ImpactVisual({ event, sim }) {
     if (!root.current) return;
     root.current.visible = age < 0.8;
     if(label.current)label.current.style.opacity=Math.max(0,1-age/.8);
-    root.current.scale.setScalar(0.5 + age * 2.2);
-    root.current.rotation.z = age * 1.1;
+    root.current.scale.setScalar(reducedMotion?1:0.5 + age * 2.2);
+    root.current.rotation.z = reducedMotion?0:age * 1.1;
     materials.current.forEach((m) => {
       if (m) m.opacity = Math.max(0, 1 - age / 0.8);
     });
@@ -120,7 +120,7 @@ export function ImpactVisual({ event, sim }) {
           ref={(m) => (materials.current[1] = m)}
         />
       </mesh>
-      {Array.from({ length: 10 }, (_, i) => (
+      {Array.from({ length: reducedMotion?0:10 }, (_, i) => (
         <mesh
           key={i}
           position={[Math.cos(i * 2.4) * 0.75, Math.sin(i * 2.4) * 0.6, 0.1]}
@@ -137,16 +137,16 @@ export function ImpactVisual({ event, sim }) {
   );
 }
 
-export function MineVisual({sim}) {
+export function MineVisual({sim,reducedMotion=false}) {
  const mesh=useRef(),object=useMemo(()=>new Object3D(),[]);
  useFrame(()=>{
   if(sim.disposed||!mesh.current)return;mesh.current.count=sim.mines.length;
   sim.mines.forEach((m,i)=>{
    object.position.set(m.x,m.y,1.35);object.scale.set(.18,.12,.18);object.updateMatrix();mesh.current.setMatrixAt(i,object.matrix);
-   mesh.current.setColorAt(i,new Color(m.age>=.8&&Math.floor(sim.time*4)%2?'#F2E500':'#020304'));
+   mesh.current.setColorAt(i,new Color(m.age>=.8&&(reducedMotion||Math.floor(sim.time*4)%2)?'#F2E500':'#020304'));
   });mesh.current.instanceMatrix.needsUpdate=true;if(mesh.current.instanceColor)mesh.current.instanceColor.needsUpdate=true;
  });
- return <instancedMesh ref={mesh} args={[null,null,16]} frustumCulled={false}><sphereGeometry args={[1,10,6]}/><meshStandardMaterial/></instancedMesh>;
+ return <instancedMesh ref={mesh} args={[null,null,16]} frustumCulled={false}><sphereGeometry args={[1,10,6]}/><meshLambertMaterial/></instancedMesh>;
 }
 export function ConeVisual({event,sim}) {
  const ref=useRef(),geometry=useMemo(()=>new BufferGeometry().setFromPoints(event.payload.rays.flatMap(p=>[

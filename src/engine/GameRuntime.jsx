@@ -19,6 +19,7 @@ export function GameRuntime({
   sim,
   game,
   quality,
+  settings,
   selectNode,
   menu,
   view,
@@ -26,9 +27,9 @@ export function GameRuntime({
 }) {
   return (
     <>
-      {sim?.terrain?<BattleCamera sim={sim} view={view}/>:<FitCamera />}
+      {sim?.terrain?<BattleCamera sim={sim} view={view} settings={settings}/>:<FitCamera />}
       {sim ? (
-        <BattleScene sim={sim} quality={quality} view={view} {...events} />
+        <BattleScene sim={sim} quality={quality} settings={settings} view={view} {...events} />
       ) : (
         <MapScene
           game={game}

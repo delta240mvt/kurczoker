@@ -2,7 +2,7 @@ import {useEffect,useMemo,useRef} from 'react';
 import {WEAPONS} from './config.js';
 import {createInputRouter,bindInput} from './input.js';
 const PHASE={player:'Twój ruch. Bez pośpiechu.','player-shot':'Jajko w drodze…','enemy-tell':'Kogut szykuje atak','enemy-move':'Kogut zmienia pozycję','enemy-charge':'Jajokról szarżuje!','enemy-shot':'Uwaga, leci jajko!','enemy-resolve':'Opadają pióra…',settle:'Za chwilę Twój ruch',finished:'Potyczka rozstrzygnięta'};
-export function BattleHUD({sim,snapshot,onCommand,onPause,view,onView,toolId,onTool,notice}) {
+export function BattleHUD({sim,snapshot,onCommand,onPause,view,onView,toolId,onTool,notice,settings={}}) {
  const current=useRef({onPause,onView,view,onCommand});current.current={onPause,onView,view,onCommand};
  const router=useMemo(()=>createInputRouter(command=>current.current.onCommand(command)),[]);
  const weapon=WEAPONS[snapshot.selectedWeaponId],ammo=snapshot.inventory.ammo[snapshot.selectedWeaponId];
@@ -25,7 +25,7 @@ export function BattleHUD({sim,snapshot,onCommand,onPause,view,onView,toolId,onT
   onLostPointerCapture={e=>router.release('pointer:'+e.pointerId)}>{icon}<small>{label}</small></button>;
  const hero=snapshot.actors.find(a=>a.team==='player');
  const enemies=snapshot.actors.filter(a=>a.team==='enemy'&&a.alive);
- return <div className="brand-hud">
+ return <div className="brand-hud" data-scale={settings.hudScale??1} data-left-handed={settings.leftHanded??false}>
   <header className="brand-battle-top"><div><small>KURCZOKER · TURA {snapshot.turn}</small><strong>♥ {hero.health}<span> / {hero.maxHealth}</span></strong></div>
    <button aria-label="Pauza" onClick={onPause}>Ⅱ <span>Pauza</span></button></header>
   {!overview&&<div className="brand-phase" role="status">{snapshot.phase==='player'&&snapshot.boss?snapshot.boss.intent.label:snapshot.phase==='enemy-tell'&&snapshot.enemyPlan?({grenadier:'Grenadier szykuje granat',rusher:'Szturmowiec rusza do ataku',shooter:'Strzelec mierzy'})[snapshot.actors.find(a=>a.id===snapshot.activeEnemyId)?.role]??snapshot.enemyPlan.label??PHASE[snapshot.phase]:PHASE[snapshot.phase]}</div>}

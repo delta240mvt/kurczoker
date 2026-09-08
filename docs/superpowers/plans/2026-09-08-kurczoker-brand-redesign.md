@@ -945,7 +945,7 @@ ktx2.detectSupport(renderer); loader.setKTX2Loader(ktx2);
 
 **Interfaces:** `normalizeSettings(raw):Settings`, Settings `{hudScale:1|1.25,leftHanded:boolean,musicVolume:0..1,effectsVolume:0..1,shake:boolean,reducedMotion:boolean,quality:'auto'|'low'|'high'}`; audio `setVolumes(audio,{music,effects})`, `pauseAudio(audio,bool)`. Zachowaj istniejące createAudioController i playEffect, rozdziel musicGain/effectsGain.
 
-- [ ] Test:
+- [x] Test:
 
 ```js
 import test from 'node:test';
@@ -958,17 +958,17 @@ test('błędne preferencje nie psują HUD i głośności',()=>{
 });
 ```
 
-- [ ] `node --test test/brand-settings.test.js` → RED.
-- [ ] Normalizuj przez jawną allowlistę; respektuj reduced-motion przy pierwszym starcie. Kontrolki głośności:
+- [x] `node --test test/brand-settings.test.js` → RED.
+- [x] Normalizuj przez jawną allowlistę; respektuj reduced-motion przy pierwszym starcie. Kontrolki głośności:
 
 ```js
 audio.musicGain.gain.setValueAtTime(settings.musicVolume,audio.context.currentTime);
 audio.effectsGain.gain.setValueAtTime(settings.effectsVolume,audio.context.currentTime);
 ```
 
-- [ ] Dodaj oryginalny prosty motyw retro i odgłosy skoku/liny/ataku; odblokowanie po interakcji, nie na załadowaniu strony. Deduplikuj event.id, nie odtwarzaj zaległych zdarzeń po pauzie. Brak AudioContext nie blokuje gry.
-- [ ] Pomoc: wskazówki po jednej na pierwszą czynność, możliwość pominięcia i powrotu. UI: duży HUD, lustrzane sterowanie, etykiety i fokus, suwaki klawiaturą, bez informacji wyłącznie kolorem/dźwiękiem. Browser test zapisuje ustawienia→reload→potwierdza i sprawdza wyłączenie shake.
-- [ ] Test settings, kontrola wizualna i keyboard menu PASS; commit `feat: add accessible controls settings and reactive audio`.
+- [x] Dodaj oryginalny prosty motyw retro i odgłosy skoku/liny/ataku; odblokowanie po interakcji, nie na załadowaniu strony. Deduplikuj event.id, nie odtwarzaj zaległych zdarzeń po pauzie. Brak AudioContext nie blokuje gry.
+- [x] Pomoc: wskazówki po jednej na pierwszą czynność, możliwość pominięcia i powrotu. UI: duży HUD, lustrzane sterowanie, etykiety i fokus, suwaki klawiaturą, bez informacji wyłącznie kolorem/dźwiękiem. Browser test zapisuje ustawienia→reload→potwierdza i sprawdza wyłączenie shake.
+- [x] Test settings, kontrola wizualna i keyboard menu PASS; commit `feat: add accessible controls settings and reactive audio`.
 
 ## Task 24 (M4): Landing DELTA240MVT i bezpośrednie wejścia
 

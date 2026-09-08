@@ -187,3 +187,12 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - PASS3/3 brand-m4-render-verified.log: pięć nowych broni obok Jajooki przez faktyczne UI, błąd pobrania GLB i retry tej samej areny, arkusz wszystkich40póz. Obejrzano brand-animation-sheet.png, warianty Native/Pixelated, brand-new-model-phone.png oraz lambert-390/1280.png.
 - Ograniczenie pomiaru: próbki testu po retry/resize (10/25FPS, p95188/103ms) obejmują zmianę rozmiaru i rozgrzewanie; nie przedstawiamy ich jako spełnienia budżetu FPS. Stabilny pomiar adaptacji, wybuchów i fizycznych urządzeń pozostaje w25.
 - Build brand-adaptive-build.log PASS; publikowany bundle gry około4.54MB nieskompresowane, pliki poniżej25MiB. To nie jest pomiar transferu z Cloudflare.
+
+
+## Task 23 — ustawienia, pomoc i audio
+
+- PASS: 13 testów settings/audio/camera (`.superpowers/brand-settings-final.log`), build (`brand-settings-build-final.log`), browser (`brand-settings-browser-final.log`, 1/1).
+- Browser: zapis i odświeżenie ustawień, oddzielne głośności, HUD 125%, leworęczne sterowanie, wyłączony shake, natywna pułapka fokusu dialogu, Pomoc → Escape → Pauza → wznowienie, 390×844 i 844×390. Brak błędów pageerror.
+- Obejrzano oba zrzuty ustawień. Poprawiono kamerę w poziomie: cały kurczak jest widoczny nad panelem celowania także z HUD 125%.
+- Reduced motion wyłącza wstrząsy, obrót pocisków, smugę, rozszerzanie/obrót eksplozji, dodatkowe odłamki i miganie uzbrojonych min. Pozostają lot, ruch i czytelna informacja o obrażeniach.
+- Oryginalny motyw syntezowany lokalnie. AudioContext dopiero po interakcji; oddzielne kanały, pauza bez zaległych dźwięków, deduplikacja zdarzeń obejmuje identyfikator walki.

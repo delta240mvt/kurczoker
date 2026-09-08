@@ -6,7 +6,7 @@ import {TerrainView} from '../tactical/TerrainView.jsx';
 import {RopeVisual,ToolVisual,BossTargetVisual} from '../tactical/TacticalOverlays.jsx';
 import {Chicken} from '../tactical/Chicken.jsx';
 import {ShotVisual,ImpactVisual,MineVisual,ConeVisual} from '../tactical/Effects.jsx';
-export function BattleScene({sim,quality,onSnapshot,onEvent,onOutcome,onReady,onAim,view={mode:'move'},toolId='pickaxe',onCommand,onView}) {
+export function BattleScene({sim,quality,settings={},onSnapshot,onEvent,onOutcome,onReady,onAim,view={mode:'move'},toolId='pickaxe',onCommand,onView}) {
  const lastPublish=useRef(-1),resolved=useRef(false),ready=useRef(false),drag=useRef(null);
  const [impacts,setImpacts]=useState([]),[cone,setCone]=useState(null),[terrain,setTerrain]=useState(()=>sim.terrain?.snapshot());
  const revision=useRef(sim.terrain?.revision),{camera}=useThree();
@@ -20,7 +20,7 @@ export function BattleScene({sim,quality,onSnapshot,onEvent,onOutcome,onReady,on
   }
   const incoming=[];
   for(const event of sim.drainEvents()){onEvent(event);if(event.type==='impact')incoming.push(event);if(event.type==='shotgun')setCone(event);}
-  if(incoming.length)setImpacts(previous=>[...previous.filter(e=>sim.time-e.time<.8),...incoming].slice(-(quality?.particles??12)));
+  if(incoming.length)setImpacts(previous=>[...previous.filter(e=>sim.time-e.time<.8),...incoming].slice(-(settings.reducedMotion?3:quality?.particles??12)));
   if(sim.outcome&&!resolved.current){resolved.current=true;onOutcome(sim.snapshot({includeTerrain:false}));}
  },-2);
  function point(e,down=false){
@@ -35,12 +35,12 @@ export function BattleScene({sim,quality,onSnapshot,onEvent,onOutcome,onReady,on
   }
  }
  return <>
-  {terrain?<><BrandWorld arena={sim.arena} sim={sim} quality={quality}/><TerrainView terrainSnapshot={terrain}/><RopeVisual sim={sim}/><ToolVisual sim={sim} toolId={toolId} visible={view.mode==='tool'}/></>:<World arena={sim.arena} quality={quality}/>}
+  {terrain?<><BrandWorld arena={sim.arena} sim={sim} quality={quality} reducedMotion={settings.reducedMotion}/><TerrainView terrainSnapshot={terrain}/><RopeVisual sim={sim}/><ToolVisual sim={sim} toolId={toolId} visible={view.mode==='tool'}/></>:<World arena={sim.arena} quality={quality}/>}
   {sim.actors.map(a=><Chicken key={a.id} sim={sim} actorId={a.id} side={a.team} boss={a.role==='boss'||sim.options.type==='boss'&&a.team==='enemy'}/>)}
-  <ShotVisual sim={sim} showAim={!terrain||view.mode==='aim'}/>
+  <ShotVisual reducedMotion={settings.reducedMotion} sim={sim} showAim={!terrain||view.mode==='aim'}/>
   <BossTargetVisual sim={sim}/>
-  {impacts.map(impact=><ImpactVisual key={impact.id} event={impact} sim={sim}/>)}
-  <MineVisual sim={sim}/>{cone&&<ConeVisual key={cone.id} event={cone} sim={sim}/>}
+  {impacts.map(impact=><ImpactVisual reducedMotion={settings.reducedMotion} key={impact.id} event={impact} sim={sim}/>)}
+  <MineVisual reducedMotion={settings.reducedMotion} sim={sim}/>{cone&&<ConeVisual key={cone.id} event={cone} sim={sim}/>}
   <mesh position={terrain?[sim.arena.width/2,sim.arena.height/2,3]:[0,3,0]}
    onPointerDown={e=>{e.stopPropagation();point(e,true)}}
    onPointerMove={e=>{if(e.pointerType!=='touch'||e.buttons)point(e)}}
