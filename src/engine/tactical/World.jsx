@@ -36,7 +36,7 @@ function Trees({ count = 24, seed = 0 }) {
         castShadow
       >
         <cylinderGeometry args={[0.08, 0.13, 0.9, 5]} />
-        <meshStandardMaterial color="#765b42" />
+        <meshLambertMaterial color="#765b42" />
       </instancedMesh>
       <instancedMesh
         args={[null, null, count]}
@@ -44,7 +44,7 @@ function Trees({ count = 24, seed = 0 }) {
         castShadow
       >
         <icosahedronGeometry args={[0.7, 1]} />
-        <meshStandardMaterial roughness={1} />
+        <meshLambertMaterial />
       </instancedMesh>
     </group>
   );
@@ -70,11 +70,11 @@ function Flowers() {
     <group>
       <instancedMesh args={[null, null, 18]} ref={(m) => place(m, false)}>
         <coneGeometry args={[0.08, 0.3, 4]} />
-        <meshStandardMaterial color="#687a48" />
+        <meshLambertMaterial color="#687a48" />
       </instancedMesh>
       <instancedMesh args={[null, null, 18]} ref={(m) => place(m, true)}>
         <icosahedronGeometry args={[0.06, 0]} />
-        <meshStandardMaterial />
+        <meshLambertMaterial />
       </instancedMesh>
     </group>
   );
@@ -84,24 +84,24 @@ export function Castle({ position = [4, 0, -4], scale = 1, boss = false }) {
     <group position={position} scale={scale}>
       <mesh position={[0, 0.65, 0]} castShadow receiveShadow>
         <boxGeometry args={[2.1, 1.3, 0.9]} />
-        <meshStandardMaterial
+        <meshLambertMaterial
           color={boss ? "#454951" : "#c8baa0"}
-          roughness={0.9}
+
         />
       </mesh>
       {[-1, 1].map((x) => (
         <group key={x} position={[x, 0, 0]}>
           <mesh position={[0, 1.05, 0]} castShadow>
             <cylinderGeometry args={[0.34, 0.42, 2.1, 8]} />
-            <meshStandardMaterial color={boss ? "#515663" : "#d6c6a7"} />
+            <meshLambertMaterial color={boss ? "#515663" : "#d6c6a7"} />
           </mesh>
           <mesh position={[0, 2.3, 0]} castShadow>
             <coneGeometry args={[0.56, 0.9, 8]} />
-            <meshStandardMaterial color={boss ? "#7d3740" : "#385e65"} />
+            <meshLambertMaterial color={boss ? "#7d3740" : "#385e65"} />
           </mesh>
           <mesh position={[0, 1.5, 0.34]}>
             <boxGeometry args={[0.12, 0.3, 0.035]} />
-            <meshStandardMaterial
+            <meshLambertMaterial
               color="#e9bc68"
               emissive="#e9bc68"
               emissiveIntensity={0.35}
@@ -111,19 +111,19 @@ export function Castle({ position = [4, 0, -4], scale = 1, boss = false }) {
       ))}
       <mesh position={[0, 0.42, 0.47]}>
         <boxGeometry args={[0.48, 0.84, 0.045]} />
-        <meshStandardMaterial color="#514737" />
+        <meshLambertMaterial color="#514737" />
       </mesh>
       <mesh position={[0, 1.45, 0]} castShadow>
         <coneGeometry args={[1.5, 0.7, 4]} />
-        <meshStandardMaterial color="#496b64" />
+        <meshLambertMaterial color="#496b64" />
       </mesh>
       <mesh position={[0.15, 2.22, 0]}>
         <cylinderGeometry args={[0.02, 0.02, 1.4, 6]} />
-        <meshStandardMaterial color="#93734a" />
+        <meshLambertMaterial color="#93734a" />
       </mesh>
       <mesh position={[0.48, 2.65, 0]}>
         <boxGeometry args={[0.62, 0.32, 0.025]} />
-        <meshStandardMaterial color={boss ? "#c65353" : "#e7bb62"} />
+        <meshLambertMaterial color={boss ? "#c65353" : "#e7bb62"} />
       </mesh>
     </group>
   );
@@ -157,16 +157,16 @@ export function World({ arena, quality = "high", map = false }) {
         <group key={p.id} position={[p.x, p.y, 0]}>
           <mesh receiveShadow castShadow>
             <boxGeometry args={[p.width, p.height, p.depth]} />
-            <meshStandardMaterial
+            <meshLambertMaterial
               color={boss ? "#70745e" : "#8c9b66"}
-              roughness={1}
+
             />
           </mesh>
           <mesh position={[0, p.height / 2 - 0.03, 0]} receiveShadow>
             <boxGeometry args={[p.width + 0.04, 0.065, p.depth + 0.04]} />
-            <meshStandardMaterial
+            <meshLambertMaterial
               color={boss ? "#96966b" : "#b1bd7c"}
-              roughness={1}
+
             />
           </mesh>
         </group>
@@ -177,7 +177,7 @@ export function World({ arena, quality = "high", map = false }) {
         castShadow
       >
         <icosahedronGeometry args={[1, 1]} />
-        <meshStandardMaterial color="#817561" flatShading roughness={1} />
+        <meshLambertMaterial color="#817561" flatShading />
       </mesh>
       {Array.from({ length: 11 }, (_, i) => (
         <mesh
@@ -188,9 +188,9 @@ export function World({ arena, quality = "high", map = false }) {
           castShadow
         >
           <dodecahedronGeometry args={[0.75, 0]} />
-          <meshStandardMaterial
+          <meshLambertMaterial
             color={i % 2 ? "#978975" : "#b0a083"}
-            roughness={1}
+
           />
         </mesh>
       ))}
@@ -204,7 +204,7 @@ export function World({ arena, quality = "high", map = false }) {
           scale={[8, 4 + i * 2, 5]}
         >
           <icosahedronGeometry args={[1, 1]} />
-          <meshStandardMaterial color={i ? "#a8bbac" : "#8fa89c"} flatShading />
+          <meshLambertMaterial color={i ? "#a8bbac" : "#8fa89c"} flatShading />
         </mesh>
       ))}
       <mesh
@@ -213,7 +213,7 @@ export function World({ arena, quality = "high", map = false }) {
         receiveShadow
       >
         <planeGeometry args={[150, 150]} />
-        <meshStandardMaterial color="#b8cbc2" roughness={0.55} />
+        <meshLambertMaterial color="#b8cbc2" />
       </mesh>
       <Flowers />
     </group>

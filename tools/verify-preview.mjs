@@ -42,7 +42,7 @@ for (let offset = 0; offset < paths.length; offset += 8) {
     )),
   );
 }
-for (const m of Object.values(manifest)) {
+for (const m of manifest.assets) {
   const response = await fetch(new URL(m.url, base)),
     remote = Buffer.from(await response.arrayBuffer()),
     local = await readFile(`public${m.url}`);

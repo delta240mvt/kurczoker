@@ -10,7 +10,7 @@ const manifest = JSON.parse(
   await readFile("src/engine/tactical/releaseManifest.json", "utf8"),
 );
 const allowed = new Set(
-  Object.values(manifest).map((m) => m.url.split("/").pop()),
+  manifest.assets.map((m) => m.url.split("/").pop()),
 );
 for (const file of await readdir(join(root, "game/release"))) {
   if (!allowed.has(file)) await rm(join(root, "game/release", file));
@@ -47,7 +47,7 @@ if (budget > 10 * 1024 ** 2)
 const report = {
   totalBytes: sizes.reduce((a, s) => a + s.bytes, 0),
   gameUncompressedBytes: budget,
-  modelsBytes: Object.values(manifest).reduce((a, m) => a + m.bytes, 0),
+  modelsBytes: manifest.assets.reduce((a, m) => a + m.bytes, 0),
   largestFiles: sizes.sort((a, b) => b.bytes - a.bytes).slice(0, 8),
 };
 await writeFile("dist/release-report.json", JSON.stringify(report, null, 2));

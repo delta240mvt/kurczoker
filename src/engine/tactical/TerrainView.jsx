@@ -15,10 +15,10 @@ export function TerrainView({terrainSnapshot}) {
  }
  return <group>
   <instancedMesh key={'soil-'+terrainSnapshot.revision} args={[null,null,boxes.length]} ref={m=>place(m,boxes)} castShadow receiveShadow>
-   <boxGeometry/><meshStandardMaterial roughness={1} flatShading/>
+   <boxGeometry/><meshLambertMaterial flatShading/>
   </instancedMesh>
   <instancedMesh key={'grass-'+terrainSnapshot.revision} args={[null,null,caps.length]} ref={m=>place(m,caps,true)}>
-   <boxGeometry/><meshStandardMaterial color="#A6D97A" roughness={1}/>
+   <boxGeometry/><meshLambertMaterial color="#A6D97A"/>
   </instancedMesh>
  </group>;
 }

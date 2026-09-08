@@ -1,35 +1,104 @@
 {
-  "hero-chicken": {
-    "url": "/game/release/hero-chicken.1fba7d2e222f.glb",
-    "bytes": 72152,
-    "animations": [
-      "Idle",
-      "Walk",
-      "Attack"
-    ],
-    "source": "Original procedural mesh: tools/generate-true-3d-chicken-actors.mjs",
-    "compression": "EXT_meshopt_compression; material colors, no raster textures"
-  },
-  "enemy-rooster": {
-    "url": "/game/release/enemy-rooster.37f86fa86010.glb",
-    "bytes": 69508,
-    "animations": [
-      "Idle",
-      "Walk",
-      "Attack"
-    ],
-    "source": "Original procedural mesh: tools/generate-true-3d-chicken-actors.mjs",
-    "compression": "EXT_meshopt_compression; material colors, no raster textures"
-  },
-  "boss-rooster": {
-    "url": "/game/release/boss-rooster.951482c5886a.glb",
-    "bytes": 70156,
-    "animations": [
-      "Idle",
-      "Walk",
-      "Attack"
-    ],
-    "source": "Original procedural mesh: tools/generate-true-3d-chicken-actors.mjs",
-    "compression": "EXT_meshopt_compression; material colors, no raster textures"
+  "schemaVersion": 2,
+  "assets": [
+    {
+      "id": "hero",
+      "url": "/game/release/hero.a92866b73426.glb",
+      "bytes": 53288,
+      "sha256": "a92866b73426e50e59ba8b5bc18383d27c61f1754dd8007b927be409ff7eac71",
+      "kind": "model",
+      "clips": [
+        "Idle",
+        "Walk",
+        "Jump",
+        "Swing",
+        "Land",
+        "Attack",
+        "Hit",
+        "Defeat"
+      ],
+      "provenance": "Original procedural DELTA240MVT model and motion: tools/create-brand-character.mjs; generated-owned",
+      "compression": "EXT_meshopt_compression; material colors; no raster textures"
+    },
+    {
+      "id": "shooter",
+      "url": "/game/release/shooter.3e4a4fe4f5a4.glb",
+      "bytes": 50304,
+      "sha256": "3e4a4fe4f5a44f9c062b8abda1eb58417f49e645e7001ea7110ced43b84c3966",
+      "kind": "model",
+      "clips": [
+        "Idle",
+        "Walk",
+        "Jump",
+        "Swing",
+        "Land",
+        "Attack",
+        "Hit",
+        "Defeat"
+      ],
+      "provenance": "Original procedural DELTA240MVT model and motion: tools/create-brand-character.mjs; generated-owned",
+      "compression": "EXT_meshopt_compression; material colors; no raster textures"
+    },
+    {
+      "id": "grenadier",
+      "url": "/game/release/grenadier.e08821bf2295.glb",
+      "bytes": 55484,
+      "sha256": "e08821bf22955a5515cb003cde3dcb05303e7a0547e36621fab8fa2f697985a9",
+      "kind": "model",
+      "clips": [
+        "Idle",
+        "Walk",
+        "Jump",
+        "Swing",
+        "Land",
+        "Attack",
+        "Hit",
+        "Defeat"
+      ],
+      "provenance": "Original procedural DELTA240MVT model and motion: tools/create-brand-character.mjs; generated-owned",
+      "compression": "EXT_meshopt_compression; material colors; no raster textures"
+    },
+    {
+      "id": "rusher",
+      "url": "/game/release/rusher.8e2e95cd9cea.glb",
+      "bytes": 50460,
+      "sha256": "8e2e95cd9ceab255f64cf5e792892768696f9ac83fe8ada6b86179b822ae2248",
+      "kind": "model",
+      "clips": [
+        "Idle",
+        "Walk",
+        "Jump",
+        "Swing",
+        "Land",
+        "Attack",
+        "Hit",
+        "Defeat"
+      ],
+      "provenance": "Original procedural DELTA240MVT model and motion: tools/create-brand-character.mjs; generated-owned",
+      "compression": "EXT_meshopt_compression; material colors; no raster textures"
+    },
+    {
+      "id": "boss",
+      "url": "/game/release/boss.b311a9a08f8c.glb",
+      "bytes": 49052,
+      "sha256": "b311a9a08f8c979abbc13d9d2f5f40c39a17d912fd138b3601d0d57f63d41bb4",
+      "kind": "model",
+      "clips": [
+        "Idle",
+        "Walk",
+        "Jump",
+        "Swing",
+        "Land",
+        "Attack",
+        "Hit",
+        "Defeat"
+      ],
+      "provenance": "Original procedural DELTA240MVT model and motion: tools/create-brand-character.mjs; generated-owned",
+      "compression": "EXT_meshopt_compression; material colors; no raster textures"
+    }
+  ],
+  "decoders": {
+    "meshopt": "bundled:three/addons/libs/meshopt_decoder.module.js",
+    "ktx2": null
   }
 }

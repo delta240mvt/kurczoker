@@ -20,7 +20,7 @@ export function BattleScene({sim,quality,onSnapshot,onEvent,onOutcome,onReady,on
   }
   const incoming=[];
   for(const event of sim.drainEvents()){onEvent(event);if(event.type==='impact')incoming.push(event);if(event.type==='shotgun')setCone(event);}
-  if(incoming.length)setImpacts(previous=>[...previous.filter(e=>sim.time-e.time<.8),...incoming].slice(-12));
+  if(incoming.length)setImpacts(previous=>[...previous.filter(e=>sim.time-e.time<.8),...incoming].slice(-(quality?.particles??12)));
   if(sim.outcome&&!resolved.current){resolved.current=true;onOutcome(sim.snapshot({includeTerrain:false}));}
  },-2);
  function point(e,down=false){
@@ -35,7 +35,7 @@ export function BattleScene({sim,quality,onSnapshot,onEvent,onOutcome,onReady,on
   }
  }
  return <>
-  {terrain?<><BrandWorld arena={sim.arena}/><TerrainView terrainSnapshot={terrain}/><RopeVisual sim={sim}/><ToolVisual sim={sim} toolId={toolId} visible={view.mode==='tool'}/></>:<World arena={sim.arena} quality={quality}/>}
+  {terrain?<><BrandWorld arena={sim.arena} sim={sim} quality={quality}/><TerrainView terrainSnapshot={terrain}/><RopeVisual sim={sim}/><ToolVisual sim={sim} toolId={toolId} visible={view.mode==='tool'}/></>:<World arena={sim.arena} quality={quality}/>}
   {sim.actors.map(a=><Chicken key={a.id} sim={sim} actorId={a.id} side={a.team} boss={a.role==='boss'||sim.options.type==='boss'&&a.team==='enemy'}/>)}
   <ShotVisual sim={sim} showAim={!terrain||view.mode==='aim'}/>
   <BossTargetVisual sim={sim}/>

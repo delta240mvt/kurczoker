@@ -912,7 +912,7 @@ finishEncounter(result){
 
 **Interfaces:** manifest v2 `{schemaVersion:2,assets:[{id,url,bytes,sha256,kind,clips,provenance}],decoders:{meshopt,ktx2}}`; `loadGameAssets({renderer,manifest,onProgress}):Promise<{models,dispose}>`. `Chicken({sim,actorId,quality})` wybiera po actorId, nie stałym `side=enemy`.
 
-- [ ] Test manifestu rzeczywistych assetów:
+- [x] Test manifestu rzeczywistych assetów:
 
 ```js
 import test from 'node:test';
@@ -927,8 +927,8 @@ test('bohater ma komplet animacji i poprawny plik runtime',async()=>{
 });
 ```
 
-- [ ] `node --test test/brand-assets.test.js` → RED.
-- [ ] Rozwiń istniejący pipeline autora modeli: sylwetka kurczaka, hełm, skrzydła, sprzęt; różne role i boss z koroną. Utwórz wymienione clipy, wyeksportuj glTF; sprawdzaj clipy również z GLB, nie tylko listę w JSON. W tym samym zadaniu przenieś wszystkie czytniki manifestu z `Object.values(manifest)` na `manifest.assets`, zachowując pliki dekoderów w allowliście release. Meshopt configure loader, KTX2 tylko dla faktycznych tekstur Basis i sprawdź detectSupport:
+- [x] `node --test test/brand-assets.test.js` → RED.
+- [x] Rozwiń istniejący pipeline autora modeli: sylwetka kurczaka, hełm, skrzydła, sprzęt; różne role i boss z koroną. Utwórz wymienione clipy, wyeksportuj glTF; sprawdzaj clipy również z GLB, nie tylko listę w JSON. W tym samym zadaniu przenieś wszystkie czytniki manifestu z `Object.values(manifest)` na `manifest.assets`, zachowując pliki dekoderów w allowliście release. Meshopt configure loader, KTX2 tylko dla faktycznych tekstur Basis i sprawdź detectSupport:
 
 ```js
 loader.setMeshoptDecoder(MeshoptDecoder);
@@ -936,8 +936,8 @@ const ktx2=new KTX2Loader().setTranscoderPath('/game/decoders/');
 ktx2.detectSupport(renderer); loader.setKTX2Loader(ktx2);
 ```
 
-- [ ] Porównaj niższy render target vs RenderPixelatedPass, wybierz czytelniejszy przy zachowanym budżecie; nie pikselizuj HTML HUD. Auto/low/high ograniczają cienie, DPR i cząstki. Użyj instancji drzew/dekoracji, zasobów współdzielonych i dispose po zmianie map.
-- [ ] Obejrzyj wszystkie clipy oraz sześć broni na desktop/phone viewport, mierząc frame time. Brak assetu daje retry i jasny błąd; uszkodzenie dekodera nie zostawia czarnego ekranu. Test assets + build PASS; commit `feat: deliver animated retro-styled 3d game assets`.
+- [x] Porównaj niższy render target vs RenderPixelatedPass, wybierz czytelniejszy przy zachowanym budżecie; nie pikselizuj HTML HUD. Auto/low/high ograniczają cienie, DPR i cząstki. Użyj instancji drzew/dekoracji, zasobów współdzielonych i dispose po zmianie map.
+- [x] Obejrzyj wszystkie clipy oraz sześć broni na desktop/phone viewport, mierząc frame time. Brak assetu daje retry i jasny błąd; uszkodzenie dekodera nie zostawia czarnego ekranu. Test assets + build PASS; commit `feat: deliver animated retro-styled 3d game assets`.
 
 ## Task 23 (M4): Ustawienia, audio, pomoc i dostępność
 
