@@ -24,3 +24,10 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - GREEN: maska + kolizje, 8 PASS / 0 FAIL.
 - Realny Rapier potwierdził zniknięcie kolizji po wycięciu tunelu oraz zachowanie kolizji fundamentu.
 - Porównanie każdej komórki maski z boxami: brak dziur, nakładania i zmiany materiału. Scalanie ogranicza liczbę colliderów; przebudowa zachowuje obiekty niezmienionych fragmentów.
+
+## Task 03 — dynamiczny kontroler i stały krok
+
+- RED: 3 nowe testy wskazały brak kontraktu dispatch/dynamicznego bohatera.
+- GREEN: 3 testy kontrolera oraz 6 istniejących testów tactical-simulation PASS.
+- Sprawdzone: rzeczywisty dynamic body, ruch, skok, brak drugiego skoku w powietrzu, sufit, cienka ściana, blokada osi Z, pauza, porównanie kroków 1/30 i 1/60, ponad 30 sekund decyzji bez zmiany tury, ograniczenie nadrabiania długiej klatki.
+- Zachowano przejściowe wywołania starego UI w tym samym runtime (bez drugiego silnika). Zastąpiono widoczny zegar tekstem „Bez pośpiechu”; usunięto TURN_SECONDS. Pełny nowy HUD pozostaje zadaniem 12.

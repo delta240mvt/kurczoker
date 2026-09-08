@@ -2,12 +2,13 @@ import R from "@dimforge/rapier3d-compat";
 import {
   STEP,
   GRAVITY,
-  TURN_SECONDS,
   arenaFor,
   addTerrain,
-  ARENA_BOUNDS,
 } from "./arena.js";
 import { clamp, launchVelocity } from "./ballistics.js";
+import {createCharacter} from './character.js';
+import {createTerrain} from './terrain/mask.js';
+import {syncTerrainColliders} from './terrain/collisions.js';
 
 let initialization;
 export async function createBattleSimulation(options = {}) {
@@ -19,26 +20,27 @@ export async function createBattleSimulation(options = {}) {
 class BattleSimulation {
   constructor(options) {
     this.options = options;
-    this.arena = arenaFor(options.type, options.encounterId);
+    this.arena = options.map ?? arenaFor(options.type, options.encounterId);
     this.world = new R.World({ x: 0, y: GRAVITY, z: 0 });
     this.world.timestep = STEP;
     this.queue = new R.EventQueue(true);
-    addTerrain(R, this.world, this.arena);
-    this.player = this.actor(
-      "player",
-      -4.5,
-      options.health ?? 3,
-      options.maxHealth ?? 3,
-    );
+    this.terrain=options.map?createTerrain(this.arena):null;
+    this.terrainRegistry=new Map();
+    if(this.terrain) syncTerrainColliders({R,world:this.world,terrain:this.terrain,registry:this.terrainRegistry});
+    else addTerrain(R, this.world, this.arena);
+    const playerSpawn=this.arena.spawns?.find(s=>s.team==='player') ?? {id:'player',team:'player',role:'hero',x:-4.5,y:.57};
+    this.player=createCharacter({R,world:this.world,spawn:playerSpawn,
+      health:options.player?.health??options.health??3,maxHealth:options.player?.maxHealth??options.maxHealth??3});
     const hp = options.type === "boss" ? 8 : options.type === "elite" ? 4 : 2;
-    this.enemy = this.actor("enemy", 3.5, hp, hp);
-    this.controller = this.world.createCharacterController(0.01);
-    this.controller.enableAutostep(0.55, 0.2, true);
-    this.controller.enableSnapToGround(0.12);
+    const enemySpawns=options.enemies?.map(e=>({...e,team:'enemy'})) ?? this.arena.spawns?.filter(s=>s.team==='enemy') ?? [{id:'enemy-1',team:'enemy',role:'shooter',x:3.5,y:.57}];
+    this.enemies=enemySpawns.map(spawn=>createCharacter({R,world:this.world,spawn,
+      health:spawn.health??(options.map?45:hp),maxHealth:spawn.maxHealth??(options.map?45:hp)}));
+    this.enemy=this.enemies[0];
+    this.actors=[this.player,...this.enemies];
     this.phase = "player";
     this.turn = 1;
     this.time = 0;
-    this.remaining = TURN_SECONDS;
+    this.remaining = null;
     this.angle = 40;
     this.power = 9;
     this.direction = 0;
@@ -56,28 +58,16 @@ class BattleSimulation {
     this.shotId = 0;
     this.trajectoryCache = null;
     this.world.step(this.queue);
+    this.actors.forEach(a=>a.updateGrounded());
   }
-  actor(team, x, health, maxHealth) {
-    const body = this.world.createRigidBody(
-      R.RigidBodyDesc.kinematicPositionBased().setTranslation(x, 0.57, 0),
-    );
-    const group = team === "player" ? 2 : 4;
-    const collider = this.world.createCollider(
-      R.ColliderDesc.cuboid(0.32, 0.55, 0.32).setCollisionGroups(
-        (group << 16) | (team === "player" ? 1 | 4 | 16 : 1 | 2 | 8),
-      ),
-      body,
-    );
-    return {
-      team,
-      health,
-      maxHealth,
-      body,
-      collider,
-      vy: 0,
-      grounded: true,
-      hitAt: -100,
-    };
+  dispatch(command) {
+    if(!command || typeof command!=='object') return {accepted:false,reason:'invalid'};
+    if(!this.canAct()) return {accepted:false,reason:this.paused?'paused':'phase'};
+    if(command.type==='move' && [-1,0,1].includes(command.direction)) {
+      this.move(command.direction);return {accepted:true};
+    }
+    if(command.type==='jump') return {accepted:this.jump()};
+    return {accepted:false,reason:'invalid'};
   }
   canAct() {
     return (
@@ -89,9 +79,7 @@ class BattleSimulation {
   }
   jump() {
     if (!this.canAct() || !this.player.grounded) return false;
-    this.player.vy = 5.5;
-    this.player.grounded = false;
-    return true;
+    return this.player.jump();
   }
   aim(angle, power = this.power, facing = this.facing) {
     if (!this.canAct()) return;
@@ -193,11 +181,12 @@ class BattleSimulation {
     this.stepActor(
       this.player,
       this.phase === "player"
-        ? this.direction * (3 + (this.options.stats?.moveSpeedBonus ?? 0) * 12)
+        ? this.direction * (4 + (this.options.stats?.moveSpeedBonus ?? 0) * 12)
         : 0,
     );
-    this.stepActor(this.enemy, 0);
+    this.enemies.forEach(a=>this.stepActor(a,0));
     this.world.step(this.queue);
+    this.actors.forEach(a=>a.updateGrounded());
     let collided = false;
     this.queue.drainCollisionEvents((a, b, started) => {
       if (
@@ -214,13 +203,7 @@ class BattleSimulation {
         this.impact();
     }
     if (this.outcome) return;
-    if (this.phase === "player") {
-      this.remaining -= STEP;
-      if (this.remaining <= 0) {
-        this.direction = 0;
-        this.nextPhase("enemy-tell");
-      }
-    } else if (this.phase === "enemy-tell" && this.phaseTime >= 1.3) {
+    if (this.phase === "enemy-tell" && this.phaseTime >= 1.3) {
       const from = this.origin(this.enemy),
         target = this.player.body.translation();
       const flight = 1.18;
@@ -233,28 +216,11 @@ class BattleSimulation {
       this.nextPhase("enemy-shot");
     } else if (this.phase === "settle" && this.phaseTime >= 0.65) {
       this.turn++;
-      this.remaining = TURN_SECONDS;
       this.nextPhase("player");
     }
   }
   stepActor(actor, vx) {
-    actor.vy += GRAVITY * STEP;
-    const p = actor.body.translation();
-    const dx =
-      clamp(p.x + vx * STEP, ARENA_BOUNDS.left, ARENA_BOUNDS.right) - p.x;
-    this.controller.computeColliderMovement(
-      actor.collider,
-      { x: dx, y: actor.vy * STEP, z: 0 },
-      R.QueryFilterFlags.EXCLUDE_DYNAMIC,
-    );
-    const m = this.controller.computedMovement();
-    actor.grounded = this.controller.computedGrounded();
-    if (actor.grounded && actor.vy < 0) actor.vy = 0;
-    actor.body.setNextKinematicTranslation({
-      x: p.x + m.x,
-      y: p.y + m.y,
-      z: 0,
-    });
+    actor.step({direction:Math.sign(vx),speed:Math.abs(vx)||4},STEP);
   }
   impact() {
     const shot = this.projectile;
@@ -360,10 +326,13 @@ class BattleSimulation {
       hitAt: a.hitAt,
     });
     return {
+      schemaVersion:2,
+      actors:this.actors.map(a=>a.snapshot()),
+      terrain:this.terrain?.snapshot()??null,
       phase: this.phase,
       turn: this.turn,
       time: this.time,
-      remaining: Math.max(0, this.remaining),
+      remaining: null,
       paused: this.paused,
       player: read(this.player),
       enemy: read(this.enemy),

@@ -459,7 +459,7 @@ export function KurczokerCanvas() {
             <strong>{PHASE_COPY[snapshot.phase]}</strong>
             {snapshot.phase === "player" && (
               <span className="turn-clock">
-                {Math.ceil(snapshot.remaining)}s
+                Bez pośpiechu
               </span>
             )}
           </div>

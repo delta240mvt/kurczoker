@@ -200,7 +200,7 @@ registry.set(box.id,collider);
 
 **Interfaces:** `createCharacter({R,world,spawn,health,maxHealth}):Character`; `.step({direction,jump},dt)`, `.snapshot():ActorSnapshot`, `.dispose()`. Runtime z kontraktu przyjmuje fixture `map`. Helper `testBattle(overrides={}):Promise<BattleRuntime>` tworzy fixture, player100HP, owned Jajooka/Kopniak, 2 kilofy/2 wiertła; `stepFor(sim,seconds)` wywołuje stałe kroki.
 
-- [ ] Dodaj test:
+- [x] Dodaj test:
 
 ```js
 import test from 'node:test';
@@ -223,8 +223,8 @@ test('ruch i skok wracają na podłoże, pauza zatrzymuje stan', async () => {
 });
 ```
 
-- [ ] Uruchom `node --test test/brand-character.test.js`, oczekuj RED.
-- [ ] Utwórz kapsułę dynamiczną i zablokuj głębię/obroty przez API sprawdzone w lokalnych `.d.ts`:
+- [x] Uruchom `node --test test/brand-character.test.js`, oczekuj RED.
+- [x] Utwórz kapsułę dynamiczną i zablokuj głębię/obroty przez API sprawdzone w lokalnych `.d.ts`:
 
 ```js
 const desc = R.RigidBodyDesc.dynamic().setTranslation(spawn.x,spawn.y,0);
@@ -234,9 +234,9 @@ body.setEnabledRotations(false,false,false,true);
 world.createCollider(R.ColliderDesc.capsule(.25,.3).setFriction(.7),body);
 ```
 
-- [ ] Dodaj ray/shape cast pod stopy, skok tylko grounded, kontrolę poziomej prędkości, ograniczenie nadrabiania do maksymalnie 8 kroków na frame i `advance` no-op przy pauzie/dispose. Usuń decyzję kończącą turę po `TURN_SECONDS`.
-- [ ] Testuj sufit, cienką ścianę, zmieniony grunt i równoważny ruch przy frame delta 1/30 i 1/60; `node --test test/brand-character.test.js` PASS.
-- [ ] Commit: `feat: drive chicken movement through fixed physics steps`.
+- [x] Dodaj ray/shape cast pod stopy, skok tylko grounded, kontrolę poziomej prędkości, ograniczenie nadrabiania do maksymalnie 8 kroków na frame i `advance` no-op przy pauzie/dispose. Usuń decyzję kończącą turę po `TURN_SECONDS`.
+- [x] Testuj sufit, cienką ścianę, zmieniony grunt i równoważny ruch przy frame delta 1/30 i 1/60; `node --test test/brand-character.test.js` PASS.
+- [x] Commit: `feat: drive chicken movement through fixed physics steps`.
 
 ## Task 04 (M1): Bezpieczny upadek i stan postaci po odrzucie
 

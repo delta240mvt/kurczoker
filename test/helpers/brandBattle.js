@@ -18,3 +18,10 @@ export function fixtureMap(overrides = {}) {
 export function stepFor(sim, seconds) {
   for (let n = 0; n < Math.round(seconds * 60); n++) sim.advance(1 / 60);
 }
+
+export async function testBattle(overrides={}) {
+  const {createBattleSimulation}=await import('../../src/engine/tactical/simulation.js');
+  return createBattleSimulation({map:fixtureMap(),encounterId:'test-1',mode:'quick',seed:1,
+    player:{health:100,maxHealth:100,upgrades:[],inventory:{owned:['jajooka','kick'],ammo:{},tools:{pickaxe:2,drill:2}}},
+    ...overrides});
+}

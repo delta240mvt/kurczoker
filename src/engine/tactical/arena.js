@@ -1,6 +1,5 @@
 export const STEP = 1 / 60;
 export const GRAVITY = -10;
-export const TURN_SECONDS = 20;
 export const ARENA_BOUNDS = { left: -6.5, right: 6.5, top: 7, bottom: -1 };
 
 export function arenaFor(type = "battle", encounterId = "") {
