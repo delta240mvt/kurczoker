@@ -156,7 +156,7 @@ export function nextRandom(state){
 
 **Interfaces:** `buildTerrainBoxes(snapshot,chunkIds?):{id,x,y,width,height,material}[]`; `syncTerrainColliders({R,world,terrain,registry,chunkIds}):void`, registry `Map<string,Collider>`. Prostokąty wynikowe mają x/y środka i wymiary; rysunek i Rapier konsumują tę samą listę.
 
-- [ ] Dodaj test na realnym Rapierze:
+- [x] Dodaj test na realnym Rapierze:
 
 ```js
 import test from 'node:test';
@@ -180,8 +180,8 @@ test('po wycięciu tunelu promień nie trafia starej ściany', () => {
 });
 ```
 
-- [ ] Uruchom `node --test test/brand-terrain-collisions.test.js`, potwierdź RED i lokalne API Rapiera.
-- [ ] Scalaj poziome runy jednakowego materiału i pionowo runy o identycznym x/width/material wewnątrz fragmentu. Usuwaj stare collidery tylko zmienionych fragmentów; dodawaj nowe:
+- [x] Uruchom `node --test test/brand-terrain-collisions.test.js`, potwierdź RED i lokalne API Rapiera.
+- [x] Scalaj poziome runy jednakowego materiału i pionowo runy o identycznym x/width/material wewnątrz fragmentu. Usuwaj stare collidery tylko zmienionych fragmentów; dodawaj nowe:
 
 ```js
 const collider = world.createCollider(
@@ -191,8 +191,8 @@ const collider = world.createCollider(
 registry.set(box.id,collider);
 ```
 
-- [ ] Sprawdź mapę materiałów vs pokrycie boxami, granice fragmentów i brak nakładających się brył; uruchom oba testy terenu, oczekuj PASS.
-- [ ] Commit: `feat: rebuild terrain collision from material edits`.
+- [x] Sprawdź mapę materiałów vs pokrycie boxami, granice fragmentów i brak nakładających się brył; uruchom oba testy terenu, oczekuj PASS.
+- [x] Commit: `feat: rebuild terrain collision from material edits`.
 
 ## Task 03 (M1): Dynamiczny kurczak i stały krok runtime
 

@@ -17,3 +17,10 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - GREEN: `node --test test/brand-terrain.test.js`, 5 PASS.
 - Sprawdzone: krater, odporny fundament, tunel przez granicę fragmentu, idempotencja, ujemne/out-of-bounds operacje, niepoprawne liczby, niezależność snapshotu, powtarzalny PRNG.
 - Materiały przechowywane w Uint8Array; operacje wycinania aktualizują tylko trafione fragmenty. Widok i adapter kolizji korzystają z tej samej maski.
+
+## Task 02 — geometria i kolizje
+
+- RED: 3 testy wykazały brak generatora boxów i synchronizacji colliderów.
+- GREEN: maska + kolizje, 8 PASS / 0 FAIL.
+- Realny Rapier potwierdził zniknięcie kolizji po wycięciu tunelu oraz zachowanie kolizji fundamentu.
+- Porównanie każdej komórki maski z boxami: brak dziur, nakładania i zmiany materiału. Scalanie ogranicza liczbę colliderów; przebudowa zachowuje obiekty niezmienionych fragmentów.
