@@ -10,8 +10,9 @@ import {createCharacter,findSafeReturn,isSafePosition} from './character.js';
 import {createTerrain} from './terrain/mask.js';
 import {syncTerrainColliders} from './terrain/collisions.js';
 import {createRope} from './rope.js';
-import {createSegmentCaster,stepProjectile,predictTrajectory} from './projectiles.js';
-import {explode,useTool} from './weapons.js';
+import {createSegmentCaster,stepProjectile,predictTrajectory,spawnClusterFragments,tickMines} from './projectiles.js';
+import {WEAPONS,projectileDefinition,nextRandom} from './config.js';
+import {explode,useTool,executeWeapon,coneRays} from './weapons.js';
 import {nextPhase as resolveTurn} from './turns.js';
 import {planEnemyAction} from './enemyAI.js';
 
@@ -46,6 +47,8 @@ class BattleSimulation {
       if(!this.disposed)this.events.push({id:`rope-${this.time}-${this.events.length}`,type:'rope-release',time:this.time,payload:{reason}});
     }});
     this.projectiles=[];
+    this.mines=[];
+    this.rngState=options.seed??1;
     this.resolvedExplosions=new Set();
     this.inventory=structuredClone(options.player?.inventory??{owned:['jajooka'],ammo:{},tools:{pickaxe:0,drill:0}});
     this.selectedWeaponId='jajooka';
@@ -89,7 +92,11 @@ class BattleSimulation {
     }
     if(command.type==='pass'){this.direction=0;this.beginEnemyResponses();return {accepted:true};}
     if(command.type==='tool') return useTool(command,this);
-    if(command.type==='attack') return {accepted:this.fire()};
+    if(command.type==='select') {
+      if(!WEAPONS[command.weaponId]||!this.inventory.owned.includes(command.weaponId))return {accepted:false,reason:'locked'};
+      this.selectedWeaponId=command.weaponId;this.trajectoryCache=null;return {accepted:true};
+    }
+    if(command.type==='attack') return this.terrain?executeWeapon({weaponId:this.selectedWeaponId,actor:this.player,aim:{angleDeg:this.angle,power:this.power},battle:this}):{accepted:this.fire()};
     if(command.type==='jump') return {accepted:this.jump()};
     if(command.type==='rope.attach') return this.rope.attach(command.point);
     if(command.type==='rope.reel') return this.rope.reel(command.rate);
@@ -102,7 +109,13 @@ class BattleSimulation {
     );
   }
   move(value) {
-    if (this.canAct() || value === 0) this.direction = Math.sign(value);
+    if (this.canAct() || value === 0) {
+      this.direction=Math.sign(value);
+      if(this.direction && this.direction!==this.facing){
+        this.facing=this.direction;this.angle=this.angle>=0?180-this.angle:-180-this.angle;
+        this.trajectoryCache=null;
+      }
+    }
   }
   jump() {
     if (!this.canAct() || !this.player.grounded) return false;
@@ -135,6 +148,7 @@ class BattleSimulation {
     return {x:p.x+Math.cos(r)*.48,y:p.y+.2+Math.sin(r)*.48,z:0};
   }
   fire(ability = "egg-bomb") {
+    if(this.terrain)return executeWeapon({weaponId:this.selectedWeaponId,actor:this.player,aim:{angleDeg:this.angle,power:this.power},battle:this}).accepted;
     if (
       !this.canAct() ||
       !(this.options.abilities ?? ["egg-bomb"]).includes(ability)
@@ -169,17 +183,18 @@ class BattleSimulation {
     }
     return true;
   }
-  spawnProjectile(team, origin, velocity, actor) {
+  spawnProjectile(team, origin, velocity, actor,weaponId='jajooka') {
     const owner=actor??(team==='player'?this.player:this.enemy);
-    const shot={id:++this.shotId,ownerId:owner.id,weaponId:'jajooka',team,
-      x:origin.x,y:origin.y,z:0,vx:velocity.x,vy:velocity.y,age:0,fuse:null,bounces:0};
+    const shot={id:++this.shotId,ownerId:owner.id,weaponId,team,
+      x:origin.x,y:origin.y,z:0,vx:velocity.x,vy:velocity.y,age:0,fuse:WEAPONS[weaponId]?.fuse??null,bounces:0};
     this.projectiles.push(shot);this.projectile=this.projectiles[0];
-    this.events.push({id:'shoot-'+shot.id,type:'shoot',team,time:this.time,payload:{ownerId:owner.id}});
+    this.events.push({id:'shoot-'+shot.id,type:'shoot',team,time:this.time,payload:{ownerId:owner.id,weaponId}});
+    return shot;
   }
   finishResult() {
     if(this.outcome)return true;
     const result=resolveTurn({actors:this.actors,phase:'check'});
-    if(!result.outcome)return false;
+    if(!result.outcome || result.outcome==='won'&&this.projectiles.length>0)return false;
     this.outcome=result.outcome;this.direction=0;this.rope.reel(0);
     this.nextPhase('finished');this.events.push({id:'result',type:this.outcome,time:this.time});
     this.actors.filter(a=>a.health<=0).forEach(a=>a.body.setEnabled(false));
@@ -236,14 +251,17 @@ class BattleSimulation {
     this.world.step(this.queue);
     this.actors.forEach(a=>a.updateGrounded());
     this.resolveFalls();
+    const mineTick=tickMines(this.mines,this.actors.map(a=>a.snapshot()),STEP,this.terrain);
+    this.mines=mineTick.mines;
+    for(const mine of mineTick.explosions)explode({id:mine.id,point:mine,radius:WEAPONS.mine.radius,maxDamage:WEAPONS.mine.damage,ownerId:mine.ownerId},this);
     for(const shot of [...this.projectiles]) {
       const result=stepProjectile(shot,STEP,this.castSegment);
       Object.assign(shot,result.projectile);
       const outside=shot.y < -2 || shot.x < (this.terrain?-3:-9) || shot.x > (this.terrain?this.arena.width+3:9);
-      if(result.hit || outside || shot.age>8)this.impact(shot);
+      if(result.hit || outside || shot.age>8 || shot.fuse!=null&&shot.fuse<=0)this.impact(shot);
     }
     this.projectile=this.projectiles[0]??null;
-    if (this.outcome) return;
+    if (this.finishResult()) return;
     const active=this.enemies.find(a=>a.id===this.activeEnemyId);
     if(this.phase==='enemy-tell' && this.phaseTime>=.7) {
       if(!active || active.health<=0){this.startNextEnemy();return;}
@@ -290,7 +308,17 @@ class BattleSimulation {
 
   impact(shot = this.projectile) {
     if(!shot || this.resolvedExplosions.has(shot.id))return;
-    explode({id:shot.id,point:{x:shot.x,y:shot.y},radius:1.8,maxDamage:30,ownerId:shot.ownerId},this);
+    if(shot.weaponId==='cluster'){
+      this.resolvedExplosions.add(shot.id);
+      this.projectiles=this.projectiles.filter(p=>p.id!==shot.id);
+      const random=()=>{const next=nextRandom(this.rngState);this.rngState=next.state;return next.value;};
+      this.projectiles.push(...spawnClusterFragments(shot,()=>++this.shotId,random));
+      this.projectile=this.projectiles[0];
+      this.events.push({id:'cluster-'+shot.id,type:'cluster',time:this.time,x:shot.x,y:shot.y,payload:{ownerId:shot.ownerId}});
+      return;
+    }
+    const definition=projectileDefinition(shot.weaponId);
+    explode({id:shot.id,point:{x:shot.x,y:shot.y},radius:definition.radius,maxDamage:definition.damage,ownerId:shot.ownerId},this);
     this.projectiles=this.projectiles.filter(p=>p.id!==shot.id);
     this.projectile=this.projectiles[0]??null;
     if(shot.team==='player')this.boost=0;
@@ -304,10 +332,16 @@ class BattleSimulation {
   trajectory() {
     if(this.disposed)return [];
     const origin=this.origin();
-    const key=JSON.stringify([origin,this.angle,this.power,this.terrain?.revision,
+    const key=JSON.stringify([origin,this.angle,this.power,this.selectedWeaponId,this.terrain?.revision,
       this.actors.map(a=>a.body.translation())]);
     if(this.trajectoryCache?.key===key)return this.trajectoryCache.points;
-    const points=predictTrajectory({origin,angleDeg:this.angle,power:this.power,castSegment:this.castSegment,ownerId:this.player.id});
+    const definition=WEAPONS[this.selectedWeaponId];
+    if(['mine','contact'].includes(definition.kind))return [];
+    if(definition.kind==='cone') {
+      const {origin,rays}=coneRays({actor:this.player,aim:{angleDeg:this.angle},battle:this});
+      return [origin,{...rays[Math.floor(rays.length/2)].point,z:0}];
+    }
+    const points=predictTrajectory({origin,angleDeg:this.angle,power:this.power,castSegment:this.castSegment,ownerId:this.player.id,weaponId:this.selectedWeaponId});
     this.trajectoryCache={key,points};return points;
   }
   snapshot({includeTerrain=true}={}) {
@@ -337,6 +371,8 @@ class BattleSimulation {
       guard: this.guard,
       boost: this.boost,
       projectiles:this.projectiles.map(p=>({...p})),
+      mines:this.mines.map(m=>({...m})),
+      rngState:this.rngState,
       projectile:this.projectile?{...this.projectile}:null,
       inventory:structuredClone(this.inventory),
       selectedWeaponId:this.selectedWeaponId,

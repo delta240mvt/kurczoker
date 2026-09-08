@@ -577,7 +577,7 @@ test('Podwórze działa przez UI w pionie',{timeout:120000},async()=>{
 
 **Interfaces:** `WEAPONS` w config; `executeWeapon({weaponId,actor,aim,battle}):Receipt` w weapons. `tickMines(mines,actors,dt):{mines,explosions}` oraz `spawnClusterFragments(projectile,nextId):Projectile[]` w projectiles. Każdy handler korzysta z `explode` z task07; inventory należy do runtime, nie do widoku.
 
-- [ ] Dodaj tabelaryczny test dostępu i zużycia:
+- [x] Dodaj tabelaryczny test dostępu i zużycia:
 
 ```js
 import test from 'node:test';
@@ -596,8 +596,8 @@ for (const weaponId of ['granajko','shotgun','mine','cluster']) {
 }
 ```
 
-- [ ] `node --test test/brand-arsenal.test.js` → RED.
-- [ ] Wprowadź definicje, zachowując liczby ze specyfikacji:
+- [x] `node --test test/brand-arsenal.test.js` → RED.
+- [x] Wprowadź definicje, zachowując liczby ze specyfikacji:
 
 ```js
 export const WEAPONS = {
@@ -610,9 +610,9 @@ export const WEAPONS = {
 };
 ```
 
-- [ ] Granajko: odbijaj prędkość `v' = v - (1+e)(v·n)n`; fuse liczy czas symulacji. Śrut: 5 raycastów w stożku, łączny limit40, zasięg5, każda ściana blokuje swój promień. Kopniak: najbliższy żywy wróg w zasięgu i bez ściany.
-- [ ] Mina: postaw na wolnym gruncie przy bohaterze, uzbrój po .8s, reaguj na obie drużyny; nie detonuj od powtórzonego eventu. Cluster: pięć kierunków rozrzutu z zapisanego PRNG, limit liczby/times życia, każdy fragment korzysta z tej samej eksplozji. Dodaj testy odbicia, pauzy zapalnika, śrutu przez ścianę, pustego kopnięcia, własnej miny i ograniczonej liczby odłamków.
-- [ ] `node --test test/brand-arsenal.test.js test/brand-projectiles.test.js` PASS; obejrzyj rzeczywisty efekt każdej broni. Commit `feat: complete the six-weapon tactical arsenal`.
+- [x] Granajko: odbijaj prędkość `v' = v - (1+e)(v·n)n`; fuse liczy czas symulacji. Śrut: 5 raycastów w stożku, łączny limit40, zasięg5, każda ściana blokuje swój promień. Kopniak: najbliższy żywy wróg w zasięgu i bez ściany.
+- [x] Mina: postaw na wolnym gruncie przy bohaterze, uzbrój po .8s, reaguj na obie drużyny; nie detonuj od powtórzonego eventu. Cluster: pięć kierunków rozrzutu z zapisanego PRNG, limit liczby/times życia, każdy fragment korzysta z tej samej eksplozji. Dodaj testy odbicia, pauzy zapalnika, śrutu przez ścianę, pustego kopnięcia, własnej miny i ograniczonej liczby odłamków.
+- [x] `node --test test/brand-arsenal.test.js test/brand-projectiles.test.js` PASS; obejrzyj rzeczywisty efekt każdej broni. Commit `feat: complete the six-weapon tactical arsenal`.
 
 ## Task 14 (M2): Dziewięć różnych topografii i walidacja przejść
 

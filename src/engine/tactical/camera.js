@@ -3,7 +3,7 @@ export function cameraTarget({viewport,bounds,actor,projectile,rope,mode,overvie
   const aspect=Math.max(.2,viewport.width/Math.max(1,viewport.height));
   let visibleHeight=Math.min(10,Math.max(6,viewport.height/64));
   let x=(projectile??actor).x+(projectile?0:clamp((actor.vx??0)*.15,-1,1));
-  let y=(projectile??actor).y+(projectile?0:-.35);
+  let y=(projectile??actor).y+(projectile?0:mode==='aim'?-.55:-.35);
   if(mode==='rope'&&!rope&&!projectile) {
     visibleHeight=11;y=actor.y+.2;
   }

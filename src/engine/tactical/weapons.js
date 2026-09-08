@@ -1,4 +1,6 @@
 import R from '@dimforge/rapier3d-compat';
+import {WEAPONS} from './config.js';
+import {launchVelocity} from './ballistics.js';
 import {syncTerrainColliders} from './terrain/collisions.js';
 
 export function explode({id,point,radius,maxDamage,ownerId},battle) {
@@ -25,8 +27,7 @@ export function explode({id,point,radius,maxDamage,ownerId},battle) {
     if(damage)hits.push({actor,damage,direction});
   }
   for(const {actor,damage,direction} of hits) {
-    actor.health=Math.max(0,actor.health-damage);actor.hitAt=battle.time;
-    actor.body.applyImpulse({x:direction.x*damage*.025,y:Math.max(.2,direction.y)*damage*.025,z:0},true);
+    damageActor(actor,damage,{x:direction.x*damage*.025,y:Math.max(.2,direction.y)*damage*.025,z:0},battle);
   }
   if(battle.terrain) {
     const chunkIds=battle.terrain.cutCircle({...point,radius});
@@ -83,4 +84,71 @@ export function useTool(command,battle) {
   battle.trajectoryCache=null;
   battle.events.push({id:`tool-${battle.turn}`,type:'tool',time:battle.time,payload:{toolId:command.toolId,area:preview.area}});
   return {accepted:true};
+}
+
+function damageActor(actor,damage,impulse,battle) {
+ const actual=Math.min(actor.health,damage);actor.health-=actual;actor.hitAt=battle.time;
+ if(actor.health<=0)actor.body.setEnabled(false);else actor.body.applyImpulse(impulse,true);
+ return actual;
+}
+export function executeWeapon({weaponId,actor,aim,battle}) {
+ const definition=WEAPONS[weaponId];
+ if(!battle.canAct())return {accepted:false,reason:'phase'};
+ if(!definition||!battle.inventory.owned.includes(weaponId))return {accepted:false,reason:'locked'};
+ const finiteAmmo=!['jajooka','kick'].includes(weaponId);
+ if(finiteAmmo&&!(battle.inventory.ammo[weaponId]>0))return {accepted:false,reason:'empty'};
+ const position=actor.body.translation(),direction=battle.facing;
+ let kickTarget,minePoint;
+ if(definition.kind==='contact') {
+  kickTarget=battle.actors.filter(a=>a.team!==actor.team&&a.health>0).map(a=>({actor:a,p:a.body.translation()}))
+   .filter(a=>Math.hypot(a.p.x-position.x,a.p.y-position.y)<=definition.range&&(a.p.x-position.x)*direction>=0)
+   .sort((a,b)=>Math.abs(a.p.x-position.x)-Math.abs(b.p.x-position.x))[0];
+  if(!kickTarget)return {accepted:false,reason:'out-of-range'};
+  const dx=kickTarget.p.x-position.x,dy=kickTarget.p.y-position.y,d=Math.hypot(dx,dy);
+  if(battle.world.castRay(new R.Ray(position,{x:dx/d,y:dy/d,z:0}),d,true,undefined,(2<<16)|1))return {accepted:false,reason:'blocked'};
+ }
+ if(definition.kind==='mine') {
+  if(!actor.grounded)return {accepted:false,reason:'ground'};
+  const x=position.x+direction*1.05,foot=position.y-.55;
+  if(!battle.terrain?.materialAt(x,foot-.08)||battle.terrain.materialAt(x,foot+.15))return {accepted:false,reason:'ground'};
+  minePoint={x,y:foot+.17};
+ }
+ if(finiteAmmo)battle.inventory.ammo[weaponId]--;
+ battle.direction=0;battle.rope.reel(0);
+ if(['impact','bounce','cluster'].includes(definition.kind)) {
+  battle.spawnProjectile(actor.team,battle.origin(actor,aim.angleDeg),launchVelocity(aim.angleDeg,aim.power),actor,weaponId);
+  battle.nextPhase('player-shot');
+ } else if(definition.kind==='contact') {
+  const target=kickTarget.actor,mass=target.body.mass();
+  const damage=damageActor(target,definition.damage,{x:direction*mass*definition.impulse,y:mass*2,z:0},battle);
+  battle.events.push({id:++battle.shotId,type:'impact',time:battle.time,x:kickTarget.p.x,y:kickTarget.p.y,damage,team:actor.team,payload:{ownerId:actor.id,kind:'kick',hits:[{actorId:target.id,damage}]}});
+  battle.beginEnemyResponses();
+ } else if(definition.kind==='mine') {
+  const mine={id:++battle.shotId,ownerId:actor.id,team:actor.team,...minePoint,age:0,vy:0};
+  battle.mines.push(mine);battle.events.push({id:'mine-'+mine.id,type:'mine-place',time:battle.time,payload:mine});
+  battle.beginEnemyResponses();
+ } else if(definition.kind==='cone') {
+  const {origin,rays:casts}=coneRays({actor,aim,battle}),rays=casts.map(c=>c.point);let damage=0;
+  for(const {hit,point,vector} of casts) {
+   if(!hit)continue;
+   const target=battle.actors.find(a=>a.collider.handle===hit.collider.handle&&a.health>0);
+   if(target)damage+=damageActor(target,definition.damage/definition.pellets,{x:vector.x*.2,y:vector.y*.2,z:0},battle);
+   else explode({id:++battle.shotId,point,radius:.18,maxDamage:0,ownerId:actor.id},battle);
+  }
+  battle.events.push({id:++battle.shotId,type:'shotgun',time:battle.time,damage,team:actor.team,payload:{ownerId:actor.id,origin,rays}});
+  battle.beginEnemyResponses();
+ }
+ return {accepted:true};
+}
+
+export function coneRays({actor,aim,battle}) {
+ const definition=WEAPONS.shotgun,origin=battle.origin(actor,aim.angleDeg);
+ const rays=Array.from({length:definition.pellets},(_,i)=>{
+  const angle=(aim.angleDeg+(i/(definition.pellets-1)-.5)*definition.spreadDeg)*Math.PI/180;
+  const vector={x:Math.cos(angle),y:Math.sin(angle),z:0};
+  const hit=battle.world.castRay(new R.Ray(origin,vector),definition.range,true,undefined,((8|16)<<16)|(1|2|4),actor.collider,actor.body);
+  const distance=hit?.timeOfImpact??definition.range;
+  return {hit,vector,point:{x:origin.x+vector.x*distance,y:origin.y+vector.y*distance}};
+ });
+ return {origin,rays};
 }

@@ -1,6 +1,7 @@
 import {Component,Suspense,useCallback,useEffect,useRef,useState} from 'react';
 import {Canvas,useFrame,useThree} from '@react-three/fiber';
 import {GameRuntime} from './GameRuntime.jsx';
+import {WEAPONS} from './tactical/config.js';
 import {getMap} from './tactical/arena.js';
 import {BattleHUD} from './tactical/BattleHUD.jsx';
 import {createBattleSimulation} from './tactical/simulation.js';
@@ -27,7 +28,7 @@ export function BrandGame() {
   if(!started)return;let cancelled=false,owned;
   setReady(false);setError('');setSim(null);setSnapshot(null);setPaused(false);setView({mode:'move'});setNotice('');
   createBattleSimulation({map,mode:'quick',encounterId:'quick-yard-'+retry,seed:1,
-   player:{health:100,maxHealth:100,upgrades:[],inventory:{owned:['jajooka','kick'],ammo:{},tools:{pickaxe:2,drill:2}}}})
+   player:{health:100,maxHealth:100,upgrades:[],inventory:{owned:Object.keys(WEAPONS),ammo:{granajko:3,shotgun:3,mine:2,cluster:2},tools:{pickaxe:2,drill:2}}}})
   .then(s=>{if(cancelled){s.dispose();return;}owned=s;runtime.current=s;s.setPaused(true);setSim(s);setSnapshot(s.snapshot({includeTerrain:false}));})
   .catch(()=>{if(!cancelled)setError('Nie udało się przygotować areny. Spróbuj jeszcze raz.');});
   return ()=>{cancelled=true;if(runtime.current===owned)runtime.current=null;owned?.dispose();};
@@ -39,21 +40,22 @@ export function BrandGame() {
  useEffect(()=>()=>{audio.current?.context?.close?.()},[]);
  const onReady=useCallback(()=>{setReady(true);runtime.current?.setPaused(pauseRef.current)},[]);
  const onEvent=useCallback(event=>{
-  if(event.type==='impact')setNotice(event.damage?`Trafienie! −${event.damage} HP`:'Ziemia drży. Kogut jeszcze stoi.');
+  if(event.type==='impact'||event.type==='shotgun')setNotice(event.damage?`Trafienie! −${event.damage} HP`:'Ziemia drży. Kogut jeszcze stoi.');
   if(event.type==='rope-release'&&event.payload.reason!=='manual')setNotice('Zaczep puścił. Możesz zarzucić lasso ponownie.');
   if(event.type==='tool')setNotice('Przejście gotowe. Możesz jeszcze strzelić.');
-  if(audio.current){const effect={shoot:'shoot',impact:'hit',won:'victory',lost:'defeat',tool:'hit'}[event.type];if(effect)playEffect(audio.current,effect)}
+  if(event.type==='mine-place')setNotice('Mina odłożona. Uważaj na nią w kolejnej turze.');
+  if(audio.current){const effect={shoot:'shoot',shotgun:'shoot',impact:'hit',won:'victory',lost:'defeat',tool:'hit'}[event.type];if(effect)playEffect(audio.current,effect)}
  },[]);
  const command=useCallback(cmd=>{const s=runtime.current;if(!s)return {accepted:false};const receipt=s.dispatch(cmd);
-  if(!receipt.accepted&&!['move','rope.reel'].includes(cmd.type))setNotice(({blocked:'Tu nie ma podatnego materiału.',used:'Narzędzie było już użyte w tej turze.',empty:'Brak zapasu.',phase:'Poczekaj na swój ruch.'})[receipt.reason]??'Tutaj się nie uda. Spróbuj innego miejsca.');
+  if(!receipt.accepted&&!['move','rope.reel'].includes(cmd.type))setNotice(({blocked:'Tu nie ma podatnego materiału.',used:'Narzędzie było już użyte w tej turze.',empty:'Brak zapasu.',phase:'Poczekaj na swój ruch.',ground:'Stań na ziemi i zostaw miejsce na minę.','out-of-range':'Podejdź bliżej, żeby kopnąć.'})[receipt.reason]??'Tutaj się nie uda. Spróbuj innego miejsca.');
   if(receipt.accepted&&cmd.type==='tool')setView({mode:'move'});
   setSnapshot(s.snapshot({includeTerrain:false}));return receipt;
  },[]);
  function toggleAudio(){audio.current??=createAudioController();setMuted(audio.current,!muted);setAudioMuted(!muted);if(muted)playEffect(audio.current,'treasure')}
  if(!started)return <main className="brand-game-menu"><a className="brand-wordmark" href="/">KURCZOKER <small>GRA OD DELTA240MVT</small></a><section className="brand-start-card"><span className="brand-kicker">SZYBKA POTYCZKA · PODWÓRZE</span><h1>Pióra w ruch.<br/><em>Twoja kolej.</em></h1><p>Wskakuj na przeszkody, rozhuśtaj lasso i zrób przejście przez ziemię. Potem poślij jajobombę. Bez zegara nad głową.</p><div className="brand-start-steps"><span>01 / Ruch i skok</span><span>02 / Lasso i narzędzia</span><span>03 / Celuj i strzel</span></div><button className="brand-primary" onClick={()=>setStarted(true)}>Rozpocznij potyczkę</button><small>Telefon i komputer · Pion i poziom · Bez konta</small></section></main>;
- return <main className="brand-game battle-screen" aria-label="Arena KURCZOKER" data-battle-phase={snapshot?.phase??'loading'} data-sim-time={snapshot?.time} data-player-x={snapshot?.player.x} data-player-y={snapshot?.player.y} data-terrain-revision={sim?.terrain.revision??0} data-rope={snapshot?.rope?'attached':''} data-turn={snapshot?.turn} data-performance={performance?JSON.stringify(performance):''}>
+ return <main className="brand-game battle-screen" aria-label="Arena KURCZOKER" data-battle-phase={snapshot?.phase??'loading'} data-sim-time={snapshot?.time} data-player-x={snapshot?.player.x} data-player-y={snapshot?.player.y} data-terrain-revision={sim?.terrain.revision??0} data-rope={snapshot?.rope?'attached':''} data-turn={snapshot?.turn} data-projectile-count={snapshot?.projectiles.length??0} data-mine-count={snapshot?.mines.length??0} data-selected-weapon={snapshot?.selectedWeaponId} data-performance={performance?JSON.stringify(performance):''}>
   <GameBoundary key={retry}><Canvas frameloop={paused||snapshot?.outcome?'demand':'always'} orthographic camera={{position:[6,5,40],zoom:70,near:.1,far:160}} dpr={1} gl={{antialias:false,alpha:false,powerPreference:'high-performance'}} fallback={<div role="alert">Ta przeglądarka nie udostępnia WebGL2.</div>}>
-   <Suspense fallback={null}>{sim&&<GameRuntime sim={sim} quality="low" view={view} toolId={toolId} onView={setView} onCommand={command} onSnapshot={setSnapshot} onEvent={onEvent} onReady={onReady} onOutcome={()=>{}}/>}</Suspense><Performance publish={setPerformance}/>
+   <Suspense fallback={null}>{sim&&<GameRuntime key={sim.options.encounterId} sim={sim} quality="low" view={view} toolId={toolId} onView={setView} onCommand={command} onSnapshot={setSnapshot} onEvent={onEvent} onReady={onReady} onOutcome={()=>{}}/>}</Suspense><Performance publish={setPerformance}/>
   </Canvas></GameBoundary>
   {sim&&snapshot&&ready&&<BattleHUD sim={sim} snapshot={snapshot} onCommand={command} onPause={()=>pause(!pauseRef.current)} view={view} onView={setView} toolId={toolId} onTool={setToolId} notice={notice}/>}
   {!ready&&<div className="brand-modal"><section role={error?'alert':'status'}><h2>{error||'Przygotowujemy podwórze…'}</h2><p>Ostrzymy dzioby i sprawdzamy lasso.</p>{error&&<button onClick={()=>setRetry(n=>n+1)}>Spróbuj ponownie</button>}</section></div>}

@@ -101,3 +101,11 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - Artefakty lokalne: .superpowers/brand-foundation-final-build.log, brand-foundation-final-browser.log, brand-m1-final-tests.log oraz makeover-qa/brand-390.png, brand-844.png, brand-1440.png, brand-desktop-victory.png.
 - Pierwszy przebieg desktopu przekroczył120s przy małej wolnej pamięci. Po zwolnieniu własnej dodatkowej karty/serwera końcowy przebieg wszystkich4 scenariuszy trwał123s i przeszedł. Testy automatyczne używają SwiftShader; to weryfikacja funkcjonalna i emulacja telefonu, nie pomiar realnego urządzenia.
 - Dalsze dopracowanie: w task14 poprawić dekoracyjny pas trawy przy częściowo zasłoniętej górze scalonego boxa; finalne modele/animacje, profile jakości i pomiary pozostają task22–25.
+
+## Task 13 — pełny arsenał
+
+- RED dziewięciu testów przed implementacją. Końcowe 27/27 testów arsenału, pocisków, postaci i zgodności runtime PASS.
+- Granajko odbija się i ma zapalnik; Dubeltówka używa pięciu zgodnych z podglądem promieni; Kopniak zadaje10HP i odrzuca; Mina-jajo uzbraja się, szkodzi obu stronom i spada po utracie podłoża; Jajo kasetowe tworzy pięć deterministycznych odłamków.
+- Zużycie amunicji jest atomowe. Kopniak i śrut korzystają ze wspólnego naliczania obrażeń bez pozornej eksplozji. Miny/kopniak mają wybór kierunku; ruch odwraca postać i celowanie.
+- Produkcyjny build PASS. Ostateczny test przeglądarkowy wszystkich pięciu nowych broni przez UI PASS,0 błędów JS,140s. Obrazy odłamków/miny/kopniaka obejrzane. Panel celowania znika na czas ataku, żeby odsłonić akcję.
+- Artefakty: .superpowers/brand-arsenal-final-tests.log, brand-arsenal-final-build.log, brand-arsenal-final-browser.log, makeover-qa/brand-weapon-*.png.
