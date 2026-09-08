@@ -4,6 +4,9 @@ export function cameraTarget({viewport,bounds,actor,projectile,rope,mode,overvie
   let visibleHeight=Math.min(10,Math.max(6,viewport.height/64));
   let x=(projectile??actor).x+(projectile?0:clamp((actor.vx??0)*.15,-1,1));
   let y=(projectile??actor).y+(projectile?0:-.35);
+  if(mode==='rope'&&!rope&&!projectile) {
+    visibleHeight=11;y=actor.y+.2;
+  }
   if(mode==='overview') {
     visibleHeight=Math.max(bounds.height+4,(bounds.width+4)/aspect)/(overviewCenter?.zoom??1);
     x=overviewCenter?.x??bounds.width/2;y=overviewCenter?.y??bounds.height/2;

@@ -1,3 +1,4 @@
+import {BrandGame} from './BrandGame.jsx';
 import {
   Component,
   Suspense,
@@ -71,7 +72,7 @@ const PHASE_COPY = {
   finished: "Starcie rozstrzygnięte",
 };
 
-export function KurczokerCanvas() {
+function LegacyKurczokerCanvas() {
   const game = useGameStore((s) => s.game),
     actions = useGameStore.getState();
   const [started, setStarted] = useState(false),
@@ -703,16 +704,16 @@ export function KurczokerCanvas() {
             {help ? (
               <>
                 <p>
-                  Masz 20 sekund na ruch, skok i jedną akcję. Celuj myszą lub
+                  Masz dowolny czas na ruch, skok i jedną akcję. Celuj myszą lub
                   ustaw kąt oraz moc suwakami. Linia pokazuje prawdziwy lot
                   jajobomby.
                 </p>
                 <dl>
                   <dt>A / D lub ← / →</dt>
                   <dd>Ruch po arenie</dd>
-                  <dt>W lub ↑</dt>
+                  <dt>Spacja lub ↑</dt>
                   <dd>Skok na platformę</dd>
-                  <dt>SPACJA / ENTER</dt>
+                  <dt>Przycisk ataku</dt>
                   <dd>Wybrana zdolność</dd>
                   <dt>ESC</dt>
                   <dd>Pauza</dd>
@@ -748,5 +749,10 @@ export function KurczokerCanvas() {
       )}
     </div>
   );
+}
+export function KurczokerCanvas(){
+ const [quick,setQuick]=useState(null);
+ useEffect(()=>{setQuick(new URLSearchParams(location.search).get('mode')==='quick')},[]);
+ return quick===null?<div className="brand-game-menu" role="status">Przygotowujemy KURCZOKERA…</div>:quick?<BrandGame/>:<LegacyKurczokerCanvas/>;
 }
 export default KurczokerCanvas;

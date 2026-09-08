@@ -3,7 +3,7 @@ import { useRef, useMemo } from "react";
 import { Vector3, BufferGeometry } from "three";
 import { Html } from "@react-three/drei";
 
-export function ShotVisual({ sim }) {
+export function ShotVisual({ sim, showAim=true }) {
   const egg = useRef(),
     trail = useRef(),
     line = useRef(),
@@ -25,10 +25,10 @@ export function ShotVisual({ sim }) {
   );
   useFrame(() => {
     if (!sim || sim.disposed) return;
-    const s = sim.snapshot();
+    const s = sim.snapshot({includeTerrain:false});
     egg.current.visible = !!s.projectile;
     trail.current.visible = !!s.projectile;
-    line.current.visible = s.phase === "player" && !s.paused;
+    line.current.visible = showAim && s.phase === "player" && !s.paused;
     if (s.projectile) {
       const p = s.projectile;
       if (shotId.current !== p.id) {

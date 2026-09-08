@@ -54,7 +54,7 @@ export function previewTool(command,snapshot,terrain) {
   if(snapshot.paused||snapshot.phase!=='player'||snapshot.outcome)return reject('phase');
   if(snapshot.toolUsed)return reject('used');
   if(!(snapshot.inventory.tools[command.toolId]>0))return reject('empty');
-  const {cellSize}=terrain.snapshot();
+  const {cellSize}=terrain;
   // Align a near-ground pickaxe cut with the actual floor, avoiding a tiny
   // blocking lip at the entrance or a new step at the exit of the tunnel.
   if(command.toolId==='pickaxe') {

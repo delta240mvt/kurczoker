@@ -122,6 +122,14 @@ class BattleSimulation {
       this.accumulator = 0;
     }
   }
+  terrainTarget(point) {
+    if(!point||!Number.isFinite(point.x)||!Number.isFinite(point.y))return null;
+    const p=this.player.body.translation(),dx=point.x-p.x,dy=point.y-p.y,d=Math.hypot(dx,dy);
+    if(d<.01)return null;
+    const direction={x:dx/d,y:dy/d,z:0};
+    const hit=this.world.castRay(new R.Ray(p,direction),Math.min(18,d+.2),true,undefined,(2<<16)|1,this.player.collider,this.player.body);
+    return hit?{x:p.x+direction.x*hit.timeOfImpact,y:p.y+direction.y*hit.timeOfImpact}:null;
+  }
   origin(actor = this.player, angle = this.angle) {
     const p=actor.body.translation(),r=angle*Math.PI/180;
     return {x:p.x+Math.cos(r)*.48,y:p.y+.2+Math.sin(r)*.48,z:0};
@@ -302,7 +310,7 @@ class BattleSimulation {
     const points=predictTrajectory({origin,angleDeg:this.angle,power:this.power,castSegment:this.castSegment,ownerId:this.player.id});
     this.trajectoryCache={key,points};return points;
   }
-  snapshot() {
+  snapshot({includeTerrain=true}={}) {
     const read = (a) => ({
       team: a.team,
       ...a.body.translation(),
@@ -314,7 +322,7 @@ class BattleSimulation {
     return {
       schemaVersion:2,
       actors:this.actors.map(a=>a.snapshot()),
-      terrain:this.terrain?.snapshot()??null,
+      terrain:includeTerrain?(this.terrain?.snapshot()??null):null,
       rope:this.rope.snapshot(),
       phase: this.phase,
       turn: this.turn,

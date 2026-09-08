@@ -107,10 +107,14 @@ test("all support abilities and equipment affect the actual simulation", async (
     sim.dispose();
   }
 });
-test("turn timeout and unanswered attacks can end a run in defeat", async () => {
+test("deliberate pass allows an enemy answer and defeat, idle time does not", async () => {
   const sim = await createBattleSimulation({ health: 1, maxHealth: 3 });
   try {
     tick(sim, 26);
+    assert.equal(sim.outcome, null);
+    assert.equal(sim.turn, 1);
+    sim.dispatch({type:"pass"});
+    tick(sim, 8);
     assert.equal(sim.outcome, "lost");
     assert.equal(sim.player.health, 0);
   } finally {

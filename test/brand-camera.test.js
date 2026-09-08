@@ -26,3 +26,10 @@ test('kurczak w kraterze pozostaje nad dolnym panelem w poziomie',()=>{
  const feet=viewport.height/2+(c.y-(actor.y-.55))*c.zoom;
  assert.ok(feet<viewport.height-144,`feet at ${feet}`);
 });
+
+test('tryb wyboru lassa pokazuje belkę nad głową także w poziomie',()=>{
+ const viewport={width:844,height:390},actor={x:6,y:3.05,vx:0,vy:0};
+ const c=cameras.cameraTarget({...input,viewport,actor,mode:'rope'});
+ const beamY=viewport.height/2+(c.y-7)*c.zoom;
+ assert.ok(beamY>60&&beamY<viewport.height-145,`beam at ${beamY}`);
+});

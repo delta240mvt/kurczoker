@@ -27,6 +27,7 @@ function manualChunks(id) {
 
 export default defineConfig({
   output: "static",
+  devToolbar: {enabled:false},
   integrations: [react()],
   vite: {
     build: {

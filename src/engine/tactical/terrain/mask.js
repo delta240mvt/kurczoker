@@ -47,7 +47,7 @@ export function createTerrain(map) {
     return [...dirty].sort((a,b)=>a-b);
   }
   return {
-    materialAt,
+    materialAt,cellSize,
     cutCircle({x,y,radius}) {
       if(![x,y,radius].every(Number.isFinite)||radius<=0) return [];
       return cut({x:x-radius,y:y-radius,width:radius*2,height:radius*2},

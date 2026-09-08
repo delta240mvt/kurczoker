@@ -534,7 +534,7 @@ const smooth=(from,to)=>from+(to-from)*alpha;
 
 **Interfaces:** `TerrainView({terrainSnapshot})` używa task02; `BattleHUD({snapshot,onCommand,onPause,onMode})`; `BattleScene({sim,...callbacks})` zachowuje jeden advance/frame. `getMap(id):MapDef` i `listMaps():MapDef[]` w arena.js zaczynają od yard. Tymczasowe wejście `/gra?mode=quick` otwiera Podwórze bez nadpisywania legacy zapisu.
 
-- [ ] Dodaj browser test na buildzie z istniejącym `serveBuild()`:
+- [x] Dodaj browser test na buildzie z istniejącym `serveBuild()`:
 
 ```js
 import test from 'node:test';
@@ -558,8 +558,8 @@ test('Podwórze działa przez UI w pionie',{timeout:120000},async()=>{
 });
 ```
 
-- [ ] Build + `node --test test/visual/brand-foundation.test.js` → RED. Jeżeli maszyna wymaga SwiftShader, użyj istniejących flag z `tactical.test.js` i oznacz to w raporcie.
-- [ ] Podłącz komendy zamiast starego `sim.move/fire`, renderuj listę actors/projectiles i teren z rewizji. Canvas full viewport:
+- [x] Build + `node --test test/visual/brand-foundation.test.js` → RED. Jeżeli maszyna wymaga SwiftShader, użyj istniejących flag z `tactical.test.js` i oznacz to w raporcie.
+- [x] Podłącz komendy zamiast starego `sim.move/fire`, renderuj listę actors/projectiles i teren z rewizji. Canvas full viewport:
 
 ```css
 .battle-screen{position:fixed;inset:0;height:100dvh;overflow:hidden;}
@@ -568,8 +568,8 @@ test('Podwórze działa przez UI w pionie',{timeout:120000},async()=>{
 .battle-controls{padding-bottom:max(12px,env(safe-area-inset-bottom));}
 ```
 
-- [ ] Zrób jedno przejście w Codexie: chodzenie → skok → zaczep → huśtanie → puszczenie → drążenie → strzał → odpowiedź → wynik. Powtórz pion/poziom, sprawdź wizualnie model i zniszczone przejście. Nie kończ M1 na samym smoke teście powyżej.
-- [ ] `npm test`, `npm run build`, foundation browser test PASS; przejrzyj zmienione legacy testy pod kątem starych zasad. Commit `feat: ship the first playable touch-ready arena`.
+- [x] Zrób jedno przejście w Codexie: chodzenie → skok → zaczep → huśtanie → puszczenie → drążenie → strzał → odpowiedź → wynik. Powtórz pion/poziom, sprawdź wizualnie model i zniszczone przejście. Nie kończ M1 na samym smoke teście powyżej.
+- [x] `npm test`, `npm run build`, foundation browser test PASS; przejrzyj zmienione legacy testy pod kątem starych zasad. Commit `feat: ship the first playable touch-ready arena`.
 
 ## Task 13 (M2): Pozostałe pięć broni i czytelne efekty
 

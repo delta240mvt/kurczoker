@@ -88,3 +88,16 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - GREEN: 4 testy kamery PASS. Cel kamery uwzględnia przestrzeń zajętą przez HUD, także nisko pod powierzchnią terenu.
 - Przegląd, powrót do kurczaka, zoom i drag podłączone w nowym HUD/scenie (integrowane w task12). Codex IAB: chodzenie, fizyczne zwijanie lassa i śledzenie uniesionego kurczaka; obrót 390×844 → 844×390 zachował HP71 i turę2.
 - Kamera nie ściska całej areny w pionie; full-map tylko w osobnym przeglądzie.
+
+## Task 12 — pierwsza kompletna arena (M1)
+
+- Wejście /gra?mode=quick: menu potyczki → Podwórze → wynik → rewanż. Stara wyprawa pozostaje przejściowo osobnym widokiem do migracji task21, korzysta z tego samego runtime.
+- RED przeglądarkowy na świeżym buildzie: brak przycisku nowej potyczki.
+- GREEN: 178/178 testów logiki; po ostatnim rozszerzeniu kamery 5/5 jej testów. Produkcyjny build PASS. Finalne testy przeglądarkowe 4/4 PASS, 0 błędów JS: 390×844, 844×390, 1440×900 oraz pełna walka 1280×720 ze zwycięstwem i rewanżem.
+- Test telefonu wysyła dwa rzeczywiste punkty dotyku przez Chromium CDP i sprawdza jednoczesne przesunięcie oraz skok. Test pełnej walki używa wyłącznie klawiatury i przycisków: dwa skoki na wzgórze, dwa strzały, odpowiedź wroga, zwycięstwo, rewanż.
+- Codex IAB: ręczne chodzenie (x6 → x9.55), zaczepienie belki, zwijanie unoszące ciało, huśtanie i puszczenie, wiercenie (rewizja1), strzał w dół (HP100 →71), nowa tura2. Pion i obrót do poziomu sprawdzone wizualnie; stan HP/tury przetrwał obrót.
+- Wykryte i poprawione: czarne tło przypięte do grupy zamiast sceny; kamera chowająca postać w kraterze za panelem; brak belki w kadrze wyboru lassa w poziomie; pasek Astro przechwytujący dotyk; niepotrzebny render podczas pauzy.
+- Zmieniono stary test wymuszający przegraną przez timeout na jawny pass i fizyczny atak przeciwnika.
+- Artefakty lokalne: .superpowers/brand-foundation-final-build.log, brand-foundation-final-browser.log, brand-m1-final-tests.log oraz makeover-qa/brand-390.png, brand-844.png, brand-1440.png, brand-desktop-victory.png.
+- Pierwszy przebieg desktopu przekroczył120s przy małej wolnej pamięci. Po zwolnieniu własnej dodatkowej karty/serwera końcowy przebieg wszystkich4 scenariuszy trwał123s i przeszedł. Testy automatyczne używają SwiftShader; to weryfikacja funkcjonalna i emulacja telefonu, nie pomiar realnego urządzenia.
+- Dalsze dopracowanie: w task14 poprawić dekoracyjny pas trawy przy częściowo zasłoniętej górze scalonego boxa; finalne modele/animacje, profile jakości i pomiary pozostają task22–25.

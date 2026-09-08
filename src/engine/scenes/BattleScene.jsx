@@ -1,63 +1,47 @@
-import { useFrame } from "@react-three/fiber";
-import { useRef, useState } from "react";
-import { World } from "../tactical/World.jsx";
-import { Chicken } from "../tactical/Chicken.jsx";
-import { ShotVisual, ImpactVisual } from "../tactical/Effects.jsx";
-
-export function BattleScene({
-  sim,
-  quality,
-  onSnapshot,
-  onEvent,
-  onOutcome,
-  onReady,
-  onAim,
-}) {
-  const lastPublish = useRef(-1),
-    resolved = useRef(false),
-    ready = useRef(false);
-  const [impact, setImpact] = useState(null);
-  useFrame((_, delta) => {
-    if (!sim || sim.disposed) return;
-    if (!ready.current) {
-      ready.current = true;
-      onReady();
-    }
-    sim.advance(delta);
-    const state = sim.snapshot();
-    if (state.time - lastPublish.current >= 0.1 || state.outcome) {
-      lastPublish.current = state.time;
-      onSnapshot(state);
-    }
-    for (const event of sim.drainEvents()) {
-      onEvent(event);
-      if (event.type === "impact") setImpact(event);
-    }
-    if (state.outcome && !resolved.current) {
-      resolved.current = true;
-      onOutcome(state);
-    }
-  });
-  return (
-    <>
-      <World arena={sim.arena} quality={quality} />
-      <Chicken sim={sim} side="player" />
-      <Chicken sim={sim} side="enemy" boss={sim.options.type === "boss"} />
-      <ShotVisual sim={sim} />
-      {impact && <ImpactVisual key={impact.id} event={impact} sim={sim} />}
-      <mesh
-        position={[0, 3, 0]}
-        onPointerMove={(e) => {
-          if (e.pointerType !== "touch" || e.buttons) onAim(e.point);
-        }}
-        onPointerDown={(e) => {
-          e.stopPropagation();
-          onAim(e.point);
-        }}
-      >
-        <planeGeometry args={[18, 12]} />
-        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
-      </mesh>
-    </>
-  );
+import {useFrame,useThree} from '@react-three/fiber';
+import {useRef,useState} from 'react';
+import {World} from '../tactical/World.jsx';
+import {BrandWorld} from '../tactical/BrandWorld.jsx';
+import {TerrainView} from '../tactical/TerrainView.jsx';
+import {RopeVisual,ToolVisual} from '../tactical/TacticalOverlays.jsx';
+import {Chicken} from '../tactical/Chicken.jsx';
+import {ShotVisual,ImpactVisual} from '../tactical/Effects.jsx';
+export function BattleScene({sim,quality,onSnapshot,onEvent,onOutcome,onReady,onAim,view={mode:'move'},toolId='pickaxe',onCommand,onView}) {
+ const lastPublish=useRef(-1),resolved=useRef(false),ready=useRef(false),drag=useRef(null);
+ const [impact,setImpact]=useState(null),[terrain,setTerrain]=useState(()=>sim.terrain?.snapshot());
+ const revision=useRef(sim.terrain?.revision),{camera}=useThree();
+ useFrame((_,delta)=>{
+  if(!sim||sim.disposed)return;
+  if(!ready.current){ready.current=true;onReady();}
+  sim.advance(delta);
+  if(sim.terrain?.revision!==revision.current){revision.current=sim.terrain.revision;setTerrain(sim.terrain.snapshot());}
+  if(sim.time-lastPublish.current>=.1||sim.outcome){
+   lastPublish.current=sim.time;onSnapshot(sim.snapshot({includeTerrain:false}));
+  }
+  for(const event of sim.drainEvents()){onEvent(event);if(event.type==='impact')setImpact(event);}
+  if(sim.outcome&&!resolved.current){resolved.current=true;onOutcome(sim.snapshot({includeTerrain:false}));}
+ },-2);
+ function point(e,down=false){
+  if(!sim.terrain){onAim?.(e.point);return;}
+  if(view.mode==='overview') {
+   if(down){drag.current={x:e.clientX,y:e.clientY,cx:view.overviewCenter?.x??sim.arena.width/2,cy:view.overviewCenter?.y??sim.arena.height/2};e.target.setPointerCapture(e.pointerId);}
+   else if(drag.current && e.buttons){const d=drag.current;onView({...view,overviewCenter:{...view.overviewCenter,x:d.cx-(e.clientX-d.x)/camera.zoom,y:d.cy+(e.clientY-d.y)/camera.zoom}});}
+  } else if(view.mode==='rope'&&down){
+   onCommand({type:'rope.attach',point:sim.terrainTarget(e.point)??e.point});
+  } else if(view.mode==='aim'&&(down||e.buttons)){
+   const p=sim.player.body.translation();onCommand({type:'aim',angleDeg:Math.atan2(e.point.y-p.y-.2,e.point.x-p.x)*180/Math.PI,power:sim.power});
+  }
+ }
+ return <>
+  {terrain?<><BrandWorld arena={sim.arena}/><TerrainView terrainSnapshot={terrain}/><RopeVisual sim={sim}/><ToolVisual sim={sim} toolId={toolId} visible={view.mode==='tool'}/></>:<World arena={sim.arena} quality={quality}/>}
+  {sim.actors.map(a=><Chicken key={a.id} sim={sim} actorId={a.id} side={a.team} boss={a.role==='boss'||sim.options.type==='boss'&&a.team==='enemy'}/>)}
+  <ShotVisual sim={sim} showAim={!terrain||view.mode==='aim'}/>
+  {impact&&<ImpactVisual key={impact.id} event={impact} sim={sim}/>}
+  <mesh position={terrain?[sim.arena.width/2,sim.arena.height/2,3]:[0,3,0]}
+   onPointerDown={e=>{e.stopPropagation();point(e,true)}}
+   onPointerMove={e=>{if(e.pointerType!=='touch'||e.buttons)point(e)}}
+   onPointerUp={()=>{drag.current=null}} onPointerCancel={()=>{drag.current=null}}>
+   <planeGeometry args={terrain?[sim.arena.width+40,sim.arena.height+40]:[18,12]}/><meshBasicMaterial transparent opacity={0} depthWrite={false}/>
+  </mesh>
+ </>;
 }

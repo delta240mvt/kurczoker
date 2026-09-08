@@ -1,3 +1,6 @@
+import yard from './maps/yard.js';
+export function listMaps(){return [yard];}
+export function getMap(id){const map=listMaps().find(m=>m.id===id);if(!map)throw new Error('Unknown map: '+id);return map;}
 export const STEP = 1 / 60;
 export const GRAVITY = -10;
 export const ARENA_BOUNDS = { left: -6.5, right: 6.5, top: 7, bottom: -1 };

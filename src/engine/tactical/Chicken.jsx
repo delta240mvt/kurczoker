@@ -6,6 +6,7 @@ import manifest from "./releaseManifest.json";
 
 export function Chicken({
   sim,
+  actorId,
   side = "player",
   boss = false,
   position,
@@ -53,7 +54,7 @@ export function Chicken({
     const state = sim?.snapshot(),
       a = state?.[side];
     const t = state?.time ?? clock.elapsedTime;
-    if (root.current && a) root.current.position.set(a.x, a.y - 0.55, a.z);
+    if (root.current && a) root.current.position.set(a.x, a.y - 0.55, a.z??0);
     const speed =
       a && lastX.current != null
         ? Math.abs(a.x - lastX.current) / Math.max(dt, 0.001)
