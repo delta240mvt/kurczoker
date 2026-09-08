@@ -1,5 +1,14 @@
 import yard from './maps/yard.js';
-export function listMaps(){return [yard];}
+import hills from './maps/hills.js';
+import roofs from './maps/roofs.js';
+import ravine from './maps/ravine.js';
+import mill from './maps/mill.js';
+import caves from './maps/caves.js';
+import quarry from './maps/quarry.js';
+import islands from './maps/islands.js';
+import fortress from './maps/fortress.js';
+export {validateMap,inspectTraversal} from './maps/validation.js';
+export function listMaps(){return [yard,hills,roofs,ravine,mill,caves,quarry,islands,fortress];}
 export function getMap(id){const map=listMaps().find(m=>m.id===id);if(!map)throw new Error('Unknown map: '+id);return map;}
 export const STEP = 1 / 60;
 export const GRAVITY = -10;

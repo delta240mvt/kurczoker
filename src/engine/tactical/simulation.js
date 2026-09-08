@@ -12,7 +12,7 @@ import {syncTerrainColliders} from './terrain/collisions.js';
 import {createRope} from './rope.js';
 import {createSegmentCaster,stepProjectile,predictTrajectory,spawnClusterFragments,tickMines} from './projectiles.js';
 import {WEAPONS,projectileDefinition,nextRandom} from './config.js';
-import {explode,useTool,executeWeapon,coneRays} from './weapons.js';
+import {explode,useTool,executeWeapon,coneRays,performKick} from './weapons.js';
 import {nextPhase as resolveTurn} from './turns.js';
 import {planEnemyAction} from './enemyAI.js';
 
@@ -214,7 +214,7 @@ class BattleSimulation {
     this.activeEnemyId=this.enemyQueue.shift()??null;
     if(!this.activeEnemyId){this.nextPhase('settle');return;}
     const actor=this.actors.find(a=>a.id===this.activeEnemyId);
-    this.enemyPlan=planEnemyAction({actor:actor.snapshot(),snapshot:this.snapshot(),terrain:this.terrain});
+    this.enemyPlan=planEnemyAction({actor:actor.snapshot(),snapshot:this.snapshot({includeTerrain:false}),terrain:this.terrain,castSegment:this.castSegment});
     this.events.push({id:'tell-'+this.turn+'-'+actor.id,type:'telegraph',time:this.time,payload:{actorId:actor.id}});
     this.nextPhase('enemy-tell');
   }
@@ -266,11 +266,13 @@ class BattleSimulation {
     if(this.phase==='enemy-tell' && this.phaseTime>=.7) {
       if(!active || active.health<=0){this.startNextEnemy();return;}
       this.nextPhase('enemy-move');
+      if(this.enemyPlan?.jump)active.jump();
     } else if(this.phase==='enemy-move' && this.phaseTime>=Math.min(1.5,this.enemyPlan?.moveSeconds??0)) {
       if(!active || active.health<=0){this.startNextEnemy();return;}
-      const plan=planEnemyAction({actor:active.snapshot(),snapshot:this.snapshot(),terrain:this.terrain});
+      const plan=planEnemyAction({actor:active.snapshot(),snapshot:this.snapshot({includeTerrain:false}),terrain:this.terrain,castSegment:this.castSegment,allowMove:false});
       if(!plan){this.startNextEnemy();return;}
-      this.spawnProjectile('enemy',this.origin(active,plan.angleDeg),launchVelocity(plan.angleDeg,plan.power),active);
+      if(plan.weaponId==='kick'){performKick(active,Math.cos(plan.angleDeg*Math.PI/180)>=0?1:-1,this);this.nextPhase('enemy-resolve');return;}
+      this.spawnProjectile('enemy',this.origin(active,plan.angleDeg),launchVelocity(plan.angleDeg,plan.power),active,plan.weaponId);
       this.nextPhase('enemy-shot');
     } else if(this.phase==='enemy-resolve' && this.phaseTime>=.3) {
       this.startNextEnemy();
@@ -378,6 +380,7 @@ class BattleSimulation {
       selectedWeaponId:this.selectedWeaponId,
       toolUsed:this.toolUsed,
       activeEnemyId:this.activeEnemyId,
+      enemyPlan:this.enemyPlan?{...this.enemyPlan}:null,
       aim:{angleDeg:this.angle,power:this.power},
       outcome: this.outcome,
     };

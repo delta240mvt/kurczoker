@@ -109,3 +109,29 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - Zużycie amunicji jest atomowe. Kopniak i śrut korzystają ze wspólnego naliczania obrażeń bez pozornej eksplozji. Miny/kopniak mają wybór kierunku; ruch odwraca postać i celowanie.
 - Produkcyjny build PASS. Ostateczny test przeglądarkowy wszystkich pięciu nowych broni przez UI PASS,0 błędów JS,140s. Obrazy odłamków/miny/kopniaka obejrzane. Panel celowania znika na czas ataku, żeby odsłonić akcję.
 - Artefakty: .superpowers/brand-arsenal-final-tests.log, brand-arsenal-final-build.log, brand-arsenal-final-browser.log, makeover-qa/brand-weapon-*.png.
+
+## Task 14–16 — dziewięć map, role AI, szybka potyczka
+
+- Testy RED: brak dziewięciu map/validatora, błędny powrót po usunięciu miękkiego gruntu, pas trawy wewnątrz wzgórza, brak ról AI i selektora.
+- Testy końcowe:74/74 testów brand PASS; osobne10/10 testów map i pełnych przejść fizycznych PASS. Produkcyjny build PASS.
+- Ostateczny zestaw przeglądarkowy:5/5 scenariuszy PASS (18 wariantów map, desktop/phone fundament, pełne zwycięstwo i rewanż),0 błędów JS,476s. Wcześniejszy test selektora9map, dwóch potyczek, odtworzenia zapasu/terenu i zachowania zapisu PASS (31s).
+- Przejścia w runtime używają wyłącznie ruchu, skoku i fizycznego lassa: sześć map do pozycji przeciwnika, młyn przez przejście pod wieżą i schody, twierdza pod rusztowaniem. Wąwóz i wyspy przebyte także po skasowaniu mostów i przebudowie rzeczywistych colliderów. Heurystyka grafu jest dodatkowym sprawdzeniem, nie dowodem grywalności.
+- Poprawiono prześwity i wysokości schodów po długich przejściach. Młyn ma schody dochodzące do prawej półki. Dodatkowe trwałe zaczepy umożliwiają wyjście nad krawędzie po zniszczeniu mostów. Trawa powstaje wyłącznie na odkrytej powierzchni.
+- Codex IAB: wąwóz390×844, Lasso→Szukaj zaczepu→dotknięcie odległej belki, automatyczny powrót do bohatera, zwijanie przesuwające x7→9.11; obrót844×390 zachował przyczepioną linę,100HP i turę1. Tymczasowy viewport i karta testowa zamknięte.
+- AI: strzelec strzela Jajooką, grenadier używa odbijającego granatu z zapalnikiem, szturmowiec szuka dojścia i kopie z zasięgu. Widoczna zapowiedź, maksymalnie120 ocen trajektorii na decyzję, graf powierzchni przebudowywany po rewizji terenu. Kolizje ruchu rozstrzyga Rapier; graf stosuje próbkowanie kapsuły i fizycznego łuku skoku.
+- QuickSelect pokazuje przekroje z tych samych MapDef. Każdy start ma świeże100HP,6broni,3granaty/3śrut/2miny/1kasetowe/2kilofy/2wiertła. Tryb nie zapisuje kampanii.
+
+| Mapa | Pion390×844 | Poziom844×390 | Przejście fizyczne |
+|---|---|---|---|
+| Podwórze | PASS | PASS | Skoki na wzgórze, pełna wygrana przez UI |
+| Dwa wzgórza | PASS | PASS | Zejście do doliny i wejście na drugie wzgórze |
+| Dachy kurników | PASS | PASS | Przejście po dachach i rusztowaniu |
+| Wąwóz | PASS | PASS | Most oraz lasso po zniszczeniu mostu |
+| Stary młyn | PASS | PASS | Tunel pod wieżą i schody na półkę przeciwnika |
+| Jaskinie | PASS | PASS | Przejście pod pierwszą ścianą i nad drugą |
+| Kamieniołom | PASS | PASS | Tarasy i schody między wzniesieniami |
+| Trzy wyspy | PASS | PASS | Łańcuch lassa po zerwaniu obu mostów; dwie role w walce |
+| Twierdza Jajokróla | PASS | PASS | Dziedziniec z prześwitem pod rusztowaniem |
+
+- Artefakty: .superpowers/brand-m2-release-tests.log, brand-m2-release-build.log, brand-m2-verified-browser.log, brand-m2-final-browser.log, brand-all-traversal-tests-4.log; makeover-qa/map-*.png i quick-select-phone.png. Obrazy wszystkich dziewięciu topografii obejrzane. Funkcjonalne testy telefonu używają prawdziwych zdarzeń dotyku w emulowanym Chromium/SwiftShader; nie są pomiarem realnego urządzenia.
+- Osobna pełna wygrana na każdej mapie i pomiary tempa/osiągów pozostają częścią końcowego odbioru task25. Najwyższe opcjonalne rusztowanie młyna wymaga jeszcze przeglądu w tym odbiorze.

@@ -1,14 +1,10 @@
 import {useMemo} from 'react';
 import {Object3D,Color} from 'three';
-import {buildTerrainBoxes} from './terrain/geometry.js';
+import {buildTerrainBoxes,buildGrassCaps} from './terrain/geometry.js';
 const COLORS={1:'#9672BF',2:'#D9A348',3:'#486361'};
 export function TerrainView({terrainSnapshot}) {
  const boxes=useMemo(()=>buildTerrainBoxes(terrainSnapshot),[terrainSnapshot]);
- const caps=useMemo(()=>boxes.filter(b=>{
-  const {columns,rows,cellSize,cells}=terrainSnapshot;
-  const x=Math.floor(b.x/cellSize),y=Math.floor((b.y+b.height/2+.01)/cellSize);
-  return b.material===1 && (y>=rows||!cells[y*columns+x]);
- }),[boxes,terrainSnapshot]);
+ const caps=useMemo(()=>buildGrassCaps(terrainSnapshot),[terrainSnapshot]);
  function place(mesh,items,cap=false){
   if(!mesh)return;const object=new Object3D();
   items.forEach((b,i)=>{

@@ -25,7 +25,7 @@ export function BattleScene({sim,quality,onSnapshot,onEvent,onOutcome,onReady,on
  },-2);
  function point(e,down=false){
   if(!sim.terrain){onAim?.(e.point);return;}
-  if(view.mode==='overview') {
+  if(view.mode==='overview'||view.mode==='rope'&&view.ropeOverview) {
    if(down){drag.current={x:e.clientX,y:e.clientY,cx:view.overviewCenter?.x??sim.arena.width/2,cy:view.overviewCenter?.y??sim.arena.height/2};e.target.setPointerCapture(e.pointerId);}
    else if(drag.current && e.buttons){const d=drag.current;onView({...view,overviewCenter:{...view.overviewCenter,x:d.cx-(e.clientX-d.x)/camera.zoom,y:d.cy+(e.clientY-d.y)/camera.zoom}});}
   } else if(view.mode==='rope'&&down){
@@ -43,7 +43,7 @@ export function BattleScene({sim,quality,onSnapshot,onEvent,onOutcome,onReady,on
   <mesh position={terrain?[sim.arena.width/2,sim.arena.height/2,3]:[0,3,0]}
    onPointerDown={e=>{e.stopPropagation();point(e,true)}}
    onPointerMove={e=>{if(e.pointerType!=='touch'||e.buttons)point(e)}}
-   onPointerUp={()=>{drag.current=null}} onPointerCancel={()=>{drag.current=null}}>
+   onPointerUp={e=>{if(view.mode==='rope'&&view.ropeOverview&&drag.current&&Math.hypot(e.clientX-drag.current.x,e.clientY-drag.current.y)<6){const r=onCommand({type:'rope.attach',point:sim.terrainTarget(e.point)??e.point});if(r?.accepted)onView({...view,ropeOverview:false});}drag.current=null;}} onPointerCancel={()=>{drag.current=null}}>
    <planeGeometry args={terrain?[sim.arena.width+40,sim.arena.height+40]:[18,12]}/><meshBasicMaterial transparent opacity={0} depthWrite={false}/>
   </mesh>
  </>;

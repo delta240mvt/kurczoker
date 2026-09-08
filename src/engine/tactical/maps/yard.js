@@ -12,6 +12,6 @@ export default {
   {id:'tunnel-wall',kind:'rect',x:25,y:2.5,width:2,height:4,material:1},
  ],
  spawns:[{id:'player',team:'player',role:'hero',x:6,y:3.2},{id:'enemy-1',team:'enemy',role:'shooter',x:17,y:4.7}],
- safeZones:[{x:3,y:2.5,width:6,height:.5},{x:13,y:4,width:4,height:.5}],
+ safeZones:[{x:3,y:.5,width:6,height:2.5},{x:13,y:.5,width:4,height:4}],
  landmarks:[{id:'barn',x:37,y:2.5},{id:'windmill',x:25,y:2.5}],
 };

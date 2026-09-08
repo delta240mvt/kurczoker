@@ -1,8 +1,9 @@
 import {Component,Suspense,useCallback,useEffect,useRef,useState} from 'react';
 import {Canvas,useFrame,useThree} from '@react-three/fiber';
 import {GameRuntime} from './GameRuntime.jsx';
-import {WEAPONS} from './tactical/config.js';
-import {getMap} from './tactical/arena.js';
+import {createQuickBattle} from '../game/quickBattle.js';
+import {QuickSelect} from './ui/QuickSelect.jsx';
+import {getMap,listMaps} from './tactical/arena.js';
 import {BattleHUD} from './tactical/BattleHUD.jsx';
 import {createBattleSimulation} from './tactical/simulation.js';
 import {createAudioController,setMuted,playEffect} from '../game/audio.js';
@@ -22,17 +23,17 @@ export function BrandGame() {
  const [paused,setPaused]=useState(false),[retry,setRetry]=useState(0),[view,setView]=useState({mode:'move'}),[toolId,setToolId]=useState('pickaxe'),[notice,setNotice]=useState(''),[muted,setAudioMuted]=useState(true),[performance,setPerformance]=useState(null);
  const runtime=useRef(null),audio=useRef(null),pauseRef=useRef(false);pauseRef.current=paused;
  useEffect(()=>{if(!notice)return;const timer=setTimeout(()=>setNotice(''),4000);return ()=>clearTimeout(timer)},[notice]);
- const map=getMap('yard');
+ const [mapId,setMapId]=useState(()=>{const id=new URLSearchParams(location.search).get('map');return listMaps().some(m=>m.id===id)?id:'yard'});
+ const map=getMap(mapId);
  const pause=useCallback(value=>{runtime.current?.setPaused(value);pauseRef.current=value;setPaused(value);if(runtime.current)setSnapshot(runtime.current.snapshot({includeTerrain:false}));},[]);
  useEffect(()=>{
   if(!started)return;let cancelled=false,owned;
   setReady(false);setError('');setSim(null);setSnapshot(null);setPaused(false);setView({mode:'move'});setNotice('');
-  createBattleSimulation({map,mode:'quick',encounterId:'quick-yard-'+retry,seed:1,
-   player:{health:100,maxHealth:100,upgrades:[],inventory:{owned:Object.keys(WEAPONS),ammo:{granajko:3,shotgun:3,mine:2,cluster:2},tools:{pickaxe:2,drill:2}}}})
+  createBattleSimulation(createQuickBattle(map.id,retry+1))
   .then(s=>{if(cancelled){s.dispose();return;}owned=s;runtime.current=s;s.setPaused(true);setSim(s);setSnapshot(s.snapshot({includeTerrain:false}));})
   .catch(()=>{if(!cancelled)setError('Nie udało się przygotować areny. Spróbuj jeszcze raz.');});
   return ()=>{cancelled=true;if(runtime.current===owned)runtime.current=null;owned?.dispose();};
- },[started,retry]);
+ },[started,retry,mapId]);
  useEffect(()=>{const blur=()=>{if(runtime.current&&!runtime.current.outcome)pause(true)},hidden=()=>{if(document.hidden)blur()};
   window.addEventListener('blur',blur);document.addEventListener('visibilitychange',hidden);
   return ()=>{window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',hidden)};
@@ -52,13 +53,13 @@ export function BrandGame() {
   setSnapshot(s.snapshot({includeTerrain:false}));return receipt;
  },[]);
  function toggleAudio(){audio.current??=createAudioController();setMuted(audio.current,!muted);setAudioMuted(!muted);if(muted)playEffect(audio.current,'treasure')}
- if(!started)return <main className="brand-game-menu"><a className="brand-wordmark" href="/">KURCZOKER <small>GRA OD DELTA240MVT</small></a><section className="brand-start-card"><span className="brand-kicker">SZYBKA POTYCZKA · PODWÓRZE</span><h1>Pióra w ruch.<br/><em>Twoja kolej.</em></h1><p>Wskakuj na przeszkody, rozhuśtaj lasso i zrób przejście przez ziemię. Potem poślij jajobombę. Bez zegara nad głową.</p><div className="brand-start-steps"><span>01 / Ruch i skok</span><span>02 / Lasso i narzędzia</span><span>03 / Celuj i strzel</span></div><button className="brand-primary" onClick={()=>setStarted(true)}>Rozpocznij potyczkę</button><small>Telefon i komputer · Pion i poziom · Bez konta</small></section></main>;
- return <main className="brand-game battle-screen" aria-label="Arena KURCZOKER" data-battle-phase={snapshot?.phase??'loading'} data-sim-time={snapshot?.time} data-player-x={snapshot?.player.x} data-player-y={snapshot?.player.y} data-terrain-revision={sim?.terrain.revision??0} data-rope={snapshot?.rope?'attached':''} data-turn={snapshot?.turn} data-projectile-count={snapshot?.projectiles.length??0} data-mine-count={snapshot?.mines.length??0} data-selected-weapon={snapshot?.selectedWeaponId} data-performance={performance?JSON.stringify(performance):''}>
+ if(!started)return <QuickSelect maps={listMaps()} selectedMapId={mapId} onSelect={setMapId} onStart={()=>setStarted(true)}/>;
+ return <main className="brand-game battle-screen" aria-label="Arena KURCZOKER" data-map-id={map.id} data-battle-phase={snapshot?.phase??'loading'} data-sim-time={snapshot?.time} data-player-x={snapshot?.player.x} data-player-y={snapshot?.player.y} data-terrain-revision={sim?.terrain.revision??0} data-rope={snapshot?.rope?'attached':''} data-turn={snapshot?.turn} data-projectile-count={snapshot?.projectiles.length??0} data-mine-count={snapshot?.mines.length??0} data-selected-weapon={snapshot?.selectedWeaponId} data-performance={performance?JSON.stringify(performance):''}>
   <GameBoundary key={retry}><Canvas frameloop={paused||snapshot?.outcome?'demand':'always'} orthographic camera={{position:[6,5,40],zoom:70,near:.1,far:160}} dpr={1} gl={{antialias:false,alpha:false,powerPreference:'high-performance'}} fallback={<div role="alert">Ta przeglądarka nie udostępnia WebGL2.</div>}>
    <Suspense fallback={null}>{sim&&<GameRuntime key={sim.options.encounterId} sim={sim} quality="low" view={view} toolId={toolId} onView={setView} onCommand={command} onSnapshot={setSnapshot} onEvent={onEvent} onReady={onReady} onOutcome={()=>{}}/>}</Suspense><Performance publish={setPerformance}/>
   </Canvas></GameBoundary>
   {sim&&snapshot&&ready&&<BattleHUD sim={sim} snapshot={snapshot} onCommand={command} onPause={()=>pause(!pauseRef.current)} view={view} onView={setView} toolId={toolId} onTool={setToolId} notice={notice}/>}
-  {!ready&&<div className="brand-modal"><section role={error?'alert':'status'}><h2>{error||'Przygotowujemy podwórze…'}</h2><p>Ostrzymy dzioby i sprawdzamy lasso.</p>{error&&<button onClick={()=>setRetry(n=>n+1)}>Spróbuj ponownie</button>}</section></div>}
+  {!ready&&<div className="brand-modal"><section role={error?'alert':'status'}><h2>{error||'Przygotowujemy arenę…'}</h2><p>Ostrzymy dzioby i sprawdzamy lasso.</p>{error&&<button onClick={()=>setRetry(n=>n+1)}>Spróbuj ponownie</button>}</section></div>}
   {paused&&<div className="brand-modal"><section role="dialog" aria-modal="true" aria-label="Pauza"><span className="brand-kicker">KURNIK MOŻE POCZEKAĆ</span><h2>Chwila przerwy.</h2><p>A/D lub strzałki: ruch. Spacja: skok. R: lasso. W/S: długość liny. Wybierz „Celuj”, ustaw kąt i moc, naciśnij „Strzel”.</p><button className="brand-primary" onClick={()=>pause(false)}>Wznów grę</button><button onClick={toggleAudio}>{muted?'Włącz dźwięk':'Wyłącz dźwięk'}</button><button onClick={()=>setStarted(false)}>Wróć do menu</button></section></div>}
   {snapshot?.outcome&&<div className="brand-modal"><section role="dialog" aria-label="Wynik potyczki"><span className="brand-kicker">{snapshot.outcome==='won'?'PODWÓRZE JEST TWOJE':'TYM RAZEM KURNIK GÓRĄ'}</span><h2>{snapshot.outcome==='won'?'Pięknie poleciały pióra.':'Jeszcze jedno podejście?'}</h2><p>{snapshot.turn} tur · {Math.round(snapshot.time)} sekund gry</p><button className="brand-primary" onClick={()=>setRetry(n=>n+1)}>Rewanż</button><button onClick={()=>setStarted(false)}>Wróć do menu</button></section></div>}
  </main>;

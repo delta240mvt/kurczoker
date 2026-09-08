@@ -35,6 +35,18 @@ export function buildTerrainBoxes(snapshot, chunkIds) {
   return boxes;
 }
 
+/** Horizontal runs of exposed soil cells. Never paint a cap through a hill. */
+export function buildGrassCaps({columns,rows,cellSize,cells}){
+ const caps=[];
+ for(let row=0;row<rows;row++)for(let col=0;col<columns;){
+  const exposed=c=>cells[row*columns+c]===1&&(row===rows-1||!cells[(row+1)*columns+c]);
+  if(!exposed(col)){col++;continue;}const start=col;
+  while(col<columns&&exposed(col))col++;
+  caps.push({x:(start+col)*cellSize/2,y:(row+1)*cellSize,width:(col-start)*cellSize,height:0});
+ }
+ return caps;
+}
+
 /** Offset visible contour corners into free space, avoiding collider seams. */
 export function boundaryCorners({columns,rows,cellSize,cells}) {
   const filled=(x,y)=>x>=0&&y>=0&&x<columns&&y<rows&&cells[y*columns+x]!==0;

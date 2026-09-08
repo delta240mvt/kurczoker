@@ -614,13 +614,15 @@ export const WEAPONS = {
 - [x] Mina: postaw na wolnym gruncie przy bohaterze, uzbrój po .8s, reaguj na obie drużyny; nie detonuj od powtórzonego eventu. Cluster: pięć kierunków rozrzutu z zapisanego PRNG, limit liczby/times życia, każdy fragment korzysta z tej samej eksplozji. Dodaj testy odbicia, pauzy zapalnika, śrutu przez ścianę, pustego kopnięcia, własnej miny i ograniczonej liczby odłamków.
 - [x] `node --test test/brand-arsenal.test.js test/brand-projectiles.test.js` PASS; obejrzyj rzeczywisty efekt każdej broni. Commit `feat: complete the six-weapon tactical arsenal`.
 
+Wykonanie M2: task14–16 zweryfikowano wspólnie i zapisano w jednym samodzielnym commicie. Selektor był potrzebny do testów map, a role AI były weryfikowane w tych samych scenariuszach. Zakresy TODO pozostają oddzielne.
+
 ## Task 14 (M2): Dziewięć różnych topografii i walidacja przejść
 
 **Files:** Create pozostałe osiem `maps/*.js` z tabeli plików; Modify `maps/yard.js`, `arena.js`, `World.jsx`; Create `test/brand-maps.test.js`.
 
 **Interfaces:** MapDef z kontraktu; `listMaps()` w stałej kolejności specyfikacji, `getMap(id)` zwraca znaną mapę lub zgłasza błąd. `validateMap(map):{ok:boolean,errors:string[]}` w arena sprawdza rozmiary, ID, materiał, wolne spawny i bezpieczne strefy. `inspectTraversal(map):{reachableSpawnPairs:boolean,clearanceFailures:string[]}` stosuje ten sam rozmiar kapsuły i dostęp do podstawowego lassa; wynik heurystyki nie zastępuje grania.
 
-- [ ] Test:
+- [x] Test:
 
 ```js
 import test from 'node:test';
@@ -633,8 +635,8 @@ test('biblioteka ma dziewięć poprawnych i różnych geometrii',()=>{
 });
 ```
 
-- [ ] `node --test test/brand-maps.test.js` → RED.
-- [ ] Każdy plik mapy eksportuje jeden MapDef. Użyj bazowych prostokątów poniżej jako konkretnego początku geometrii, potem dodaj opisane w specyfikacji półki/mosty/osłony i landmarks. Format skrótu `[x,y,width,height,material]`; najpierw fundamenty, potem miękki teren. Sufit jaskini nie jest pełnym wypełnieniem komór.
+- [x] `node --test test/brand-maps.test.js` → RED.
+- [x] Każdy plik mapy eksportuje jeden MapDef. Użyj bazowych prostokątów poniżej jako konkretnego początku geometrii, potem dodaj opisane w specyfikacji półki/mosty/osłony i landmarks. Format skrótu `[x,y,width,height,material]`; najpierw fundamenty, potem miękki teren. Sufit jaskini nie jest pełnym wypełnieniem komór.
 
 ```js
 const terrainSeeds = {
@@ -655,8 +657,8 @@ const shapes=rows.map(([x,y,width,height,material],i)=>({
 }));
 ```
 
-- [ ] Ustal spawny nad faktycznym podłożem (capsule half-height .55 + margines), odporne strefy powrotu i zaczepy w zasięgu18. Wszystkie przejścia do wysokości mają stopnie/lasso; Stary młyn nie wymaga skoku24 jednostek. Dodaj odpowiednie tunele/schody przez puste odstępy między shape'ami, nie niewidzialne teleporty.
-- [ ] Każdą mapę przejdź i rozegraj w pionie/poziomie: alternatywa po zniszczeniu mostu, dostęp do wroga i działanie min. Zapisz dziewięć wierszy wyników w QA. Testy maps/terrain PASS; commit `feat: add nine distinct traversable battle maps`.
+- [x] Ustal spawny nad faktycznym podłożem (capsule half-height .55 + margines), odporne strefy powrotu i zaczepy w zasięgu18. Wszystkie przejścia do wysokości mają stopnie/lasso; Stary młyn nie wymaga skoku24 jednostek. Dodaj odpowiednie tunele/schody przez puste odstępy między shape'ami, nie niewidzialne teleporty.
+- [x] Każdą mapę przejdź i rozegraj w pionie/poziomie: alternatywa po zniszczeniu mostu, dostęp do wroga i działanie min. Zapisz dziewięć wierszy wyników w QA. Testy maps/terrain PASS; commit `feat: add nine distinct traversable battle maps`.
 
 ## Task 15 (M2): Trzy role AI po zmianie terenu
 
@@ -664,7 +666,7 @@ const shapes=rows.map(([x,y,width,height,material],i)=>({
 
 **Interfaces:** `planEnemyAction` z task09; dodatkowo `scoreEnemyAction({role,damage,selfDamage,distanceAfter,opensPath}):number`, `buildWalkGraph(terrain,actorSize):{nodes,edges,revision}` w enemyAI. Próbkowanie dostępnych powierzchni, krawędzie chodzenia/skoku sprawdzone przez shape casts. Cache keyed terrain.revision.
 
-- [ ] Test ról:
+- [x] Test ról:
 
 ```js
 import test from 'node:test';
@@ -676,16 +678,16 @@ test('Szturmowiec premiuje podejście, ale nie samobójczy atak',()=>{
 });
 ```
 
-- [ ] `node --test test/brand-ai.test.js` → RED.
-- [ ] Wprowadź skończony zbiór kandydatów: lewo/bez ruchu/prawo, czasy0/.5/1s, kąty i moce grid; użyj wspólnej trajektorii do oceny, limit200 kandydatów. Wzór startowy:
+- [x] `node --test test/brand-ai.test.js` → RED.
+- [x] Wprowadź skończony zbiór kandydatów: lewo/bez ruchu/prawo, czasy0/.5/1s, kąty i moce grid; użyj wspólnej trajektorii do oceny, limit200 kandydatów. Wzór startowy:
 
 ```js
 return damage*3 - selfDamage*5 + (opensPath?8:0)
   - distanceAfter*(role==='rusher'?2:.2);
 ```
 
-- [ ] Shooter używa Jajooki, Grenadier granatu, Rusher podejścia i Kopniaka (Jajooka jako legalny atak otwierający teren). Nie wykonuj ataku przed widocznym telegraphem. Brak kandydata → null → koniec akcji. Dodaj scenariusz ściany usuniętej w trakcie walki i braku legalnej drogi; sprawdź zmianę decyzji/revision, brak stalej pętli.
-- [ ] Testy AI/turns PASS, rzeczywista walka przeciw dwóm rolom; commit `feat: make enemy roles react to rebuilt terrain`.
+- [x] Shooter używa Jajooki, Grenadier granatu, Rusher podejścia i Kopniaka (Jajooka jako legalny atak otwierający teren). Nie wykonuj ataku przed widocznym telegraphem. Brak kandydata → null → koniec akcji. Dodaj scenariusz ściany usuniętej w trakcie walki i braku legalnej drogi; sprawdź zmianę decyzji/revision, brak stalej pętli.
+- [x] Testy AI/turns PASS, rzeczywista walka przeciw dwóm rolom; commit `feat: make enemy roles react to rebuilt terrain`.
 
 ## Task 16 (M2): Szybka potyczka i izolacja od wyprawy
 
@@ -693,7 +695,7 @@ return damage*3 - selfDamage*5 + (opensPath?8:0)
 
 **Interfaces:** `createQuickBattle(mapId,seed):BattleOptions`; `QuickSelect({maps,selectedMapId,onSelect,onStart})`; pełny standardowy inventory ze specyfikacji. Wynik quick jest stanem UI, nie operacją na kampanii.
 
-- [ ] Test:
+- [x] Test:
 
 ```js
 import test from 'node:test';
@@ -708,8 +710,8 @@ test('szybki tryb ma pełny arsenał i niezależne zapasy',()=>{
 });
 ```
 
-- [ ] `node --test test/brand-quick.test.js` → RED.
-- [ ] Zbuduj świeże inventory przy każdym starcie i stabilne encounterId z seed/map. Selektor map ma przyciski o nazwie mapy, `aria-pressed` wybranej i czytelny przekrój. Początek komponentu:
+- [x] `node --test test/brand-quick.test.js` → RED.
+- [x] Zbuduj świeże inventory przy każdym starcie i stabilne encounterId z seed/map. Selektor map ma przyciski o nazwie mapy, `aria-pressed` wybranej i czytelny przekrój. Początek komponentu:
 
 ```jsx
 {maps.map(map=><button key={map.id} aria-pressed={selectedMapId===map.id}
@@ -717,8 +719,8 @@ test('szybki tryb ma pełny arsenał i niezależne zapasy',()=>{
 <button onClick={onStart}>Rozpocznij potyczkę</button>
 ```
 
-- [ ] Rozwiń browser foundation: dziewięć przycisków, uruchom dwie różne mapy, rewanż z bazowym terenem i zapasem. Zasymulowany istniejący zapis wyprawy pozostaje bajtowo niezmieniony po quick.
-- [ ] Test quick i browser PASS; commit `feat: expose instant battles on all nine maps`.
+- [x] Rozwiń browser foundation: dziewięć przycisków, uruchom dwie różne mapy, rewanż z bazowym terenem i zapasem. Zasymulowany istniejący zapis wyprawy pozostaje bajtowo niezmieniony po quick.
+- [x] Test quick i browser PASS; commit `feat: expose instant battles on all nine maps`.
 
 ## Task 17 (M3): Czysty przebieg czterech walk wyprawy
 

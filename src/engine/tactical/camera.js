@@ -1,5 +1,5 @@
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
-export function cameraTarget({viewport,bounds,actor,projectile,rope,mode,overviewCenter,dt,previous}) {
+export function cameraTarget({viewport,bounds,actor,projectile,rope,mode,ropeOverview=false,overviewCenter,dt,previous}) {
   const aspect=Math.max(.2,viewport.width/Math.max(1,viewport.height));
   let visibleHeight=Math.min(10,Math.max(6,viewport.height/64));
   let x=(projectile??actor).x+(projectile?0:clamp((actor.vx??0)*.15,-1,1));
@@ -7,7 +7,7 @@ export function cameraTarget({viewport,bounds,actor,projectile,rope,mode,overvie
   if(mode==='rope'&&!rope&&!projectile) {
     visibleHeight=11;y=actor.y+.2;
   }
-  if(mode==='overview') {
+  if(mode==='overview'||mode==='rope'&&ropeOverview) {
     visibleHeight=Math.max(bounds.height+4,(bounds.width+4)/aspect)/(overviewCenter?.zoom??1);
     x=overviewCenter?.x??bounds.width/2;y=overviewCenter?.y??bounds.height/2;
   } else if(rope && !projectile) {

@@ -2,6 +2,12 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as cameras from '../src/engine/tactical/camera.js';
 const input={viewport:{width:390,height:844},bounds:{width:72,height:26},actor:{x:30,y:5,vx:0,vy:0},projectile:null,rope:null,mode:'move',overviewCenter:null,dt:1/60,previous:null};
+test('szukanie zaczepu obejmuje dużą mapę i pozwala ją przybliżyć',()=>{
+ const c=cameras.cameraTarget({...input,mode:'rope',ropeOverview:true});
+ assert.ok(c.visibleHeight*390/844>=72);
+ const zoom=cameras.cameraTarget({...input,mode:'rope',ropeOverview:true,overviewCenter:{x:45,y:15,zoom:2}});
+ assert.equal(zoom.x,45);assert.ok(zoom.visibleHeight<c.visibleHeight);
+});
 test('pion zachowuje czytelną wielkość bohatera na szerokiej mapie',()=>{
  const c=cameras.cameraTarget(input);assert.ok(c.visibleHeight<=12);assert.ok(c.zoom*1.1>=48);assert.ok(Math.abs(c.x-30)<1);
 });

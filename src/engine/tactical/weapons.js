@@ -119,9 +119,7 @@ export function executeWeapon({weaponId,actor,aim,battle}) {
   battle.spawnProjectile(actor.team,battle.origin(actor,aim.angleDeg),launchVelocity(aim.angleDeg,aim.power),actor,weaponId);
   battle.nextPhase('player-shot');
  } else if(definition.kind==='contact') {
-  const target=kickTarget.actor,mass=target.body.mass();
-  const damage=damageActor(target,definition.damage,{x:direction*mass*definition.impulse,y:mass*2,z:0},battle);
-  battle.events.push({id:++battle.shotId,type:'impact',time:battle.time,x:kickTarget.p.x,y:kickTarget.p.y,damage,team:actor.team,payload:{ownerId:actor.id,kind:'kick',hits:[{actorId:target.id,damage}]}});
+  performKick(actor,direction,battle);
   battle.beginEnemyResponses();
  } else if(definition.kind==='mine') {
   const mine={id:++battle.shotId,ownerId:actor.id,team:actor.team,...minePoint,age:0,vy:0};
@@ -151,4 +149,17 @@ export function coneRays({actor,aim,battle}) {
   return {hit,vector,point:{x:origin.x+vector.x*distance,y:origin.y+vector.y*distance}};
  });
  return {origin,rays};
+}
+
+export function performKick(actor,direction,battle){
+ const position=actor.body.translation(),definition=WEAPONS.kick;
+ const target=battle.actors.find(a=>a.team!==actor.team&&a.health>0&&
+  Math.hypot(a.body.translation().x-position.x,a.body.translation().y-position.y)<=definition.range&&
+  (a.body.translation().x-position.x)*direction>=0);
+ if(!target)return false;
+ const p=target.body.translation(),dx=p.x-position.x,dy=p.y-position.y,d=Math.hypot(dx,dy);
+ if(d>0&&battle.world.castRay(new R.Ray(position,{x:dx/d,y:dy/d,z:0}),d,true,undefined,(2<<16)|1))return false;
+ const mass=target.body.mass(),damage=damageActor(target,definition.damage,{x:direction*mass*definition.impulse,y:mass*2,z:0},battle);
+ battle.events.push({id:++battle.shotId,type:'impact',time:battle.time,x:p.x,y:p.y,damage,team:actor.team,payload:{ownerId:actor.id,kind:'kick',hits:[{actorId:target.id,damage}]}});
+ return true;
 }
