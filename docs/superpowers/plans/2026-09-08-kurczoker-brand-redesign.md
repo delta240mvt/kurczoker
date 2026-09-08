@@ -356,7 +356,7 @@ const freeLength=Math.max(.2,rope.length-used);
 
 **Interfaces:** `launchVelocity(angleDeg,power):{x,y,z:0}` pełny kąt -180..180; `stepProjectile(projectile,dt,castSegment):{projectile,hit}`; `predictTrajectory({origin,angleDeg,power,dt,maxSteps,castSegment}):Vec2[]`. Rzeczywisty lot i podgląd wywołują ten sam krok; kolizja swept segment/shape zamiast próbkowania tylko pozycji końcowej. `explode({id,point,radius,maxDamage,ownerId},battle):void` w weapons.js.
 
-- [ ] Test:
+- [x] Test:
 
 ```js
 import test from 'node:test';
@@ -374,8 +374,8 @@ test('pierwszy pocisk idzie po podglądzie i nie można wystrzelić dwa razy',as
 });
 ```
 
-- [ ] `node --test test/brand-projectiles.test.js` → RED.
-- [ ] Zastąp ograniczony stary kąt i użyj jednego integratora:
+- [x] `node --test test/brand-projectiles.test.js` → RED.
+- [x] Zastąp ograniczony stary kąt i użyj jednego integratora:
 
 ```js
 const radians=angleDeg*Math.PI/180;
@@ -383,8 +383,8 @@ const velocity={x:Math.cos(radians)*power,y:Math.sin(radians)*power,z:0};
 // W obu ścieżkach: vx bez wiatru; vy += gravity*dt; next=position+velocity*dt.
 ```
 
-- [ ] Eksplozja: ustal trafionych i osłoniętych na starej geometrii, nalicz raz obrażenia/impuls, wytnij krater, zsynchronizuj teren i unieważnij cache. Testuj strzał lewo/dół, self-hit, miss, ścianę i cienki collider.
-- [ ] `node --test test/brand-projectiles.test.js test/brand-terrain-collisions.test.js` PASS; commit `feat: share ballistics between preview and real attacks`.
+- [x] Eksplozja: ustal trafionych i osłoniętych na starej geometrii, nalicz raz obrażenia/impuls, wytnij krater, zsynchronizuj teren i unieważnij cache. Testuj strzał lewo/dół, self-hit, miss, ścianę i cienki collider.
+- [x] `node --test test/brand-projectiles.test.js test/brand-terrain-collisions.test.js` PASS; commit `feat: share ballistics between preview and real attacks`.
 
 ## Task 08 (M1): Kilof i wiertło z kosztem jednej akcji narzędzia
 

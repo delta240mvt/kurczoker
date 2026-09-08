@@ -53,3 +53,10 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - Każdy odcinek przetestowanej trasy omija materiał. Strona owijania jest zachowywana, dopóki odcinki są legalne; po usunięciu ściany lina prostuje się.
 - Kontur i widoczność między narożnikami cache'owane według rewizji terenu. Limit 12 pivotów i 128 kandydatów; niemożliwy przebieg odczepia z przyczyną, bez teleportowania.
 - Długość constraintu uwzględnia odcinki przed ostatnim pivotem. Zniszczony zaczep zwalnia constraint i emituje rope-release/anchor-destroyed.
+
+## Task 07 — wspólna balistyka
+
+- RED: nowe testy wykazały stary generator trajektorii nieobsługujący maski terenu.
+- GREEN: 23 testy balistyki, colliderów, postaci, liny i starego adaptera PASS.
+- Jeden integrator lotu i swept shape cast obsługują podgląd oraz rzeczywisty pocisk, także strzały w lewo i dół.
+- Eksplozja uwzględnia osłonę, obrażenia własne, impuls i krater. Dodatkowy test potwierdził deduplikację i dwie eksplozje bez kroku świata pomiędzy: druga widzi już usuniętą osłonę.

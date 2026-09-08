@@ -10,6 +10,8 @@ import {createCharacter,findSafeReturn,isSafePosition} from './character.js';
 import {createTerrain} from './terrain/mask.js';
 import {syncTerrainColliders} from './terrain/collisions.js';
 import {createRope} from './rope.js';
+import {createSegmentCaster,stepProjectile,predictTrajectory} from './projectiles.js';
+import {explode} from './weapons.js';
 
 let initialization;
 export async function createBattleSimulation(options = {}) {
@@ -41,6 +43,11 @@ class BattleSimulation {
     this.rope=createRope({world:this.world,playerBody:this.player.body,terrain:this.terrain,onRelease:reason=>{
       if(!this.disposed)this.events.push({id:`rope-${this.time}-${this.events.length}`,type:'rope-release',time:this.time,payload:{reason}});
     }});
+    this.projectiles=[];
+    this.resolvedExplosions=new Set();
+    this.inventory=structuredClone(options.player?.inventory??{owned:['jajooka'],ammo:{},tools:{pickaxe:0,drill:0}});
+    this.selectedWeaponId='jajooka';
+    this.castSegment=createSegmentCaster(this.world,this.actors);
     this.phase = "player";
     this.turn = 1;
     this.time = 0;
@@ -70,6 +77,11 @@ class BattleSimulation {
     if(command.type==='move' && [-1,0,1].includes(command.direction)) {
       this.move(command.direction);return {accepted:true};
     }
+    if(command.type==='aim' && Number.isFinite(command.angleDeg) && Number.isFinite(command.power)) {
+      this.angle=clamp(command.angleDeg,-180,180);this.power=clamp(command.power,2,18);
+      this.facing=Math.cos(this.angle*Math.PI/180)>=0?1:-1;return {accepted:true};
+    }
+    if(command.type==='attack') return {accepted:this.fire()};
     if(command.type==='jump') return {accepted:this.jump()};
     if(command.type==='rope.attach') return this.rope.attach(command.point);
     if(command.type==='rope.reel') return this.rope.reel(command.rate);
@@ -90,8 +102,8 @@ class BattleSimulation {
   }
   aim(angle, power = this.power, facing = this.facing) {
     if (!this.canAct()) return;
-    if (Number.isFinite(angle)) this.angle = clamp(angle, 10, 80);
-    if (Number.isFinite(power)) this.power = clamp(power, 6, 14);
+    if (Number.isFinite(angle)) this.angle = facing<0?180-clamp(angle,-180,180):clamp(angle,-180,180);
+    if (Number.isFinite(power)) this.power = clamp(power, 2, 18);
     if (facing === 1 || facing === -1) this.facing = facing;
   }
   setPaused(value) {
@@ -102,13 +114,9 @@ class BattleSimulation {
       this.accumulator = 0;
     }
   }
-  origin(actor = this.player) {
-    const p = actor.body.translation();
-    return {
-      x: p.x + (actor.team === "player" ? 0.52 * this.facing : -0.52),
-      y: p.y + 0.36,
-      z: 0,
-    };
+  origin(actor = this.player, angle = this.angle) {
+    const p=actor.body.translation(),r=angle*Math.PI/180;
+    return {x:p.x+Math.cos(r)*.48,y:p.y+.2+Math.sin(r)*.48,z:0};
   }
   fire(ability = "egg-bomb") {
     if (
@@ -139,30 +147,18 @@ class BattleSimulation {
       this.spawnProjectile(
         "player",
         this.origin(),
-        launchVelocity(this.angle, this.power, this.facing),
+        launchVelocity(this.angle, this.power),
       );
       this.nextPhase("player-shot");
     }
     return true;
   }
   spawnProjectile(team, origin, velocity) {
-    const body = this.world.createRigidBody(
-      R.RigidBodyDesc.dynamic()
-        .setTranslation(origin.x, origin.y, 0)
-        .setCcdEnabled(true)
-        .enabledTranslations(true, true, false),
-    );
-    const group = team === "player" ? 8 : 16;
-    const collider = this.world.createCollider(
-      R.ColliderDesc.ball(0.14)
-        .setRestitution(0)
-        .setCollisionGroups((group << 16) | (team === "player" ? 1 | 4 : 1 | 2))
-        .setActiveEvents(R.ActiveEvents.COLLISION_EVENTS),
-      body,
-    );
-    body.setLinvel(velocity, true);
-    this.projectile = { id: ++this.shotId, team, body, collider, age: 0 };
-    this.events.push({ type: "shoot", team });
+    const owner=team==='player'?this.player:this.enemy;
+    const shot={id:++this.shotId,ownerId:owner.id,weaponId:'jajooka',team,
+      x:origin.x,y:origin.y,z:0,vx:velocity.x,vy:velocity.y,age:0,fuse:null,bounces:0};
+    this.projectiles.push(shot);this.projectile=this.projectiles[0];
+    this.events.push({id:'shoot-'+shot.id,type:'shoot',team,time:this.time,payload:{ownerId:owner.id}});
   }
   nextPhase(phase) {
     this.phase = phase;
@@ -197,21 +193,13 @@ class BattleSimulation {
     this.world.step(this.queue);
     this.actors.forEach(a=>a.updateGrounded());
     this.resolveFalls();
-    let collided = false;
-    this.queue.drainCollisionEvents((a, b, started) => {
-      if (
-        started &&
-        this.projectile &&
-        [a, b].includes(this.projectile.collider.handle)
-      )
-        collided = true;
-    });
-    if (this.projectile) {
-      this.projectile.age += STEP;
-      const p = this.projectile.body.translation();
-      if (collided || p.y < -2 || Math.abs(p.x) > 9 || this.projectile.age > 5)
-        this.impact();
+    for(const shot of [...this.projectiles]) {
+      const result=stepProjectile(shot,STEP,this.castSegment);
+      Object.assign(shot,result.projectile);
+      const outside=shot.y < -2 || shot.x < (this.terrain?-3:-9) || shot.x > (this.terrain?this.arena.width+3:9);
+      if(result.hit || outside || shot.age>8)this.impact(shot);
     }
+    this.projectile=this.projectiles[0]??null;
     if (this.outcome) return;
     if (this.phase === "enemy-tell" && this.phaseTime >= 1.3) {
       const from = this.origin(this.enemy),
@@ -258,99 +246,24 @@ class BattleSimulation {
       this.outcome=outcome;this.nextPhase('finished');this.events.push({type:outcome});
     }
   }
-  impact() {
-    const shot = this.projectile;
-    if (!shot) return;
-    const position = shot.body.translation();
-    const target = shot.team === "player" ? this.enemy : this.player;
-    const p = target.body.translation();
-    const radius = 1.05;
-    let damage =
-      Math.hypot(p.x - position.x, p.y - position.y) <= radius + 0.35
-        ? shot.team === "player"
-          ? 2 + (this.options.stats?.eggBombDamageBonus ?? 0) + this.boost
-          : 1
-        : 0;
-    if (shot.team === "enemy" && damage) {
-      if (this.guard > 0) {
-        damage = 0;
-        this.guard--;
-      } else if (
-        (this.options.artifacts ?? []).includes("shell-shield") &&
-        !this.shellUsed
-      ) {
-        damage = 0;
-        this.shellUsed = true;
-      }
-    }
-    target.health = Math.max(0, target.health - damage);
-    if (damage) target.hitAt = this.time;
-    if (shot.team === "player") this.boost = 0;
-    this.events.push({
-      type: "impact",
-      x: position.x,
-      y: position.y,
-      damage,
-      team: shot.team,
-      target: target.team,
-      id: shot.id,
-    });
-    this.world.removeRigidBody(shot.body);
-    this.projectile = null;
-    if (this.enemy.health <= 0 || this.player.health <= 0) {
-      this.outcome = this.enemy.health <= 0 ? "won" : "lost";
-      this.nextPhase("finished");
-      this.events.push({ type: this.outcome });
-    } else this.nextPhase(shot.team === "player" ? "enemy-tell" : "settle");
+  impact(shot = this.projectile) {
+    if(!shot || this.resolvedExplosions.has(shot.id))return;
+    explode({id:shot.id,point:{x:shot.x,y:shot.y},radius:1.8,maxDamage:30,ownerId:shot.ownerId},this);
+    this.projectiles=this.projectiles.filter(p=>p.id!==shot.id);
+    this.projectile=this.projectiles[0]??null;
+    if(shot.team==='player')this.boost=0;
+    const outcome=this.player.health<=0?'lost':this.enemies.every(a=>a.health<=0)?'won':null;
+    if(outcome){this.outcome=outcome;this.nextPhase('finished');this.events.push({type:outcome});}
+    else if(!this.projectiles.length)this.nextPhase(shot.team==='player'?'enemy-tell':'settle');
   }
   trajectory() {
-    if (this.disposed) return [];
-    const origin = this.origin();
-    const key = `${origin.x.toFixed(2)}:${origin.y.toFixed(2)}:${this.angle}:${this.power}:${this.facing}`;
-    if (this.trajectoryCache?.key === key) return this.trajectoryCache.points;
-    // Use a small isolated Rapier world, not a different analytical approximation.
-    const w = new R.World({ x: 0, y: GRAVITY, z: 0 });
-    w.timestep = STEP;
-    const q = new R.EventQueue(true);
-    addTerrain(R, w, this.arena);
-    const enemy = this.enemy.body.translation();
-    w.createCollider(
-      R.ColliderDesc.cuboid(0.32, 0.55, 0.32).setTranslation(
-        enemy.x,
-        enemy.y,
-        0,
-      ),
-    );
-    const body = w.createRigidBody(
-      R.RigidBodyDesc.dynamic()
-        .setTranslation(origin.x, origin.y, 0)
-        .setCcdEnabled(true),
-    );
-    w.createCollider(
-      R.ColliderDesc.ball(0.14)
-        .setRestitution(0)
-        .setActiveEvents(R.ActiveEvents.COLLISION_EVENTS),
-      body,
-    );
-    body.setLinvel(launchVelocity(this.angle, this.power, this.facing), true);
-    const points = [{ ...origin }];
-    try {
-      for (let i = 0; i < 180; i++) {
-        w.step(q);
-        let hit = false;
-        q.drainCollisionEvents((a, b, started) => {
-          if (started) hit = true;
-        });
-        const p = body.translation();
-        points.push({ x: p.x, y: p.y, z: 0 });
-        if (hit || p.y < -1 || Math.abs(p.x) > 8) break;
-      }
-    } finally {
-      q.free();
-      w.free();
-    }
-    this.trajectoryCache = { key, points };
-    return points;
+    if(this.disposed)return [];
+    const origin=this.origin();
+    const key=JSON.stringify([origin,this.angle,this.power,this.terrain?.revision,
+      this.actors.map(a=>a.body.translation())]);
+    if(this.trajectoryCache?.key===key)return this.trajectoryCache.points;
+    const points=predictTrajectory({origin,angleDeg:this.angle,power:this.power,castSegment:this.castSegment,ownerId:this.player.id});
+    this.trajectoryCache={key,points};return points;
   }
   snapshot() {
     const read = (a) => ({
@@ -378,13 +291,11 @@ class BattleSimulation {
       facing: this.facing,
       guard: this.guard,
       boost: this.boost,
-      projectile: this.projectile
-        ? {
-            id: this.projectile.id,
-            team: this.projectile.team,
-            ...this.projectile.body.translation(),
-          }
-        : null,
+      projectiles:this.projectiles.map(p=>({...p})),
+      projectile:this.projectile?{...this.projectile}:null,
+      inventory:structuredClone(this.inventory),
+      selectedWeaponId:this.selectedWeaponId,
+      aim:{angleDeg:this.angle,power:this.power},
       outcome: this.outcome,
     };
   }
