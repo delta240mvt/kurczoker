@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useMemo } from "react";
+import {createInputRouter,bindInput} from './input.js';
 import { ABILITY_COPY } from "./copy.js";
 export function Controls({
   sim,
@@ -12,60 +13,12 @@ export function Controls({
 }) {
   const callbacks = useRef({ fire, onPause, paused });
   callbacks.current = { fire, onPause, paused };
-  useEffect(() => {
-    const keys = new Set();
-    function move() {
-      sim.move(
-        (keys.has("KeyD") || keys.has("ArrowRight") ? 1 : 0) -
-          (keys.has("KeyA") || keys.has("ArrowLeft") ? 1 : 0),
-      );
-    }
-    function down(e) {
-      if (e.code === "Escape") {
-        e.preventDefault();
-        if (!e.repeat) callbacks.current.onPause();
-        return;
-      }
-      if (/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
-      if (
-        ![
-          "KeyA",
-          "KeyD",
-          "ArrowLeft",
-          "ArrowRight",
-          "KeyW",
-          "ArrowUp",
-          "Space",
-          "Enter",
-        ].includes(e.code)
-      )
-        return;
-      e.preventDefault();
-      if (callbacks.current.paused) return;
-      keys.add(e.code);
-      move();
-      if (["KeyW", "ArrowUp"].includes(e.code) && !e.repeat) sim.jump();
-      if (["Space", "Enter"].includes(e.code) && !e.repeat)
-        callbacks.current.fire();
-    }
-    function up(e) {
-      keys.delete(e.code);
-      move();
-    }
-    function clear() {
-      keys.clear();
-      sim.move(0);
-    }
-    window.addEventListener("keydown", down);
-    window.addEventListener("keyup", up);
-    window.addEventListener("blur", clear);
-    return () => {
-      clear();
-      window.removeEventListener("keydown", down);
-      window.removeEventListener("keyup", up);
-      window.removeEventListener("blur", clear);
-    };
-  }, [sim]);
+  const router=useMemo(()=>createInputRouter(command=>sim.dispatch(command)),[sim]);
+  useEffect(()=>bindInput({router,onPause:()=>callbacks.current.onPause(),onRope:()=>{
+    if(sim.rope.attached)sim.dispatch({type:'rope.release'});
+    else router.setMode('rope');
+  }}),[sim,router]);
+  useEffect(()=>router.setMode(paused||snapshot?.phase!=='player'?'menu':'move'),[paused,snapshot?.phase,router]);
   const active = snapshot?.phase === "player" && !snapshot.paused && !paused;
   const moveButton = (direction, label) => (
     <button
@@ -75,11 +28,11 @@ export function Controls({
       onPointerDown={(e) => {
         e.preventDefault();
         e.currentTarget.setPointerCapture(e.pointerId);
-        sim.move(direction);
+        router.press('pointer:'+e.pointerId,direction<0?'left':'right');
       }}
-      onPointerUp={() => sim.move(0)}
-      onPointerCancel={() => sim.move(0)}
-      onLostPointerCapture={() => sim.move(0)}
+      onPointerUp={e => router.release('pointer:'+e.pointerId)}
+      onPointerCancel={() => router.clear()}
+      onLostPointerCapture={e => router.release('pointer:'+e.pointerId)}
     >
       {direction < 0 ? "←" : "→"}
     </button>
@@ -147,11 +100,14 @@ export function Controls({
           className="move-button"
           aria-label="Skok"
           disabled={!active}
-          onClick={() => sim.jump()}
+          onPointerDown={e=>{e.preventDefault();e.currentTarget.setPointerCapture(e.pointerId);router.press('pointer:'+e.pointerId,'jump');}}
+          onPointerUp={e=>router.release('pointer:'+e.pointerId)}
+          onPointerCancel={()=>router.clear()}
+          onLostPointerCapture={e=>router.release('pointer:'+e.pointerId)}
         >
           ↑
         </button>
-        <span className="key-hint">A / D · W</span>
+        <span className="key-hint">A / D · SPACJA</span>
       </div>
       <button
         className="primary fire-button"
@@ -161,7 +117,7 @@ export function Controls({
       >
         <span>{ABILITY_COPY[selected]?.icon}</span>
         {ABILITY_COPY[selected]?.action}
-        <small>SPACJA / ENTER</small>
+        <small>ATAK KOŃCZY TURĘ</small>
       </button>
     </section>
   );

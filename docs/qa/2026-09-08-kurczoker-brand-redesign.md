@@ -74,3 +74,10 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - GREEN: 9 testów tur i balistyki PASS; 6 istniejących testów tactical-simulation również PASS po integracji.
 - Dowolny czas namysłu, telegraph 0.7 s, ograniczony ruch, jeden fizyczny atak każdego żywego przeciwnika i nowa tura.
 - Sprawdzone pomijanie trupa w kolejce, pauza telegraphu, odnowienie narzędzia, tura wiszącego na lassie bohatera i jeden wynik lost przy jednoczesnej śmierci.
+
+## Task 10 — sterowanie równoczesne
+
+- RED: brak input routera. GREEN: 3 testy PASS.
+- Osobne identyfikatory klawiatury i dotyku; skok nie zwalnia biegu. Żaden pointer release ani klawisz ruchu nie wywołuje ataku.
+- Menu, utrata okna, widoczność i obrót czyszczą ruch/zwijanie; cleanup usuwa listenery. Formularze i repeat nie uruchamiają akcji.
+- Podłączono również przejściowy Controls; test fizycznego multi-touch i nowego HUD odbędzie się w zadaniu 12.

@@ -467,7 +467,7 @@ if(state.outcome) state.phase='finished';
 
 **Interfaces:** `createInputRouter(emit):{press(id,action),release(id),clear(),setMode(mode),mode()}`; action `left|right|jump|reel-in|reel-out`. Identyfikatory pointerId i code klawiatury są osobne. Mode `move|aim|rope|tool|overview|menu`. Akcja attack jest wyłącznie kliknięciem jawnego przycisku, nie release pointera.
 
-- [ ] Test:
+- [x] Test:
 
 ```js
 import test from 'node:test';
@@ -482,8 +482,8 @@ test('puszczenie skoku nie puszcza trzymanego ruchu i nie strzela',()=>{
 });
 ```
 
-- [ ] `node --test test/brand-input.test.js` → RED.
-- [ ] Trzymaj Map aktywnych pointerów; policz kierunek ze zbioru zamiast zerować ruch przy każdym release. `release` publikuje aktualny kierunek, nawet jeśli zmienił się tylko skok; `clear` wysyła najpierw zero zwijania, potem zero ruchu. Podłącz blur, visibilitychange, pointercancel, lostpointercapture i zmianę orientacji.
+- [x] `node --test test/brand-input.test.js` → RED.
+- [x] Trzymaj Map aktywnych pointerów; policz kierunek ze zbioru zamiast zerować ruch przy każdym release. `release` publikuje aktualny kierunek, nawet jeśli zmienił się tylko skok; `clear` wysyła najpierw zero zwijania, potem zero ruchu. Podłącz blur, visibilitychange, pointercancel, lostpointercapture i zmianę orientacji.
 
 ```jsx
 <button aria-label="Skok" onPointerDown={e=>{
@@ -493,8 +493,8 @@ test('puszczenie skoku nie puszcza trzymanego ruchu i nie strzela',()=>{
  onPointerCancel={()=>router.clear()}>Skok</button>
 ```
 
-- [ ] Ustaw Space=jump, R=lasso/puszczenie, A/D i strzałki=ruch, W/S=długość; ignoruj editable/repeat dla jednorazowych akcji. Test kombinacji klawiatura+dotyk, menu i usunięcia event listenerów PASS.
-- [ ] Commit: `feat: support simultaneous mobile movement and actions`.
+- [x] Ustaw Space=jump, R=lasso/puszczenie, A/D i strzałki=ruch, W/S=długość; ignoruj editable/repeat dla jednorazowych akcji. Test kombinacji klawiatura+dotyk, menu i usunięcia event listenerów PASS.
+- [x] Commit: `feat: support simultaneous mobile movement and actions`.
 
 ## Task 11 (M1): Kamera śledząca i przegląd szerokiej areny
 
