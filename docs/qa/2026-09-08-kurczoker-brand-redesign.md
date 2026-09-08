@@ -38,3 +38,10 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - GREEN: 4 testy upadków oraz 3 regresje kontrolera PASS.
 - Koszt 20% maksymalnego HP dotyczy obu stron i jest naliczany raz. Brak zdrowia lub jakiegokolwiek poprawnego miejsca kończy życie postaci.
 - Powrót sprawdza aktualny materiał pod stopami, wolną przestrzeń na ciało i zajęcie przez inne postacie. Nie korzysta ze zniszczonej półki.
+
+## Task 05 — fizyczne lasso
+
+- RED: 3 testy wykazały brak zaczepiania i stanu liny.
+- GREEN: 3 testy lassa PASS, na dynamicznym ciele Rapiera i natywnym rope joint.
+- Zwijanie rzeczywiście unosi bohatera; puszczenie zachowuje obie składowe prędkości. Sprawdzone granice długości 1.2–18, przesłonięty/pusty/odległy/niepoprawny zaczep i brak przenikania przez belkę.
+- Długość jointa zmieniana przez odtworzenie constraintu, ponieważ RopeImpulseJoint w zainstalowanym API nie udostępnia setLimits. Nie przestawiamy pozycji bohatera w celu naciągnięcia liny.

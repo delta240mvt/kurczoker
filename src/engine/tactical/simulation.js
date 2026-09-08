@@ -9,6 +9,7 @@ import { clamp, launchVelocity } from "./ballistics.js";
 import {createCharacter,findSafeReturn,isSafePosition} from './character.js';
 import {createTerrain} from './terrain/mask.js';
 import {syncTerrainColliders} from './terrain/collisions.js';
+import {createRope} from './rope.js';
 
 let initialization;
 export async function createBattleSimulation(options = {}) {
@@ -37,6 +38,7 @@ class BattleSimulation {
       health:spawn.health??(options.map?45:hp),maxHealth:spawn.maxHealth??(options.map?45:hp)}));
     this.enemy=this.enemies[0];
     this.actors=[this.player,...this.enemies];
+    this.rope=createRope({world:this.world,playerBody:this.player.body,terrain:this.terrain});
     this.phase = "player";
     this.turn = 1;
     this.time = 0;
@@ -67,6 +69,9 @@ class BattleSimulation {
       this.move(command.direction);return {accepted:true};
     }
     if(command.type==='jump') return {accepted:this.jump()};
+    if(command.type==='rope.attach') return this.rope.attach(command.point);
+    if(command.type==='rope.reel') return this.rope.reel(command.rate);
+    if(command.type==='rope.release') {this.rope.release();return {accepted:true};}
     return {accepted:false,reason:'invalid'};
   }
   canAct() {
@@ -91,6 +96,7 @@ class BattleSimulation {
     if (!this.disposed) {
       this.paused = !!value;
       this.direction = 0;
+      this.rope?.reel(0);
       this.accumulator = 0;
     }
   }
@@ -185,6 +191,7 @@ class BattleSimulation {
         : 0,
     );
     this.enemies.forEach(a=>this.stepActor(a,0));
+    this.rope.step(STEP);
     this.world.step(this.queue);
     this.actors.forEach(a=>a.updateGrounded());
     this.resolveFalls();
@@ -356,6 +363,7 @@ class BattleSimulation {
       schemaVersion:2,
       actors:this.actors.map(a=>a.snapshot()),
       terrain:this.terrain?.snapshot()??null,
+      rope:this.rope.snapshot(),
       phase: this.phase,
       turn: this.turn,
       time: this.time,
@@ -384,6 +392,7 @@ class BattleSimulation {
   dispose() {
     if (this.disposed) return;
     this.disposed = true;
+    this.rope.release();
     this.queue.free();
     this.world.free();
     this.events.length = 0;

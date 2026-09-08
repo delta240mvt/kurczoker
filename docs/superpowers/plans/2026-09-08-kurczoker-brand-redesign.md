@@ -281,7 +281,7 @@ actor.health = Math.max(0, actor.health - Math.ceil(actor.maxHealth * .2));
 
 **Interfaces:** `createRope({world,playerBody,terrain}):Rope`; `.attach(point):Receipt`, `.release():void`, `.reel(rate):void`, `.step(dt):void`, `.snapshot():RopeState`. Runtime obsługuje komendy `rope.*`. Początkowy zasięg 18 jednostek, długość min1.2/max18; prędkość zwijania4 jednostki/s.
 
-- [ ] Testuj realną mapę z belką nad bohaterem:
+- [x] Testuj realną mapę z belką nad bohaterem:
 
 ```js
 import test from 'node:test';
@@ -304,15 +304,15 @@ test('lina kotwiczy na belce i puszcza bez wyzerowania pędu',async()=>{
 });
 ```
 
-- [ ] `node --test test/brand-rope.test.js` → RED.
-- [ ] Raycastuj od bohatera do celu; przyjmij tylko pierwszą trafioną powierzchnię w tolerancji punktu. Ograniczenie długości działa na dynamiczne ciało, bez `setTranslation` przez ściany. Dobierz rope joint dostępny w lockfile lub własny impuls ograniczający prędkość radialną, używając kolizji Rapiera. Zwijanie:
+- [x] `node --test test/brand-rope.test.js` → RED.
+- [x] Raycastuj od bohatera do celu; przyjmij tylko pierwszą trafioną powierzchnię w tolerancji punktu. Ograniczenie długości działa na dynamiczne ciało, bez `setTranslation` przez ściany. Dobierz rope joint dostępny w lockfile lub własny impuls ograniczający prędkość radialną, używając kolizji Rapiera. Zwijanie:
 
 ```js
 rope.length = Math.max(1.2,Math.min(18,rope.length + rope.reelRate*4*dt));
 ```
 
-- [ ] Sprawdź odmowę pustego/przesłoniętego/odległego zaczepu, brak amunicji, stabilne naprężenie, brak teleportacji przy skracaniu; test PASS.
-- [ ] Commit: `feat: add physical grapple movement and release`.
+- [x] Sprawdź odmowę pustego/przesłoniętego/odległego zaczepu, brak amunicji, stabilne naprężenie, brak teleportacji przy skracaniu; test PASS.
+- [x] Commit: `feat: add physical grapple movement and release`.
 
 ## Task 06 (M1): Lina na narożnikach i zniszczony zaczep
 
