@@ -26,8 +26,9 @@ export function explode({id,point,radius,maxDamage,ownerId},battle) {
     }
     if(damage)hits.push({actor,damage,direction});
   }
-  for(const {actor,damage,direction} of hits) {
-    damageActor(actor,damage,{x:direction.x*damage*.025,y:Math.max(.2,direction.y)*damage*.025,z:0},battle);
+  for(const hit of hits) {
+    const {actor,damage,direction}=hit;
+    hit.damage=damageActor(actor,damage,{x:direction.x*damage*.025,y:Math.max(.2,direction.y)*damage*.025,z:0},battle);
   }
   if(battle.terrain) {
     const chunkIds=battle.terrain.cutCircle({...point,radius});
@@ -87,6 +88,7 @@ export function useTool(command,battle) {
 }
 
 function damageActor(actor,damage,impulse,battle) {
+ if(damage>0&&actor.guardAvailable){damage=Math.ceil(damage/2);actor.guardAvailable=false;}
  const actual=Math.min(actor.health,damage);actor.health-=actual;actor.hitAt=battle.time;
  if(actor.health<=0)actor.body.setEnabled(false);else actor.body.applyImpulse(impulse,true);
  return actual;

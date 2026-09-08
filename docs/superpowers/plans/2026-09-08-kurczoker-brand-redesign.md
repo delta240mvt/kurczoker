@@ -728,7 +728,7 @@ test('szybki tryb ma pełny arsenał i niezależne zapasy',()=>{
 
 **Interfaces:** `createExpedition(seed):Expedition`; `chooseRoute(game,routeId):Expedition`; `startEncounter(game):{game,options:BattleOptions}`; `finishEncounter(game,result):Expedition`. Result `{encounterId,outcome,health,inventory,upgrades,battleStart}`. Expedition `{schemaVersion:2,runId,seed,rngState,scene,stage:0..3,health,maxHealth,grain,inventory,upgrades,routes,selectedRouteId,encounterId,battleStart,completedEncounterIds,rewardChoices,offers,secondChanceUsed,status}`; scenes `map|battle|reward|shop|retry|result`, status `active|won|lost`.
 
-- [ ] Test liczby etapów i odrzucenia obcego wyniku:
+- [x] Test liczby etapów i odrzucenia obcego wyniku:
 
 ```js
 import test from 'node:test';
@@ -744,8 +744,8 @@ test('nowa wyprawa zaczyna się skromnie i ignoruje obcy wynik',()=>{
 });
 ```
 
-- [ ] `node --test test/brand-expedition.test.js` → RED.
-- [ ] Przebieg map/yard→reward→routes→battle→reward→shop→battle→reward→shop→boss→result. `stage` zwiększaj dopiero przy zatwierdzonym przejściu do kolejnej walki, nie przy każdej nagrodzie. Pierwsza trasa wskazuje yard i jest wybrana domyślnie. PRNG z task01 zapisywany w stanie:
+- [x] `node --test test/brand-expedition.test.js` → RED.
+- [x] Przebieg map/yard→reward→routes→battle→reward→shop→battle→reward→shop→boss→result. `stage` zwiększaj dopiero przy zatwierdzonym przejściu do kolejnej walki, nie przy każdej nagrodzie. Pierwsza trasa wskazuje yard i jest wybrana domyślnie. PRNG z task01 zapisywany w stanie:
 
 ```js
 import {nextRandom} from '../engine/tactical/config.js';
@@ -754,8 +754,8 @@ const nextGame={...game,rngState:roll.state};
 // Wybór z jawnej listy kandydatów: Math.floor(roll.value*candidates.length).
 ```
 
-- [ ] Odrzucaj wynik dla niewłaściwej sceny, encounterId już completed lub niezgodnego aktywnego encounter. Przekazuj rzeczywiste HP/inventory do następnej walki. Testuj dokładnie4 encounters, ostatni boss, powtórzony event bez ponownego łupu oraz wybór wyłącznie dostępnej trasy.
-- [ ] Test expedition PASS; commit `feat: model the four-encounter expedition flow`.
+- [x] Odrzucaj wynik dla niewłaściwej sceny, encounterId już completed lub niezgodnego aktywnego encounter. Przekazuj rzeczywiste HP/inventory do następnej walki. Testuj dokładnie4 encounters, ostatni boss, powtórzony event bez ponownego łupu oraz wybór wyłącznie dostępnej trasy.
+- [x] Test expedition PASS; commit `feat: model the four-encounter expedition flow`.
 
 ## Task 18 (M3): Nagrody, ulepszenia i sklep
 
@@ -763,7 +763,7 @@ const nextGame={...game,rngState:roll.state};
 
 **Interfaces:** `rewardChoices(game):Reward[]`, `applyReward(game,rewardId):Expedition`, `shopOffers(game):Offer[]`, `buyOffer(game,offerId):Expedition`, `leaveShop(game):Expedition`. Reward `{id,label,description,kind,weaponId?,amount?}`; Offer dodaje `{price,purchased}`. Ulepszenia ID `shell`,`boots`,`toolbelt`; wartości shell 50% pierwszego trafienia, boots koszt upadku10% zamiast20%, toolbelt +1 obu narzędzi przy zdobyciu.
 
-- [ ] Test realnej oferty i braku ujemnej waluty:
+- [x] Test realnej oferty i braku ujemnej waluty:
 
 ```js
 import test from 'node:test';
@@ -780,8 +780,8 @@ test('leczenie jest atomowe, ograniczone do maxHP i nie kupuje się dwukrotnie',
 });
 ```
 
-- [ ] `node --test test/brand-economy.test.js` → RED.
-- [ ] Pierwszy łup gwarantuje Granajko3 i wybór narzędzia1. Później trzy różne role nagrody. Zastępuj posiadane unikalne ulepszenie amunicją/lekiem, nowej broni dodaj zapas. Zakup sprawdza ofertę w bieżącym stanie, nie cenę z payloadu:
+- [x] `node --test test/brand-economy.test.js` → RED.
+- [x] Pierwszy łup gwarantuje Granajko3 i wybór narzędzia1. Później trzy różne role nagrody. Zastępuj posiadane unikalne ulepszenie amunicją/lekiem, nowej broni dodaj zapas. Zakup sprawdza ofertę w bieżącym stanie, nie cenę z payloadu:
 
 ```js
 const offer=game.offers.find(o=>o.id===offerId);
@@ -790,8 +790,8 @@ const paid={...game,grain:game.grain-offer.price,
  offers:game.offers.map(o=>o.id===offerId?{...o,purchased:true}:o)};
 ```
 
-- [ ] UI pokazuje stan przed/po i przyczynę blokady. Do runtime dodaj reset osłony na początku encounter i konsumowanie tylko pierwszego faktycznego trafienia; boots działa identycznie po wznowieniu. Testy duplikatów, ammo>0 nowej broni, ponownego kliknięcia i braku pieniędzy PASS.
-- [ ] Commit: `feat: add meaningful expedition rewards and purchases`.
+- [x] UI pokazuje stan przed/po i przyczynę blokady. Do runtime dodaj reset osłony na początku encounter i konsumowanie tylko pierwszego faktycznego trafienia; boots działa identycznie po wznowieniu. Testy duplikatów, ammo>0 nowej broni, ponownego kliknięcia i braku pieniędzy PASS.
+- [x] Commit: `feat: add meaningful expedition rewards and purchases`.
 
 ## Task 19 (M3): Jajokról z zapowiedziami i finałem
 

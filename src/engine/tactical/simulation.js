@@ -37,6 +37,7 @@ class BattleSimulation {
     const playerSpawn=this.arena.spawns?.find(s=>s.team==='player') ?? {id:'player',team:'player',role:'hero',x:-4.5,y:.57};
     this.player=createCharacter({R,world:this.world,spawn:playerSpawn,
       health:options.player?.health??options.health??3,maxHealth:options.player?.maxHealth??options.maxHealth??3});
+    this.player.guardAvailable=(options.player?.upgrades??[]).includes('shell');
     const hp = options.type === "boss" ? 8 : options.type === "elite" ? 4 : 2;
     const enemySpawns=options.enemies?.map(e=>({...e,team:'enemy'})) ?? this.arena.spawns?.filter(s=>s.team==='enemy') ?? [{id:'enemy-1',team:'enemy',role:'shooter',x:3.5,y:.57}];
     this.enemies=enemySpawns.map(spawn=>createCharacter({R,world:this.world,spawn,
@@ -293,7 +294,7 @@ class BattleSimulation {
         actor.lastSafe={x:position.x,y:position.y};
       }
       if(position.y>=-2 && position.x>=-2 && position.x<=this.arena.width+2) continue;
-      actor.health=Math.max(0,actor.health-Math.ceil(actor.maxHealth*.2));
+      actor.health=Math.max(0,actor.health-Math.ceil(actor.maxHealth*(actor===this.player&&(this.options.player?.upgrades??[]).includes('boots')?.1:.2)));
       this.events.push({id:`fall-${this.time}-${actor.id}`,type:'fall',time:this.time,payload:{actorId:actor.id,health:actor.health}});
       const point=findSafeReturn({terrain:this.terrain,safeZones:this.arena.safeZones,lastSafe:actor.lastSafe,
         actors:this.actors.filter(a=>a!==actor).map(a=>a.snapshot())});

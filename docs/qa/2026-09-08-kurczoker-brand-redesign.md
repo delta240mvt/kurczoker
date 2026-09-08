@@ -135,3 +135,13 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 
 - Artefakty: .superpowers/brand-m2-release-tests.log, brand-m2-release-build.log, brand-m2-verified-browser.log, brand-m2-final-browser.log, brand-all-traversal-tests-4.log; makeover-qa/map-*.png i quick-select-phone.png. Obrazy wszystkich dziewięciu topografii obejrzane. Funkcjonalne testy telefonu używają prawdziwych zdarzeń dotyku w emulowanym Chromium/SwiftShader; nie są pomiarem realnego urządzenia.
 - Osobna pełna wygrana na każdej mapie i pomiary tempa/osiągów pozostają częścią końcowego odbioru task25. Najwyższe opcjonalne rusztowanie młyna wymaga jeszcze przeglądu w tym odbiorze.
+
+## Task 17–18 — przebieg i ekonomia wyprawy
+
+- Czysty reducer utrzymuje cztery walki, stabilne encounterId, trasy i przenoszenie HP/zapasów. Obcy/powtórzony wynik jest ignorowany; pierwsza porażka prowadzi do drugiej szansy, kolejna do końca wyprawy. Właściwe wznowienie powstaje w task20.
+- Pierwsza nagroda daje Granajko3 i wybrane narzędzie. Kolejne wybory oferują broń z zapasem, jedno z trzech osiągalnych ulepszeń i leczenie/narzędzie. Sklep ma atomowe zakupy bez ujemnej waluty i ponownego zakupu tej samej oferty.
+- Pancerz łagodzi pierwsze faktyczne trafienie o połowę; efekt0 nie zużywa osłony. Zdarzenie podaje faktycznie stracone HP. Buty zmniejszają koszt upadku do10%, pas daje po jednym narzędziu.
+- RED: brak reducerów; po dodaniu reguł ekonomii osobne RED działania pancerza/butów. Dodatkowy test wykrył nieosiągalne ulepszenia przy stałej kolejności ofert — wybór jest teraz deterministyczny z seeda spośród nieposiadanych.
+- GREEN:23/23 testów ekonomii, wyprawy i arsenału; parser JSX RewardPanel/ShopPanel PASS. Cztery pełne przejścia domenowe, odrzucanie duplikatów i brak zmiany wejściowego stanu sprawdzone.
+- Ekrany łupu/sklepu są gotowe do podłączenia w task21; nie są jeszcze aktywnym trybem aplikacji. Test całej wyprawy przez UI, czas10–15min i odświeżenie pozostają task21/25.
+- Artefakty: .superpowers/brand-expedition-red.log, brand-economy-runtime-red.log, brand-upgrades-red.log, brand-economy-final-tests.log. Task17–18 zapisane razem, ponieważ wynik walki generuje bezpośrednio ofertę nagrody.
