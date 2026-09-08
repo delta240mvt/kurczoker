@@ -108,8 +108,8 @@ Identyfikatory broni: `jajooka`, `granajko`, `shotgun`, `kick`, `mine`, `cluster
 
 **Interfaces:** `createTerrain(map):Terrain`; Terrain `.materialAt(x,y):number`, `.cutCircle({x,y,radius}):number[]`, `.cutRect({x,y,width,height}):number[]`, `.snapshot():{revision,columns,rows,cells:number[],cellSize}`. Zwracane tablice to ID zmienionych fragmentów. Test helper `fixtureMap(overrides={})` zwraca płaską mapę 20×12, cellSize .125, chunkCells 32, ziemia `{x:0,y:0,width:20,height:2}`, odporny pas pod nią do y=.25, spawny (2,2.7)/(16,2.7), safe zone x1..3 przy y2.
 
-- [ ] Sprawdź `git status`, branch, `node --version`; jeśli brakuje runtime, użyj narzędzia bundled workspace dependencies. Uruchom `npm ci`, `npm test`, `npm run build`; zapisz rzeczywisty baseline w raporcie QA. Nie aktualizuj zależności bez potrzeby.
-- [ ] Dodaj test zachowania:
+- [x] Sprawdź `git status`, branch, `node --version`; jeśli brakuje runtime, użyj narzędzia bundled workspace dependencies. Uruchom `npm ci`, `npm test`, `npm run build`; zapisz rzeczywisty baseline w raporcie QA. Nie aktualizuj zależności bez potrzeby.
+- [x] Dodaj test zachowania:
 
 ```js
 import test from 'node:test';
@@ -127,8 +127,8 @@ test('krater usuwa ziemię, zachowuje fundament i podnosi rewizję raz', () => {
 });
 ```
 
-- [ ] Uruchom `node --test test/brand-terrain.test.js` i zobacz RED.
-- [ ] Zaimplementuj płaską `Uint8Array`, rasteryzację prostokątów w kolejności i wycinanie tylko materiałów 1/2. Ogranicz zakres iteracji do bounding box operacji; przy braku zmiany nie zwiększaj rewizji. Rdzeń adresowania:
+- [x] Uruchom `node --test test/brand-terrain.test.js` i zobacz RED.
+- [x] Zaimplementuj płaską `Uint8Array`, rasteryzację prostokątów w kolejności i wycinanie tylko materiałów 1/2. Ogranicz zakres iteracji do bounding box operacji; przy braku zmiany nie zwiększaj rewizji. Rdzeń adresowania:
 
 ```js
 const column = Math.floor(x / cellSize);
@@ -138,8 +138,8 @@ const index = row * columns + column;
 if (cells[index] === 1 || cells[index] === 2) cells[index] = 0;
 ```
 
-- [ ] Dodaj przypadki tunelu, ujemnych współrzędnych, granicy fragmentu, pustej operacji i snapshotu niezależnego od mutacji. Uruchom test ponownie, oczekuj PASS.
-- [ ] W config.js dodaj wspólny PRNG używany przez pociski i wyprawę. Przechowuj zwracany stan, nie tylko seed; test tego samego ciągu dla tego samego stanu i innego kolejnego stanu:
+- [x] Dodaj przypadki tunelu, ujemnych współrzędnych, granicy fragmentu, pustej operacji i snapshotu niezależnego od mutacji. Uruchom test ponownie, oczekuj PASS.
+- [x] W config.js dodaj wspólny PRNG używany przez pociski i wyprawę. Przechowuj zwracany stan, nie tylko seed; test tego samego ciągu dla tego samego stanu i innego kolejnego stanu:
 
 ```js
 export function nextRandom(state){
@@ -148,7 +148,7 @@ export function nextRandom(state){
 }
 ```
 
-- [ ] Commit: `feat: model destructible material terrain`.
+- [x] Commit: `feat: model destructible material terrain`.
 
 ## Task 02 (M1): Jedna geometria dla obrazu i kolizji
 
