@@ -244,7 +244,7 @@ world.createCollider(R.ColliderDesc.capsule(.25,.3).setFriction(.7),body);
 
 **Interfaces:** `findSafeReturn({terrain,actors,safeZones,lastSafe,actorSize}):Vec2|null` w character.js; po powrocie zeruj prędkość, odczep linę, nalicz 20% maxHP raz na zdarzenie. Brak bezpiecznego punktu oznacza porażkę tej postaci z eventem, nie teleport do ściany.
 
-- [ ] Test w `brand-falls.test.js` używa fixture z dwoma wyspami i spawnu nad szczeliną:
+- [x] Test w `brand-falls.test.js` używa fixture z dwoma wyspami i spawnu nad szczeliną:
 
 ```js
 import test from 'node:test';
@@ -264,16 +264,16 @@ test('wpadnięcie w szczelinę kosztuje HP raz i przywraca wolne miejsce', async
 });
 ```
 
-- [ ] `node --test test/brand-falls.test.js` → RED.
-- [ ] Oceniaj strefy safe przez maskę i shape query; kolejność: poprawny lastSafe, najbliższy poprawny punkt strefy, null. Nalicz:
+- [x] `node --test test/brand-falls.test.js` → RED.
+- [x] Oceniaj strefy safe przez maskę i shape query; kolejność: poprawny lastSafe, najbliższy poprawny punkt strefy, null. Nalicz:
 
 ```js
 actor.health = Math.max(0, actor.health - Math.ceil(actor.maxHealth * .2));
 // Dopiero po wykryciu przejścia poza dolną granicę; nie co klatkę pobytu pod nią.
 ```
 
-- [ ] Dodaj przypadki śmierci przy niskim HP, zniszczonego lastSafe i takiej samej reguły dla wroga; test PASS.
-- [ ] Commit: `feat: resolve arena falls without unsafe respawns`.
+- [x] Dodaj przypadki śmierci przy niskim HP, zniszczonego lastSafe i takiej samej reguły dla wroga; test PASS.
+- [x] Commit: `feat: resolve arena falls without unsafe respawns`.
 
 ## Task 05 (M1): Zaczep lassa, huśtanie i puszczenie
 

@@ -6,7 +6,7 @@ import {
   addTerrain,
 } from "./arena.js";
 import { clamp, launchVelocity } from "./ballistics.js";
-import {createCharacter} from './character.js';
+import {createCharacter,findSafeReturn,isSafePosition} from './character.js';
 import {createTerrain} from './terrain/mask.js';
 import {syncTerrainColliders} from './terrain/collisions.js';
 
@@ -187,6 +187,7 @@ class BattleSimulation {
     this.enemies.forEach(a=>this.stepActor(a,0));
     this.world.step(this.queue);
     this.actors.forEach(a=>a.updateGrounded());
+    this.resolveFalls();
     let collided = false;
     this.queue.drainCollisionEvents((a, b, started) => {
       if (
@@ -221,6 +222,32 @@ class BattleSimulation {
   }
   stepActor(actor, vx) {
     actor.step({direction:Math.sign(vx),speed:Math.abs(vx)||4},STEP);
+  }
+  resolveFalls() {
+    if(!this.terrain) return;
+    for(const actor of this.actors) {
+      if(actor.health<=0) continue;
+      const position=actor.body.translation();
+      if(actor.grounded && isSafePosition({point:position,terrain:this.terrain})) {
+        actor.lastSafe={x:position.x,y:position.y};
+      }
+      if(position.y>=-2 && position.x>=-2 && position.x<=this.arena.width+2) continue;
+      actor.health=Math.max(0,actor.health-Math.ceil(actor.maxHealth*.2));
+      this.events.push({id:`fall-${this.time}-${actor.id}`,type:'fall',time:this.time,payload:{actorId:actor.id,health:actor.health}});
+      const point=findSafeReturn({terrain:this.terrain,safeZones:this.arena.safeZones,lastSafe:actor.lastSafe,
+        actors:this.actors.filter(a=>a!==actor).map(a=>a.snapshot())});
+      if(!point) actor.health=0;
+      if(actor.health>0) {
+        actor.body.setTranslation({...point,z:0},true);
+        actor.body.setLinvel({x:0,y:0,z:0},true);
+        actor.grounded=false;
+      } else actor.body.setEnabled(false);
+      if(actor===this.player) {this.direction=0;this.rope?.release();}
+    }
+    const outcome=this.player.health<=0?'lost':this.enemies.every(a=>a.health<=0)?'won':null;
+    if(outcome && !this.outcome) {
+      this.outcome=outcome;this.nextPhase('finished');this.events.push({type:outcome});
+    }
   }
   impact() {
     const shot = this.projectile;

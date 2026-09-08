@@ -1,6 +1,32 @@
 export const ACTOR_RADIUS=.3;
 export const ACTOR_HALF_HEIGHT=.55;
 
+export function isSafePosition({point,terrain,actors=[],actorSize={radius:ACTOR_RADIUS,halfHeight:ACTOR_HALF_HEIGHT}}) {
+  const {x,y}=point,{radius,halfHeight}=actorSize;
+  if(![x,y].every(Number.isFinite)) return false;
+  if(!terrain.materialAt(x,y-halfHeight-.04)) return false;
+  for(const dx of [-radius,0,radius]) for(const dy of [-halfHeight+.08,0,halfHeight]) {
+    if(terrain.materialAt(x+dx,y+dy)) return false;
+  }
+  return !actors.some(a=>a.alive && Math.abs(a.x-x)<radius*2+.08 && Math.abs(a.y-y)<halfHeight*2+.08);
+}
+
+export function findSafeReturn({terrain,actors=[],safeZones,lastSafe,actorSize={radius:ACTOR_RADIUS,halfHeight:ACTOR_HALF_HEIGHT}}) {
+  const safe=point=>isSafePosition({point,terrain,actors,actorSize});
+  if(lastSafe && safe(lastSafe)) return {...lastSafe};
+  const candidates=[];
+  for(const zone of safeZones) {
+    for(let x=zone.x;x<=zone.x+zone.width;x+=.25) {
+      for(let ground=zone.y;ground<=zone.y+zone.height;ground+=.125) {
+        const point={x,y:ground+actorSize.halfHeight+.015};
+        if(safe(point)){candidates.push(point);break;}
+      }
+    }
+  }
+  if(lastSafe) candidates.sort((a,b)=>Math.hypot(a.x-lastSafe.x,a.y-lastSafe.y)-Math.hypot(b.x-lastSafe.x,b.y-lastSafe.y));
+  return candidates[0]??null;
+}
+
 export function createCharacter({R,world,spawn,health=100,maxHealth=100}) {
   const body=world.createRigidBody(R.RigidBodyDesc.dynamic()
     .setTranslation(spawn.x,spawn.y,0).setCcdEnabled(true));

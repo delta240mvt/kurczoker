@@ -31,3 +31,10 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - GREEN: 3 testy kontrolera oraz 6 istniejących testów tactical-simulation PASS.
 - Sprawdzone: rzeczywisty dynamic body, ruch, skok, brak drugiego skoku w powietrzu, sufit, cienka ściana, blokada osi Z, pauza, porównanie kroków 1/30 i 1/60, ponad 30 sekund decyzji bez zmiany tury, ograniczenie nadrabiania długiej klatki.
 - Zachowano przejściowe wywołania starego UI w tym samym runtime (bez drugiego silnika). Zastąpiono widoczny zegar tekstem „Bez pośpiechu”; usunięto TURN_SECONDS. Pełny nowy HUD pozostaje zadaniem 12.
+
+## Task 04 — upadki i bezpieczny powrót
+
+- RED: 4 testy wykazały brak kosztu upadku, porażki i walidacji powrotu.
+- GREEN: 4 testy upadków oraz 3 regresje kontrolera PASS.
+- Koszt 20% maksymalnego HP dotyczy obu stron i jest naliczany raz. Brak zdrowia lub jakiegokolwiek poprawnego miejsca kończy życie postaci.
+- Powrót sprawdza aktualny materiał pod stopami, wolną przestrzeń na ciało i zajęcie przez inne postacie. Nie korzysta ze zniszczonej półki.
