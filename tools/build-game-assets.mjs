@@ -3,13 +3,14 @@ import {ALL_EXTENSIONS} from '@gltf-transform/extensions';
 import {dedup,weld,meshopt,prune,join} from '@gltf-transform/functions';
 import {MeshoptEncoder,MeshoptDecoder} from 'meshoptimizer';
 import {GLTFExporter} from 'three/addons/exporters/GLTFExporter.js';
-import {mkdir,writeFile} from 'node:fs/promises';
+import {mkdir,writeFile,readFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {createBrandCharacter} from './create-brand-character.mjs';
 globalThis.FileReader=class{async readAsArrayBuffer(blob){this.result=await blob.arrayBuffer();this.onloadend?.()}};
 await MeshoptEncoder.ready;await MeshoptDecoder.ready;
 const io=new NodeIO().registerExtensions(ALL_EXTENSIONS).registerDependencies({'meshopt.encoder':MeshoptEncoder,'meshopt.decoder':MeshoptDecoder});
-const manifest={schemaVersion:2,assets:[],decoders:{meshopt:'bundled:three/addons/libs/meshopt_decoder.module.js',ktx2:null}};
+const previous=JSON.parse(await readFile('src/engine/tactical/releaseManifest.json','utf8'));
+const manifest={schemaVersion:2,assets:previous.assets.filter(a=>a.kind!=='model'),decoders:{meshopt:'bundled:three/addons/libs/meshopt_decoder.module.js',ktx2:null}};
 await mkdir('public/game/release',{recursive:true});
 for(const id of ['hero','shooter','grenadier','rusher','boss']){
  const {scene,animations}=createBrandCharacter(id);

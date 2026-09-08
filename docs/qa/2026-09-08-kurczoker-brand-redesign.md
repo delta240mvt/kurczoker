@@ -196,3 +196,12 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - Obejrzano oba zrzuty ustawień. Poprawiono kamerę w poziomie: cały kurczak jest widoczny nad panelem celowania także z HUD 125%.
 - Reduced motion wyłącza wstrząsy, obrót pocisków, smugę, rozszerzanie/obrót eksplozji, dodatkowe odłamki i miganie uzbrojonych min. Pozostają lot, ruch i czytelna informacja o obrażeniach.
 - Oryginalny motyw syntezowany lokalnie. AudioContext dopiero po interakcji; oddzielne kanały, pauza bez zaległych dźwięków, deduplikacja zdarzeń obejmuje identyfikator walki.
+
+
+## Task 24 — landing DELTA240MVT
+
+- Nowy landing: dwa bezpośrednie tryby, wznowienie poprawnego aktywnego zapisu, rzeczywisty klip WebM i poster z builda, dziewięć podglądów z danych map, zasady, autor, FAQ i aktualny opis zapisu lokalnego.
+- Typografia Inter Variable / IBM Plex Mono z lokalnych paczek Fontsource (OFL), paleta z DESIGN-MASTER. Wzorzec hero z lokalnego `strony-sprzedażowe/baza-wiedzy/hero-component-desktop.md`: obietnica, opis, CTA, dowód w postaci gry. Brak nowych integracji analitycznych.
+- RED: poprzedni landing nie zawierał zatwierdzonego H1 (`brand-landing-red.log`). PASS: build, `brand-landing-browser-final.log` (odtwarzanie filmu, obie ścieżki, 9 map, FAQ, brak canvas/GLB/Rapier przed grą, brak overflow 360px i 1440px). Kontrola w Codex IAB oraz zrzut całej strony 360px.
+- Lekki moduł wznowienia sprawdza checksum i walidację zapisu, bez importowania symulacji/Three. Szybkie mapy mają bezpośrednie parametry `map`.
+- Pełny test unit wykazał 237/239 PASS; dwa testy analityki wymagały migracji selektorów źródła po przeniesieniu stopki do komponentu i zmianie cudzysłowów. Zakres sprawdzenia zachowany.

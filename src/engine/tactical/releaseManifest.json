@@ -95,6 +95,22 @@
       ],
       "provenance": "Original procedural DELTA240MVT model and motion: tools/create-brand-character.mjs; generated-owned",
       "compression": "EXT_meshopt_compression; material colors; no raster textures"
+    },
+    {
+      "id": "demo",
+      "url": "/game/release/demo.c5cd3b333965.webm",
+      "bytes": 170691,
+      "sha256": "c5cd3b33396530474ec9af90bfaca945436c132885694afc802e6483a4e2c6d0",
+      "kind": "video",
+      "provenance": "Actual KURCZOKER gameplay captured from the production build using keyboard and game UI; tools/record-game-demo.mjs"
+    },
+    {
+      "id": "demo-poster",
+      "url": "/game/release/demo-poster.a1b13e9ea9e5.png",
+      "bytes": 42068,
+      "sha256": "a1b13e9ea9e5fc5ac55c734028dd35a8f3fed9f3bc9238ae1669c66f62a34e6f",
+      "kind": "image",
+      "provenance": "Actual KURCZOKER gameplay captured from the production build using keyboard and game UI; tools/record-game-demo.mjs"
     }
   ],
   "decoders": {

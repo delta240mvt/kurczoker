@@ -13,6 +13,7 @@ export async function serveBuild() {
     ".svg": "image/svg+xml",
     ".png": "image/png",
     ".webp": "image/webp",
+    ".webm": "video/webm",
     ".woff2": "font/woff2",
   };
   const server = createServer(async (req, res) => {

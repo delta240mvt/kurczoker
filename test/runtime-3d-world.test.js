@@ -14,7 +14,7 @@ test("release actors decode to real 3D geometry with idle, walk and attack anima
   const manifest = JSON.parse(
     await readFile("src/engine/tactical/releaseManifest.json", "utf8"),
   );
-  for (const entry of manifest.assets) {
+  for (const entry of manifest.assets.filter(a=>a.kind==='model')) {
     const bytes = await readFile(`public${entry.url}`);
     assert.equal(bytes.length, entry.bytes);
     assert.ok(bytes.length < 100_000);

@@ -976,7 +976,7 @@ audio.effectsGain.gain.setValueAtTime(settings.effectsVolume,audio.context.curre
 
 **Interfaces:** CTA `/gra?mode=quick` oraz `/gra?mode=expedition`; link wznowienia czyta tylko dostępność zapisu przez lekki moduł storage, nie ładuje Rapiera/Three. Rzeczywisty krótki klip z builda zapisany w `public/game/release/` i manifest, fallback obraz bez autoplay audio.
 
-- [ ] Browser test widocznych ścieżek:
+- [x] Browser test widocznych ścieżek:
 
 ```js
 import test from 'node:test';
@@ -995,8 +995,8 @@ test('landing prowadzi od razu do dwóch trybów',async()=>{
 });
 ```
 
-- [ ] Build + `node --test test/visual/brand-landing.test.js` → RED.
-- [ ] Zbuduj hero z zaakceptowanym copy i typografią:
+- [x] Build + `node --test test/visual/brand-landing.test.js` → RED.
+- [x] Zbuduj hero z zaakceptowanym copy i typografią:
 
 ```astro
 <section class="brand-hero" aria-labelledby="game-title">
@@ -1009,8 +1009,8 @@ test('landing prowadzi od razu do dwóch trybów',async()=>{
 </section>
 ```
 
-- [ ] Dalej prawdziwa demonstracja, krótkie zasady,9map, autor/link do projektów, FAQ i polityka opisująca faktyczny lokalny zapis. Korzystaj z materiałów marki i wzorców sprzedażowych, bez fikcyjnych opinii i nowej analityki. W hero nie montuj pełnego `KurczokerCanvas`.
-- [ ] Sprawdź brand tokens ze specyfikacji, overflow360px, keyboard/tab, czytelny tekst, brak assetów silnika w waterfall przed kliknięciem gry. Browser landing PASS; commit `feat: rebuild the landing around the Delta240MVT brand`.
+- [x] Dalej prawdziwa demonstracja, krótkie zasady,9map, autor/link do projektów, FAQ i polityka opisująca faktyczny lokalny zapis. Korzystaj z materiałów marki i wzorców sprzedażowych, bez fikcyjnych opinii i nowej analityki. W hero nie montuj pełnego `KurczokerCanvas`.
+- [x] Sprawdź brand tokens ze specyfikacji, overflow360px, keyboard/tab, czytelny tekst, brak assetów silnika w waterfall przed kliknięciem gry. Browser landing PASS; commit `feat: rebuild the landing around the Delta240MVT brand`.
 
 ## Task 25 (M4/M5): Całościowa regresja, pomiary i poprawki
 

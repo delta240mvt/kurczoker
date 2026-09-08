@@ -28,8 +28,8 @@ test("public pages include the shared Umami analytics component", async () => {
   for (const pagePath of pagePaths) {
     const page = await readFile(pagePath, "utf8");
 
-    assert.match(page, /import UmamiAnalytics from "\.\.\/components\/UmamiAnalytics\.astro"/);
-    assert.match(page, /<UmamiAnalytics \/>/);
+    assert.match(page, /import UmamiAnalytics from ['"]\.\.\/components\/UmamiAnalytics\.astro['"]/);
+    assert.match(page, /<UmamiAnalytics\s*\/>/);
   }
 });
 
@@ -49,9 +49,9 @@ test("privacy policy discloses Umami analytics data practices", async () => {
 });
 
 test("landing footer links to the privacy policy route", async () => {
-  const landingPage = await readFile("src/pages/index.astro", "utf8");
+  const landingPage = await readFile("src/components/KurczokerLanding.astro", "utf8");
   const normalizedLanding = withoutDiacritics(landingPage);
 
   assert.match(normalizedLanding, /href="\/polityka-prywatnosci"/);
-  assert.match(normalizedLanding, />Prywatnosc</);
+  assert.match(normalizedLanding, />Prywatnosc i zapis</);
 });
