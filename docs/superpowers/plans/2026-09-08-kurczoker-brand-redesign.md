@@ -1075,7 +1075,7 @@ node tools/deploy-pages.mjs --branch baza080926-makeover
 ```
 
 - [x] Zapisz zwrócony immutable preview URL; uruchom browser suite przeciw temu URL (testy muszą honorować istniejące `KURCZOKER_VISUAL_BASE_URL`) i przejdź oba tryby w Codexie. Sprawdź HTTPS, load models/decoder/audio, odświeżenie i checkpoint. Mierz transfer. Jeśli poprawka zmienia build, powtórz dotknięty odbiór na nowym preview. Preview7f03e3f9:19/19PASS, Codex desktop/pion/poziom, transfer1 836 354bajty.
-- [ ] Zapisz raport, commit `release: approve the tested Kurczoker redesign`; sprawdź clean tree i push gałęzi. Odczytaj aktualny remote main przed integracją:
+- [x] Zapisz raport, commit `release: approve the tested Kurczoker redesign`; sprawdź clean tree i push gałęzi. Odczytaj aktualny remote main przed integracją:
 
 ```powershell
 git fetch origin
@@ -1084,14 +1084,14 @@ git log --oneline HEAD..origin/main
 git push origin baza080926-makeover
 ```
 
-- [ ] Jeśli main jest przodkiem zatwierdzonego HEAD, fast-forward `git push origin HEAD:main` realizuje wcześniejsze zlecenie bez zmiany worktree. Jeśli main ma cudze zmiany, zintegruj je na bieżącej gałęzi bez force, rozwiąż konflikty i ponów odpowiednie testy/preview. Nie publikuj nieprzetestowanego merge'a.
-- [ ] Produkcja: zachowaj niezmienione pliki dist sprawdzonego preview; porównaj hash listy. Jeśli build zawiera nowy hash commita i trzeba go odtworzyć, najpierw opublikuj nowy preview i sprawdź go. Następnie:
+- [x] Jeśli main jest przodkiem zatwierdzonego HEAD, fast-forward `git push origin HEAD:main` realizuje wcześniejsze zlecenie bez zmiany worktree. Jeśli main ma cudze zmiany, zintegruj je na bieżącej gałęzi bez force, rozwiąż konflikty i ponów odpowiednie testy/preview. Nie publikuj nieprzetestowanego merge'a.
+- [x] Produkcja: zachowaj niezmienione pliki dist sprawdzonego preview; porównaj hash listy. Jeśli build zawiera nowy hash commita i trzeba go odtworzyć, najpierw opublikuj nowy preview i sprawdź go. Następnie:
 
 ```powershell
 node tools/deploy-pages.mjs --branch main --production
 ```
 
-- [ ] Potwierdź zwrócony production URL, połączenie domeny z projektem i krótką grę kontrolną. Zapisz commit, URL preview i produkcji oraz poprzedni deployment do rollbacku. Przy błędzie auth/domeny wykonaj wszystkie lokalne kroki i podaj konkretny brak dostępu; nie twierdź, że opublikowano. Nie pytaj ponownie o już zlecony push/deploy.
+- [x] Potwierdź zwrócony production URL, połączenie domeny z projektem i krótką grę kontrolną. Zapisz commit, URL preview i produkcji oraz poprzedni deployment do rollbacku. Przy błędzie auth/domeny wykonaj wszystkie lokalne kroki i podaj konkretny brak dostępu; nie twierdź, że opublikowano. Nie pytaj ponownie o już zlecony push/deploy.
 
 ## Mapa pokrycia specyfikacji
 
