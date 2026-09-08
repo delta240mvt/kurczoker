@@ -59,3 +59,16 @@ Lokalne dowody są w `.superpowers/makeover-qa/`: `desktop-battle.png`, `mobile-
 `node tools/verify-preview.mjs https://96803d5b.kurczoker-makeover.pages.dev` powtarza kontrolę HTTP. `KURCZOKER_VISUAL_BASE_URL` kieruje `npm run test:visual` na wybrane preview. `node test/visual/profile.mjs` wykonuje krótki pomiar sprzętowy Direct3D11 na Windows. CI uruchamia testy, build i przeglądarkę, zapisując obrazy jako artefakty.
 
 Podstawa decyzji technicznych i źródła: [audyt oraz research](2026-09-08-kurczoker-audyt-i-plan-naprawczy.md). Zakres: [projekt](../superpowers/specs/2026-09-08-kurczoker-makeover-design.md), [TODO](../superpowers/plans/2026-09-08-kurczoker-makeover.md).
+
+## Dodatkowy odbiór w przeglądarce Codexa
+
+Na żądanie właściciela wykonano interaktywny test w **Codex In-app Browser**, przez widoczne przyciski, suwaki i klawiaturę; bez podmieniania stanu gry. Sprawdzono desktop 1440×900 oraz mobilny viewport 390×844. Odczyt DOM w widoku mobilnym potwierdził `innerWidth = clientWidth = scrollWidth = 390`.
+
+- [x] Desktop: scena 3D, rozpoczęcie wyprawy, pauza/wznowienie, rzeczywisty rzut i nagroda.
+- [x] Sklep: 9 ziaren przed zakupem, 3 po zakupie Butów wichru; oferty za 10 ziaren zablokowane.
+- [x] Mobile: zakup, odświeżenie, przycisk kontynuacji i zachowane saldo; kolejna walka zakończona wygraną.
+- [x] Suwaki: natywne sterowanie klawiaturą zmienia kąt do 10° i moc do 6; odpowiedź przeciwnika odbiera zdrowie. Ustawienia odczytano ponownie po aktualizacji HUD.
+- [x] Osobna karta niezmiennego deploymentu `96803d5b`: pełne przejście przez sklep, zwykłe walki, elitę i bossa. Jajo chaosu zwiększyło trafienie do 3 HP, Korona grzebienia zwiększyła maksymalne zdrowie do 4.
+- [x] Finał w widoku mobilnym: „Chwała Kurczokerowi!”, **2/4 HP, 21 ziaren, 6 odwiedzonych miejsc i 3 artefakty**. Konsola końcowej karty: brak wpisów poziomu error. HUD podczas ustabilizowanej rozgrywki pokazywał około 60 FPS.
+
+Po odbiorze przywrócono standardowy rozmiar przeglądarki. Ten test potwierdza działanie w osadzonej przeglądarce Codexa i układ mobilny; nie zastępuje pomiaru na fizycznym telefonie. Nie stwierdzono nowego błędu rozgrywki wymagającego zmiany kodu.
