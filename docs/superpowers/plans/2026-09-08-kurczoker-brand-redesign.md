@@ -392,7 +392,7 @@ const velocity={x:Math.cos(radians)*power,y:Math.sin(radians)*power,z:0};
 
 **Interfaces:** `toolArea({toolId,actor,direction}):{x,y,width,height}` oraz `previewTool(command,snapshot,terrain):{area,allowed,reason?}` w weapons.js. Kilof obszar szer.2.5/wys.1.5 przed graczem; wiertło szer.1.5/wys.2.5 pod nim. Ziemia i drewno podatne, fundament odporny.
 
-- [ ] Test:
+- [x] Test:
 
 ```js
 import test from 'node:test';
@@ -409,8 +409,8 @@ test('jedno wiercenie pozwala jeszcze strzelić, drugie nie zużywa zapasu',asyn
 });
 ```
 
-- [ ] `node --test test/brand-tools.test.js` → RED.
-- [ ] Zatwierdzaj atomowo, po sprawdzeniu czy przynajmniej jedna komórka zmieni się:
+- [x] `node --test test/brand-tools.test.js` → RED.
+- [x] Zatwierdzaj atomowo, po sprawdzeniu czy przynajmniej jedna komórka zmieni się:
 
 ```js
 if (state.toolUsed) return {accepted:false,reason:'used'};
@@ -420,8 +420,8 @@ if (!changed.length) return {accepted:false,reason:'blocked'};
 state.inventory.tools[toolId]--; state.toolUsed=true;
 ```
 
-- [ ] Testuj anulowany podgląd bez kosztu, pusty zapas, fundament, przejście postaci przez tunel i rewizję trajektorii; test PASS.
-- [ ] Commit: `feat: add limited digging tools before the turn attack`.
+- [x] Testuj anulowany podgląd bez kosztu, pusty zapas, fundament, przejście postaci przez tunel i rewizję trajektorii; test PASS.
+- [x] Commit: `feat: add limited digging tools before the turn attack`.
 
 ## Task 09 (M1): Fazy tury, odpowiedź jednego wroga i wynik
 

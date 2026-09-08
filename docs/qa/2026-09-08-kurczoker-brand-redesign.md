@@ -60,3 +60,10 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - GREEN: 23 testy balistyki, colliderów, postaci, liny i starego adaptera PASS.
 - Jeden integrator lotu i swept shape cast obsługują podgląd oraz rzeczywisty pocisk, także strzały w lewo i dół.
 - Eksplozja uwzględnia osłonę, obrażenia własne, impuls i krater. Dodatkowy test potwierdził deduplikację i dwie eksplozje bez kroku świata pomiędzy: druga widzi już usuniętą osłonę.
+
+## Task 08 — narzędzia
+
+- RED: trzy testy brakujących komend i podglądu narzędzi.
+- GREEN: 8 testów narzędzi i balistyki PASS.
+- Podgląd nie mutuje świata, puste narzędzie i fundament nie kosztują ładunku, udany wykop zużywa jedną akcję narzędzia i zostawia atak.
+- Rzeczywisty ruch przez tunel wykrył próg siatki. Po diagnozie wyrównano dolną krawędź kilofa do pobliskiego podłoża; ciało przechodzi teraz cały wykop, bez przenoszenia pozycji.

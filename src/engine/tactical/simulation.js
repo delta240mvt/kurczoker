@@ -11,7 +11,7 @@ import {createTerrain} from './terrain/mask.js';
 import {syncTerrainColliders} from './terrain/collisions.js';
 import {createRope} from './rope.js';
 import {createSegmentCaster,stepProjectile,predictTrajectory} from './projectiles.js';
-import {explode} from './weapons.js';
+import {explode,useTool} from './weapons.js';
 
 let initialization;
 export async function createBattleSimulation(options = {}) {
@@ -47,6 +47,7 @@ class BattleSimulation {
     this.resolvedExplosions=new Set();
     this.inventory=structuredClone(options.player?.inventory??{owned:['jajooka'],ammo:{},tools:{pickaxe:0,drill:0}});
     this.selectedWeaponId='jajooka';
+    this.toolUsed=false;
     this.castSegment=createSegmentCaster(this.world,this.actors);
     this.phase = "player";
     this.turn = 1;
@@ -81,6 +82,7 @@ class BattleSimulation {
       this.angle=clamp(command.angleDeg,-180,180);this.power=clamp(command.power,2,18);
       this.facing=Math.cos(this.angle*Math.PI/180)>=0?1:-1;return {accepted:true};
     }
+    if(command.type==='tool') return useTool(command,this);
     if(command.type==='attack') return {accepted:this.fire()};
     if(command.type==='jump') return {accepted:this.jump()};
     if(command.type==='rope.attach') return this.rope.attach(command.point);
@@ -214,6 +216,7 @@ class BattleSimulation {
       this.nextPhase("enemy-shot");
     } else if (this.phase === "settle" && this.phaseTime >= 0.65) {
       this.turn++;
+      this.toolUsed=false;
       this.nextPhase("player");
     }
   }
@@ -295,6 +298,7 @@ class BattleSimulation {
       projectile:this.projectile?{...this.projectile}:null,
       inventory:structuredClone(this.inventory),
       selectedWeaponId:this.selectedWeaponId,
+      toolUsed:this.toolUsed,
       aim:{angleDeg:this.angle,power:this.power},
       outcome: this.outcome,
     };
