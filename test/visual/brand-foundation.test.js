@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {chromium} from 'playwright';
 import {serveBuild} from './server.js';
+import {fight} from './fight-driver.js';
 for(const viewport of [{width:390,height:844},{width:844,height:390},{width:1440,height:900}]){
  test(`Podwórze przez UI ${viewport.width}x${viewport.height}`,{timeout:120000},async()=>{
  const host=process.env.KURCZOKER_VISUAL_BASE_URL?{url:process.env.KURCZOKER_VISUAL_BASE_URL,close:async()=>{}}:await serveBuild();
@@ -44,7 +45,7 @@ for(const viewport of [{width:390,height:844},{width:844,height:390},{width:1440
  });
 }
 
-test('Podwórze: dwa skoki na wzgórze, wymiana ataków, zwycięstwo i rewanż',{timeout:180000},async()=>{
+test('Podwórze: ruch i skoki, wymiana ataków, zwycięstwo i rewanż',{timeout:180000},async()=>{
  const host=process.env.KURCZOKER_VISUAL_BASE_URL?{url:process.env.KURCZOKER_VISUAL_BASE_URL,close:async()=>{}}:await serveBuild();
  const browser=await chromium.launch({args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']});
  try{
@@ -53,22 +54,7 @@ test('Podwórze: dwa skoki na wzgórze, wymiana ataków, zwycięstwo i rewanż',
   await page.getByRole('button',{name:'Rozpocznij potyczkę',exact:true}).click();
   await page.getByRole('button',{name:'Skok',exact:true}).waitFor();
   await page.waitForFunction(()=>document.querySelector('[aria-label="Skok"]')?.disabled===false);
-  await page.keyboard.down('d');
-  await page.waitForFunction(()=>Number(document.querySelector('[data-player-x]')?.dataset.playerX)>8.6);
-  await page.keyboard.press('Space');
-  await page.waitForFunction(()=>Number(document.querySelector('[data-player-x]')?.dataset.playerX)>11.1);
-  await page.keyboard.up('d');
-  await page.waitForFunction(()=>{const y=Number(document.querySelector('[data-player-y]')?.dataset.playerY);return y>3.7&&y<3.85});
-  await page.keyboard.down('d');await page.keyboard.press('Space');
-  await page.waitForFunction(()=>Number(document.querySelector('[data-player-x]')?.dataset.playerX)>13.8);
-  await page.keyboard.up('d');
-  await page.waitForFunction(()=>{const y=Number(document.querySelector('[data-player-y]')?.dataset.playerY);return y>4.5&&y<4.6});
-  await page.getByRole('button',{name:'Celuj',exact:true}).click();
-  await page.getByRole('slider',{name:'Kąt',exact:true}).fill('5');
-  await page.getByRole('slider',{name:'Moc',exact:true}).fill('8');
-  await page.getByRole('button',{name:'Strzel',exact:true}).click();
-  await page.waitForFunction(()=>document.querySelector('[data-turn]')?.dataset.turn==='2');
-  await page.getByRole('button',{name:'Strzel',exact:true}).click();
+  await fight(page);
   await page.getByRole('heading',{name:'Pięknie poleciały pióra.',exact:true}).waitFor({timeout:30000});
   await page.screenshot({path:'.superpowers/makeover-qa/brand-desktop-victory.png'});
   await page.getByRole('button',{name:'Rewanż',exact:true}).click();

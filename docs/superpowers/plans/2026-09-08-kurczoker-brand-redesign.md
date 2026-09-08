@@ -1068,13 +1068,13 @@ test('main wymaga jawnego wskazania produkcji',()=>{
 ```
 
 - [x] Dodaj poprawne MIME/cache, hashowane assety immutable, HTML/manifest rewalidowane. Manifest generuj SHA-256 dla plików dist. Nie przypisuj repo commit bez sprawdzenia dirty state; nie stosuj stale `--commit-dirty=true` do finalnego czystego wydania.
-- [ ] Test deploy PASS, build, kontrola wszystkich plików25MiB. Wykonaj jawnie:
+- [x] Test deploy PASS, build, kontrola wszystkich plików25MiB. Wykonaj jawnie:
 
 ```powershell
 node tools/deploy-pages.mjs --branch baza080926-makeover
 ```
 
-- [ ] Zapisz zwrócony immutable preview URL; uruchom browser suite przeciw temu URL (testy muszą honorować istniejące `KURCZOKER_VISUAL_BASE_URL`) i przejdź oba tryby w Codexie. Sprawdź HTTPS, load models/decoder/audio, odświeżenie i checkpoint. Mierz transfer. Jeśli poprawka zmienia build, powtórz dotknięty odbiór na nowym preview.
+- [x] Zapisz zwrócony immutable preview URL; uruchom browser suite przeciw temu URL (testy muszą honorować istniejące `KURCZOKER_VISUAL_BASE_URL`) i przejdź oba tryby w Codexie. Sprawdź HTTPS, load models/decoder/audio, odświeżenie i checkpoint. Mierz transfer. Jeśli poprawka zmienia build, powtórz dotknięty odbiór na nowym preview. Preview7f03e3f9:19/19PASS, Codex desktop/pion/poziom, transfer1 836 354bajty.
 - [ ] Zapisz raport, commit `release: approve the tested Kurczoker redesign`; sprawdź clean tree i push gałęzi. Odczytaj aktualny remote main przed integracją:
 
 ```powershell
