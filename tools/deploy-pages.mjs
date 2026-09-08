@@ -1,6 +1,8 @@
 import { spawnSync, execFileSync } from "node:child_process";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
+import {deploymentTarget} from './deploy-target.mjs';
+import {verifyRelease} from './release-integrity.mjs';
 
 if (existsSync(".env")) process.loadEnvFile(".env");
 const config = JSON.parse(readFileSync("tools/pages.config.json", "utf8"));
@@ -14,14 +16,14 @@ const branch =
     : execFileSync("git", ["branch", "--show-current"], {
         encoding: "utf8",
       }).trim();
-if (!branch || !/^[\w./-]+$/.test(branch))
-  throw new Error("A valid named branch is required.");
-if (branch === config.productionBranch && !production)
-  throw new Error(
-    "Use --production explicitly after preview QA to publish the production branch.",
-  );
+deploymentTarget({branch,production,config:{...config,projectName:project}});
 if (!existsSync("dist/release-report.json"))
   throw new Error("Run npm run build first.");
+const report=await verifyRelease('dist');
+const dirty=!!execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim();
+if(production&&(dirty||report.dirty))throw new Error('Production requires a clean checkout and a build from a clean source.');
+// Documentation commits may follow preview QA; the tested source must remain an ancestor.
+execFileSync('git',['merge-base','--is-ancestor',report.sourceCommit,'HEAD']);
 const result = spawnSync(
   process.execPath,
   [
@@ -33,7 +35,8 @@ const result = spawnSync(
     project,
     "--branch",
     branch,
-    "--commit-dirty=true",
+    '--commit-hash',report.sourceCommit,
+    '--commit-dirty='+String(report.dirty||dirty),
   ],
   { stdio: "inherit", env: process.env },
 );

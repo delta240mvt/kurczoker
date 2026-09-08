@@ -205,3 +205,35 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - RED: poprzedni landing nie zawierał zatwierdzonego H1 (`brand-landing-red.log`). PASS: build, `brand-landing-browser-final.log` (odtwarzanie filmu, obie ścieżki, 9 map, FAQ, brak canvas/GLB/Rapier przed grą, brak overflow 360px i 1440px). Kontrola w Codex IAB oraz zrzut całej strony 360px.
 - Lekki moduł wznowienia sprawdza checksum i walidację zapisu, bez importowania symulacji/Three. Szybkie mapy mają bezpośrednie parametry `map`.
 - Pełny test unit wykazał 237/239 PASS; dwa testy analityki wymagały migracji selektorów źródła po przeniesieniu stopki do komponentu i zmianie cudzysłowów. Zakres sprawdzenia zachowany.
+
+
+## Task 25 — regresja wydania
+
+- Pierwszy pełny browser suite: 16/17 PASS (`brand-full-browser-initial.log`, 607,99 s). Jedyny błąd: harness przeglądu modeli po dodaniu filmu iterował też po video/posterze. Ograniczono go do `kind=model`; runtime loader już miał prawidłowy filtr.
+- PASS: 18 konfiguracji map (9 × pion/poziom), wszystkie bronie, dotyk wielopunktowy, zwycięstwo/rewanż, pełna wyprawa z bossem (184,10 s sterowania automatycznego), retry/loss, quota/rollback, odświeżenie z kraterem, ustawienia, menu i klawiatura. Historyczny `tactical.test.js` przeniesiono na aktualne UI; jego pełne scenariusze nagród/sklepu/finału są w `brand-expedition`, awarii assetów w `brand-assets`, ruchu/zwycięstwa/rewanżu w `brand-foundation`.
+- Nowy browser test: granat zatrzymany w pauzie przez 1s (czas i liczba pocisków bez zmian), wznowienie do następnej tury, zaczepienie liny i obrót 390×844 → 844×390. PASS (`brand-release-browser-initial.log`).
+- Poprawki z RED→GREEN: powrót omija zasięg eksplozji min, walidacja `hitAt` i spójności `alive/health`, zakończona wyprawa nie pokazuje starszego aktywnego zapisu. 10/10 logiki checkpoint/upadków i 4/4 bridge PASS. Poprawiono rozpoznawanie starego zapisu (wskazówki v2 nie są starym zapisem) i sprzątanie listenera audio.
+- Zapis prywatności pokazuje rzeczywisty stan opcjonalnej analityki w danym buildzie, zamiast nieaktualnego endpointu.
+- Audyt: początkowo 26 zgłoszeń (20 high), po aktualizacjach zgodnych z semver 7 (6 high), w tym Astro wymagające nowszej wersji. Aktualizacja Astro i integracji React razem według [oficjalnego przewodnika v7](https://docs.astro.build/en/guides/upgrade-to/v7/); lokalny Node 22.23 spełnia wymaganie pakietu >=22.12.0.
+- Nie ma dostępu do fizycznego Androida/iPhone'a ani grupy testerów 35–65. Pomiary SwiftShader i czasy automatycznego przejścia nie są pomiarami tych urządzeń ani potwierdzeniem czasu 10–15 min dla człowieka.
+
+## Przygotowanie Task 26
+
+- `deploymentTarget` rozdziela main/production i preview. Wymagany raport źródłowego commita, dirty state i SHA-256 każdego pliku. Weryfikator odrzuca zmianę pliku oraz dodatkowy plik; produkcja wymaga czystego źródła i checkoutu. Testy 4/4 PASS (`brand-deploy-green.log`), wcześniej RED brak weryfikacji w skrypcie.
+- `git fetch origin`: brak commitów origin/main nieobecnych w HEAD. Integracja może być fast-forward bez zmiany worktree.
+
+## Końcowy odbiór — 2026-09-08
+
+- Ręczny odbiór w Codex IAB wykrył blokadę skoku na krawędzi krateru po strzale Podwórze/40°/moc9. Kapsuła była podparta z boku, poza trzema starymi promieniami. Dodano dwa promienie przy brzegu kapsuły, nadal wymagając normalnej skierowanej w górę. Test rzeczywistej symulacji najpierw FAIL (`brand-crater-red.log`), następnie PASS; regresja postaci/AI/przejść 13/13 PASS. Osobny browser test 360×800 odtwarza strzał, krater, turę2 i skuteczny skok.
+- Usunięto import starego globalnego CSS z aktywnej gry. Pozostaje mały reset; stary import fontów Google nie nadpisuje już marki. Końcowy pomiar transferu lokalnego nie zawiera żądań Google Fonts.
+- `npm test`: **245/245 PASS**, 0 FAIL (`brand-unit-accepted.log`, 66,76s). Build z końcową diagnostyką trajektorii PASS (`brand-trajectory-qa-build.log`).
+- Test całej wyprawy ustala wyłącznie Date/seed=1, pozostawiając rzeczywiste timery i rAF. Wybiera strzały na podstawie końca tej samej trajektorii, którą renderuje gra. Używa przycisków, sliderów i klawiatury; nie zmienia HP, zasobów, fizyki ani wyników. Podwórze → Wzgórza → Wąwóz → Jajokról: zwycięstwo, dwa sklepy, 300,73s (`brand-expedition-trajectory.log`). To czas automatu, nie wynik badania graczy.
+- Audit po aktualizacji: **0 podatności produkcyjnych**, 4 high w zależnościach deweloperskich MCP (`threejs-devtools-mcp` → Puppeteer → extract-zip), bez dostępnej poprawki w tym łańcuchu. Nie są częścią publikowanego dist. Astro7.3.1 / @astrojs/react6.0.5, Node22.23.0.
+- Lokalny zimny transfer wejścia do pierwszej areny: **4 639 978 bajtów**, 0 błędów (`makeover-qa/transfer-local-final.json`), serwer bez kompresji. Telefon emulowany390×844, DPR.65, buffer253×548. Pomiar produkcyjny nastąpi na preview.
+- Profil lokalnego desktopu: Chromium147, ANGLE Intel UHD/D3D11,1440×900: high44FPS/p9558ms, low59FPS/p9523ms,22draw calls/8346trójkątów (`makeover-qa/hardware-performance.json`). Wynik zależy od obciążenia tej maszyny; nie jest gwarancją60FPS na telefonach. Codex IAB: pion60FPS/p9519ms; próbka po obrocie36FPS/p9577ms obejmuje resize i rozgrzewanie.
+- Odbiór Codex obejmował desktop1440×900, pion390×844 i360×800 oraz poziom844×390: landing, wybór trybu, ruch, lasso, obrót, strzał, odpowiedź przeciwnika, pauza i wznowienie. Zrzuty zachowano lokalnie w `.superpowers/makeover-qa/`.
+- **Niewykonane:** fizyczny Android/iPhone, test użyteczności osób35–65, trzy ręcznie mierzone wyprawy oraz osobna pełna wygrana na każdej z9map. Przejścia fizyczne wszystkich map,18wariantów widoku i pełny przebieg wyprawy są osobnymi potwierdzonymi testami. Nie przedstawiamy ich jako tych brakujących badań.
+- Cloudflare: dostępny projekt `kurczoker-makeover`, produkcyjna gałąźmain, domena `kurczoker-makeover.pages.dev`. Brak wcześniejszego produkcyjnego deploymentu. Odczyt dostępnych stref i projektów nie znalazł przypisania `kurczoker.com`; publikacja użyje domeny Pages, bez zgadywania konfiguracji DNS.
+- **Finalny pełny browser suite: 19/19 PASS, 0 FAIL**, 611,09s (`brand-browser-accepted-2.log`). Wszystkie18wariantów map,6broni, pełna wygrana wyprawy, zapis/reload/retry/loss, IndexedDB rollback, dotyk, klawiatura, settings, lasso/obrót, pauza pocisku, krater/skok, landing i odzyskanie modeli przeszły w jednym przebiegu.
+- Poprzedni przebieg przerwano po błędzie automatu kopniaka: czekał na wąski przedział wysokości, możliwy do pominięcia między klatkami. Automat reaguje teraz na faktyczne podparcie. Bot wyprawy sprawdza także wysoki łuk nad kraterem, zamiast wielokrotnie szukać równych poziomów. Zakres asercji i zasady gry zachowano. Bez równoległego uruchamiania obciążającej regresji logiki z testem grafiki.
+- `git diff --check` PASS. Weryfikator HTTPS porównuje raport źródłowy i SHA-256 wszystkich faktycznie serwowanych plików z testowanym dist, nie tylko modele.

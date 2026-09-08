@@ -12,12 +12,17 @@ test('arsenał przez UI: granat, odłamki, śrut, mina i kopniak',{timeout:24000
    await page.waitForFunction(()=>document.querySelector('[aria-label="Skok"]')?.disabled===false);
    await page.waitForFunction(()=>{const y=Number(document.querySelector('[data-player-y]')?.dataset.playerY);return y>3.03&&y<3.07});
    if(id==='kick') {
-    await page.keyboard.down('d');await page.waitForFunction(()=>Number(document.querySelector('[data-player-x]').dataset.playerX)>8.6);
-    await page.keyboard.press('Space');await page.waitForFunction(()=>Number(document.querySelector('[data-player-x]').dataset.playerX)>11.1);await page.keyboard.up('d');
-    await page.waitForFunction(()=>{const y=Number(document.querySelector('[data-player-y]').dataset.playerY);return y>3.7&&y<3.85});
-    await page.keyboard.down('d');await page.keyboard.press('Space');await page.waitForFunction(()=>Number(document.querySelector('[data-player-x]').dataset.playerX)>13.8);await page.keyboard.up('d');
-    await page.waitForFunction(()=>{const y=Number(document.querySelector('[data-player-y]').dataset.playerY);return y>4.5&&y<4.6});
-    await page.keyboard.down('d');await page.waitForFunction(()=>Number(document.querySelector('[data-player-x]').dataset.playerX)>15.9);await page.keyboard.up('d');
+    // React to actual footing instead of waiting for a narrow intermediate
+    // height that can be passed between browser frames on a busy machine.
+    for(let step=0;step<250;step++){
+     const hero=JSON.parse(await page.locator('.battle-screen').getAttribute('data-actors')).find(a=>a.team==='player');
+     if(hero.x>=15.9)break;
+     await page.keyboard.down('d');
+     if(hero.grounded&&hero.x>8.5&&hero.x<14)await page.keyboard.press('Space');
+     await page.waitForTimeout(100);
+    }
+    await page.keyboard.up('d');
+    await page.waitForFunction(()=>JSON.parse(document.querySelector('.battle-screen').dataset.actors).find(a=>a.team==='player').grounded);
    }
    await page.getByRole('button',{name:'Celuj',exact:true}).click();
    await page.getByRole('combobox',{name:'Broń',exact:true}).selectOption(id);

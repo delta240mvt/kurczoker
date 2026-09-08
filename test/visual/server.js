@@ -2,6 +2,7 @@ import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { resolve, extname, sep } from "node:path";
 export async function serveBuild() {
+  if(process.env.KURCZOKER_VISUAL_BASE_URL)return {url:process.env.KURCZOKER_VISUAL_BASE_URL,close:async()=>{}};
   const root = resolve("dist");
   const mime = {
     ".html": "text/html",

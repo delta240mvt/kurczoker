@@ -48,7 +48,7 @@ export function BrandGame({request,onCheckpoint,onOutcome,onMenu,onRematch,setti
   return ()=>{window.removeEventListener('blur',blur);document.removeEventListener('visibilitychange',hidden)};
  },[pause]);
  useEffect(()=>{setAudioMuted(audio.current.muted);const activate=()=>{if(audioActivated.current)return;audioActivated.current=true;pauseAudio(audio.current,pauseRef.current);setMuted(audio.current,false);setAudioMuted(false);startMusic(audio.current)};
-  window.addEventListener('pointerdown',activate,{once:true,capture:true});window.addEventListener('keydown',activate,{once:true});return ()=>{window.removeEventListener('pointerdown',activate,true);window.removeEventListener('keydown',activate,true);if(!audioController)disposeAudio(audio.current)};
+  window.addEventListener('pointerdown',activate,{once:true,capture:true});window.addEventListener('keydown',activate,{once:true,capture:true});return ()=>{window.removeEventListener('pointerdown',activate,true);window.removeEventListener('keydown',activate,true);if(!audioController)disposeAudio(audio.current)};
  },[audioController]);
  const onReady=useCallback(()=>{setReady(true);runtime.current?.setPaused(pauseRef.current);pauseAudio(audio.current,pauseRef.current)},[]);
  const onEvent=useCallback(event=>{

@@ -47,7 +47,7 @@ test('druga szansa odtwarza początek walki, flagi nie da się zużyć dwukrotni
 });
 test('poprawny hash nie przepuszcza błędnego schematu, mapy lub aktorów',async()=>{
  const {game,sim,battleStart}=await setup();try{const original=data(game,sim,battleStart);
-  const mutations=[v=>v.battle.mapId='unknown',v=>v.battle.actors[1].id=v.battle.actors[0].id,v=>v.battle.terrain.cells.pop(),v=>v.battle.inventory.ammo.granajko=-1,v=>v.game.scene='arbitrary'];
+  const mutations=[v=>v.battle.mapId='unknown',v=>v.battle.actors[1].id=v.battle.actors[0].id,v=>v.battle.terrain.cells.pop(),v=>v.battle.inventory.ammo.granajko=-1,v=>v.game.scene='arbitrary',v=>v.battle.actors[0].hitAt='bad',v=>v.battle.actors[0].alive=false];
   for(const mutate of mutations){const value=structuredClone(original);mutate(value);const payload=JSON.stringify(value),digest=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(payload));
    const checksum=Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
    assert.equal((await checkpoint.decodeCheckpoint(JSON.stringify({version:2,payload,checksum})))?.ok,false);

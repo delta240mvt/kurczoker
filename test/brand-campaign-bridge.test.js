@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {createBrandStore} from '../src/engine/store/useGameStore.js';
 import {createBattleSimulation} from '../src/engine/tactical/simulation.js';
-import {decodeCheckpoint} from '../src/engine/tactical/checkpoint.js';
+import {decodeCheckpoint,encodeCheckpoint} from '../src/engine/tactical/checkpoint.js';
 const memory=()=>{let latest=null,previous=null;return {read:async()=>({latest,previous}),write:async text=>{previous=latest;latest=text}}};
 test('quick preserves expedition and its persistent checkpoint',async()=>{
  const storage=memory(),store=createBrandStore(1,{storage});
@@ -35,4 +35,12 @@ test('failed save keeps playable memory state and reports error; previous valid 
  storage.write=async()=>{throw new DOMException('full','QuotaExceededError')};
  restored.getState().startExpedition(10);await restored.getState().flush();
  assert.equal(restored.getState().game.seed,10);assert.match(restored.getState().saveError,/miejsca/);assert.equal(restored.getState().saving,false);
+});
+
+test('completed latest expedition does not advertise an older active save',async()=>{
+ const storage=memory(),store=createBrandStore(4,{storage});store.getState().startExpedition(4);await store.getState().flush();
+ const decoded=await decodeCheckpoint((await storage.read()).latest);
+ decoded.value.game.status='lost';decoded.value.game.scene='result';decoded.value.game.health=0;
+ await storage.write(await encodeCheckpoint(decoded.value));
+ const fresh=createBrandStore(9,{storage});await fresh.getState().inspectSave();assert.equal(fresh.getState().savedAvailable,false);
 });

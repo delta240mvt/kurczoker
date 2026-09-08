@@ -1,9 +1,10 @@
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useRef, useMemo, useEffect } from "react";
 import { Vector3, BufferGeometry, Object3D, Color } from "three";
 import { Html } from "@react-three/drei";
 
 export function ShotVisual({ sim, showAim=true, reducedMotion=false }) {
+  const {gl}=useThree();
   const object=useMemo(()=>new Object3D(),[]);
   const egg = useRef(),
     trail = useRef(),
@@ -57,12 +58,16 @@ export function ShotVisual({ sim, showAim=true, reducedMotion=false }) {
     }
     if (line.current.visible) {
       const points = sim.trajectory();
+      // QA reads the endpoint of the visible line, never a separate predictor.
+      gl.domElement.dataset.aimEnd=JSON.stringify(points.at(-1)??null);
+      gl.domElement.dataset.aimAngle=String(s.aim.angleDeg);
+      gl.domElement.dataset.aimPower=String(s.aim.power);
       const attr = arcGeometry.attributes.position;
       points.forEach((p, i) => attr.setXYZ(i, p.x, p.y, p.z));
       attr.needsUpdate = true;
       arcGeometry.setDrawRange(0, points.length);
       arcGeometry.computeBoundingSphere();
-    }
+    } else delete gl.domElement.dataset.aimEnd;
   });
   return (
     <>

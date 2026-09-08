@@ -39,3 +39,9 @@ test('zniszczona półka i zajęty punkt nie są bezpiecznym powrotem',()=>{
   assert.ok(p.x>1.6&&p.x<=3);
   assert.notEqual(p.x,5);
 });
+
+test('powrót po upadku omija miny, również jeszcze nieuzbrojone',()=>{
+ const terrain=createTerrain(fixtureMap()),mine={x:2,y:2.17,age:0};
+ const point=findSafeReturn({terrain,lastSafe:{x:2,y:2.565},safeZones:[{x:1,y:2,width:5,height:1}],mines:[mine]});
+ assert.ok(point);assert.ok(Math.hypot(point.x-mine.x,point.y-mine.y)>1.5);
+});

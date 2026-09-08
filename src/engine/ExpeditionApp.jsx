@@ -25,7 +25,7 @@ export function ExpeditionApp(){
  const [page,setPage]=useState(()=>new URLSearchParams(location.search).get('mode')==='quick'?'quick':'expedition');
  const [mapId,setMapId]=useState(()=>{const id=new URLSearchParams(location.search).get('map');return listMaps().some(m=>m.id===id)?id:'yard'});
  const [confirm,setConfirm]=useState(false),[legacy,setLegacy]=useState(false);
- useEffect(()=>{state.inspectSave();try{setLegacy(Object.keys(localStorage).some(k=>k.startsWith('kurczoker')&&!k.includes('settings')))}catch{}
+ useEffect(()=>{state.inspectSave();try{setLegacy(['kurczoker-save','kurczoker.checkpoint.v1'].some(k=>localStorage.getItem(k)!==null))}catch{}
   if(new URLSearchParams(location.search).get('resume')==='1')state.resume();
  },[store]);
  function menu(){state.menu();state.inspectSave();pauseAudio(audioController,false)}

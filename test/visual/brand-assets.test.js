@@ -15,7 +15,7 @@ test('model load failure retries the same arena',{timeout:90000},async()=>{
 });
 test('all decoded models and animation poses render into a review sheet',{timeout:90000},async()=>{
  const host=await serveBuild(),browser=await chromium.launch({args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}),page=await browser.newPage({viewport:{width:1050,height:1600}});
- const catalog=JSON.parse(await readFile('src/engine/tactical/releaseManifest.json','utf8'));
+ const catalog=JSON.parse(await readFile('src/engine/tactical/releaseManifest.json','utf8'));catalog.assets=catalog.assets.filter(a=>a.kind==='model');
  try{
   await page.goto(host.url+'/asset-review');await page.setContent('<style>body{margin:0;background:#f8f7f3;color:#020304;font:16px monospace}header{height:50px;display:flex;align-items:center;justify-content:space-around}canvas{display:block}footer{padding:10px}</style><header><b>HERO</b><b>SHOOTER</b><b>GRENADIER</b><b>RUSHER</b><b>BOSS</b></header><canvas></canvas><footer role="status">Loading</footer>');
   const source=`import * as T from 'three';import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';import {MeshoptDecoder} from 'three/addons/libs/meshopt_decoder.module.js';import {RenderPixelatedPass} from 'three/addons/postprocessing/RenderPixelatedPass.js';import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';import {loadGameAssets} from './src/engine/tactical/assets.js';

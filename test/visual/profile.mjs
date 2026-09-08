@@ -13,16 +13,16 @@ page.on("response", (r) => {
   if (r.status() >= 400) console.log("HTTP", r.status(), r.url());
 });
 try {
-  await page.goto(`${base}/gra`, { waitUntil: "domcontentloaded" });
-  await page.getByRole("button", { name: "Nowa wyprawa", exact: true }).click();
-  await page.locator('[data-route-id="battle-1"]').click();
-  await page.waitForFunction(
-    () =>
-      document.querySelector('[aria-label="Rzuć jajobombę"]')?.disabled ===
-      false,
-  );
-  for (const quality of ["high", "low"]) {
-    await page.getByLabel("Jakość grafiki").selectOption(quality);
+  await page.goto(`${base}/gra?mode=quick`, {waitUntil:'domcontentloaded'});
+  await page.getByRole('button',{name:'Rozpocznij potyczkę',exact:true}).click();
+  await page.getByRole('button',{name:'Skok',exact:true}).waitFor();
+  await page.getByRole('button',{name:'Pomiń wskazówki',exact:true}).click();
+  for (const quality of ['high','low']) {
+    await page.getByRole('button',{name:'Pauza',exact:true}).click();
+    await page.getByRole('button',{name:'Ustawienia',exact:true}).click();
+    await page.getByLabel('Jakość grafiki',{exact:true}).selectOption(quality);
+    await page.getByRole('button',{name:'Gotowe',exact:true}).click();
+    await page.getByRole('button',{name:'Wznów grę',exact:true}).click();
     await page.waitForTimeout(6500);
     measurements.push(
       await page.evaluate((quality) => {

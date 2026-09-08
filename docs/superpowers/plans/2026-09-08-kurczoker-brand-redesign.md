@@ -1018,7 +1018,7 @@ test('landing prowadzi od razu do dwóch trybów',async()=>{
 
 **Interfaces:** `measureGameTransfer(url):Promise<{encodedBytes,requests,errors}>` w tools/measure-game-transfer.mjs; CLI bierze jawny argument URL. Raport zawiera środowisko, viewport/device, build/commit, scenariusz i PASS/FAIL z dowodem.
 
-- [ ] Dodaj test awarii assetu do suite browser (w teście dostępne page/base z istniejącej konfiguracji):
+- [x] Dodaj test awarii assetu do suite browser (w teście dostępne page/base z istniejącej konfiguracji):
 
 ```js
 await page.route('**/*.glb',route=>route.abort());
@@ -1030,9 +1030,9 @@ await page.getByRole('button',{name:'Spróbuj ponownie',exact:true}).click();
 await page.getByRole('button',{name:'Skok',exact:true}).waitFor();
 ```
 
-- [ ] Uruchom `node --test test/visual/brand-release.test.js`; brak obsługi retry musi dać RED. Napraw rzeczywistą przyczynę i ponów dotknięty scenariusz.
-- [ ] Rozszerz QA o dziewięć map,6broni, wszystkie narzędzia/AI, oba zakończenia, pauzę w wybuchu, zapis, drugą szansę, popup menu i obrót w linie. Przejdź w Codex browser desktop1440×900, pion390×844 i360×800, poziom844×390. Zapisuj screenshots i błędy, a nie tylko narrację.
-- [ ] Pomiary transferu używają CDP Network.loadingFinished `encodedDataLength`, bez cache, wejście do pierwszej walki; nie sumują niezaładowanych map. Raport jawnie wskazuje, że lokalny prosty server może nie kompresować i wynik produkcyjny mierzy się na preview. Budżet pojedynczego pliku licz z `stat`, oddziel od celu10MiB transferu.
+- [x] Uruchom `node --test test/visual/brand-release.test.js`; brak obsługi retry musi dać RED. Napraw rzeczywistą przyczynę i ponów dotknięty scenariusz. Dowód awarii/retry assetów jest w `brand-assets.test.js`; `brand-release` sprawdza krater/skok oraz pauzę/obrót liny.
+- [x] Rozszerz QA o dziewięć map,6broni, wszystkie narzędzia/AI, oba zakończenia, pauzę w wybuchu, zapis, drugą szansę, popup menu i obrót w linie. Przejdź w Codex browser desktop1440×900, pion390×844 i360×800, poziom844×390. Zapisuj screenshots i błędy, a nie tylko narrację.
+- [x] Pomiary transferu używają CDP Network.loadingFinished `encodedDataLength`, bez cache, wejście do pierwszej walki; nie sumują niezaładowanych map. Raport jawnie wskazuje, że lokalny prosty server może nie kompresować i wynik produkcyjny mierzy się na preview. Budżet pojedynczego pliku licz z `stat`, oddziel od celu10MiB transferu.
 
 ```js
 const client=await page.context().newCDPSession(page);
@@ -1043,7 +1043,9 @@ client.on('Network.loadingFinished',e=>{encodedBytes+=e.encodedDataLength;});
 ```
 
 - [ ] Zmierz frame time p95, start i wybuch kasetowy na realnym Androidzie i iPhonie; wpisz model/przeglądarkę/profil. Brak urządzenia odnotuj jako niewykonany test, kończ pozostałe dostępne prace. Trzy ukończone wyprawy osoby znającej sterowanie: zmierz czas i popraw HP/tempoAI, bez zegara decyzji. Profile jakości nie zmieniają wyniku symulacji.
-- [ ] `npm test`, `npm run build`, `npm run test:visual`, `git diff --check` → PASS. Nowe błędy naprawiaj z testem przyczyny; nie usuwaj testu tylko z powodu FAIL. Commit `test: verify the complete redesign and release budgets`.
+
+  **Niewykonane — brak fizycznych urządzeń/testerów:** raport zawiera osobno pomiary desktopu i emulacji oraz czasy automatu. Zgodnie z tym punktem kontynuujemy pozostałe prace; nie oznaczamy badań urządzeń/ludzi jako wykonanych.
+- [x] `npm test`, `npm run build`, `npm run test:visual`, `git diff --check` → PASS. Nowe błędy naprawiaj z testem przyczyny; nie usuwaj testu tylko z powodu FAIL. Commit `test: verify the complete redesign and release budgets`. Końcowo245/245 unit i19/19 browser; ograniczenia badań urządzeń/ludzi opisane wyżej i w QA.
 
 ## Task 26 (M5): Preview, commit/push i produkcja sprawdzonego buildu
 
@@ -1051,7 +1053,7 @@ client.on('Network.loadingFinished',e=>{encodedBytes+=e.encodedDataLength;});
 
 **Interfaces:** `release-report.json` dodaje `sourceCommit`, `dirty`, `files:[{path,sha256,bytes}]` oraz wynik kontroli limitu25MiB. Hash listy nie obejmuje samego raportu. `deploy-pages.mjs --branch <branch>` publikuje preview, `--branch main --production` produkcję; script odrzuca produkcję bez jawnego flag i bez zgodnego manifestu.
 
-- [ ] Test deploy-script rozszerz o rozdzielenie ścieżek i zweryfikuj RED przed zmianą. Pure helper `deploymentTarget({branch,production,config}):{branch,project}` eksportuj z nowego `tools/deploy-target.mjs` i importuj w skrypcie; test nie wysyła nic do Cloudflare:
+- [x] Test deploy-script rozszerz o rozdzielenie ścieżek i zweryfikuj RED przed zmianą. Pure helper `deploymentTarget({branch,production,config}):{branch,project}` eksportuj z nowego `tools/deploy-target.mjs` i importuj w skrypcie; test nie wysyła nic do Cloudflare:
 
 ```js
 import test from 'node:test';
@@ -1065,7 +1067,7 @@ test('main wymaga jawnego wskazania produkcji',()=>{
 });
 ```
 
-- [ ] Dodaj poprawne MIME/cache, hashowane assety immutable, HTML/manifest rewalidowane. Manifest generuj SHA-256 dla plików dist. Nie przypisuj repo commit bez sprawdzenia dirty state; nie stosuj stale `--commit-dirty=true` do finalnego czystego wydania.
+- [x] Dodaj poprawne MIME/cache, hashowane assety immutable, HTML/manifest rewalidowane. Manifest generuj SHA-256 dla plików dist. Nie przypisuj repo commit bez sprawdzenia dirty state; nie stosuj stale `--commit-dirty=true` do finalnego czystego wydania.
 - [ ] Test deploy PASS, build, kontrola wszystkich plików25MiB. Wykonaj jawnie:
 
 ```powershell

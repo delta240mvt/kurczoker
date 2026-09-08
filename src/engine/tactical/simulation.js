@@ -320,13 +320,13 @@ class BattleSimulation {
     for(const actor of this.actors) {
       if(actor.health<=0) continue;
       const position=actor.body.translation();
-      if(actor.grounded && isSafePosition({point:position,terrain:this.terrain})) {
+      if(actor.grounded && isSafePosition({point:position,terrain:this.terrain,mines:this.mines})) {
         actor.lastSafe={x:position.x,y:position.y};
       }
       if(position.y>=-2 && position.x>=-2 && position.x<=this.arena.width+2) continue;
       actor.health=Math.max(0,actor.health-Math.ceil(actor.maxHealth*(actor===this.player&&(this.options.player?.upgrades??[]).includes('boots')?.1:.2)));
       this.events.push({id:`fall-${this.time}-${actor.id}`,type:'fall',time:this.time,payload:{actorId:actor.id,health:actor.health}});
-      const point=findSafeReturn({terrain:this.terrain,safeZones:this.arena.safeZones,lastSafe:actor.lastSafe,
+      const point=findSafeReturn({terrain:this.terrain,mines:this.mines,safeZones:this.arena.safeZones,lastSafe:actor.lastSafe,
         actors:this.actors.filter(a=>a!==actor).map(a=>a.snapshot())});
       if(!point) actor.health=0;
       if(actor.health>0) {

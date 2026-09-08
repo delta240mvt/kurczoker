@@ -1,11 +1,17 @@
 import { readdir, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { resolve, join, sep } from "node:path";
+import {execFileSync} from 'node:child_process';
+import {releaseFiles} from './release-integrity.mjs';
 const root = resolve("dist");
 // Astro copies public recursively. Source generations are kept in the repo, never in the release.
 const drafts = resolve(root, "game/assets");
 if (!drafts.startsWith(root + sep))
   throw new Error("Release path escaped dist");
 await rm(drafts, { recursive: true, force: true });
+// Superseded landing screenshots are source references, not release assets.
+const oldScreens=resolve(root,'uix/screeny');
+if(!oldScreens.startsWith(root+sep))throw new Error('Release path escaped dist');
+await rm(oldScreens,{recursive:true,force:true});
 const manifest = JSON.parse(
   await readFile("src/engine/tactical/releaseManifest.json", "utf8"),
 );
@@ -45,10 +51,15 @@ const budget = game.reduce((a, s) => a + s.bytes, 0);
 if (budget > 10 * 1024 ** 2)
   throw new Error(`Game payload exceeds 10 MiB: ${budget}`);
 const report = {
+  sourceCommit:execFileSync('git',['rev-parse','HEAD'],{encoding:'utf8'}).trim(),
+  dirty:!!execFileSync('git',['status','--porcelain'],{encoding:'utf8'}).trim(),
+  files:await releaseFiles(root),
+  maxFileBytes:25*1024**2,
   totalBytes: sizes.reduce((a, s) => a + s.bytes, 0),
   gameUncompressedBytes: budget,
-  modelsBytes: manifest.assets.reduce((a, m) => a + m.bytes, 0),
+  modelsBytes: manifest.assets.filter(a=>a.kind==='model').reduce((a, m) => a + m.bytes, 0),
   largestFiles: sizes.sort((a, b) => b.bytes - a.bytes).slice(0, 8),
 };
 await writeFile("dist/release-report.json", JSON.stringify(report, null, 2));
-console.log("Release asset budget:", JSON.stringify(report, null, 2));
+const {files:integrity,...summary}=report;
+console.log("Release asset budget:", JSON.stringify({...summary,verifiedFiles:integrity.length}, null, 2));

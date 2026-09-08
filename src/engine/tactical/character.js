@@ -1,18 +1,20 @@
+import {WEAPONS} from './config.js';
 export const ACTOR_RADIUS=.3;
 export const ACTOR_HALF_HEIGHT=.55;
 
-export function isSafePosition({point,terrain,actors=[],actorSize={radius:ACTOR_RADIUS,halfHeight:ACTOR_HALF_HEIGHT}}) {
+export function isSafePosition({point,terrain,actors=[],mines=[],actorSize={radius:ACTOR_RADIUS,halfHeight:ACTOR_HALF_HEIGHT}}) {
   const {x,y}=point,{radius,halfHeight}=actorSize;
   if(![x,y].every(Number.isFinite)) return false;
   if(!terrain.materialAt(x,y-halfHeight-.04)) return false;
   for(const dx of [-radius,0,radius]) for(const dy of [-halfHeight+.08,0,halfHeight]) {
     if(terrain.materialAt(x+dx,y+dy)) return false;
   }
+  if(mines.some(m=>Math.hypot(m.x-x,m.y-y)<=WEAPONS.mine.radius+radius))return false;
   return !actors.some(a=>a.alive && Math.abs(a.x-x)<radius*2+.08 && Math.abs(a.y-y)<halfHeight*2+.08);
 }
 
-export function findSafeReturn({terrain,actors=[],safeZones,lastSafe,actorSize={radius:ACTOR_RADIUS,halfHeight:ACTOR_HALF_HEIGHT}}) {
-  const safe=point=>isSafePosition({point,terrain,actors,actorSize});
+export function findSafeReturn({terrain,actors=[],mines=[],safeZones,lastSafe,actorSize={radius:ACTOR_RADIUS,halfHeight:ACTOR_HALF_HEIGHT}}) {
+  const safe=point=>isSafePosition({point,terrain,actors,mines,actorSize});
   if(lastSafe && safe(lastSafe)) return {...lastSafe};
   const candidates=[];
   for(const zone of safeZones) {
@@ -40,7 +42,9 @@ export function createCharacter({R,world,spawn,health=100,maxHealth=100}) {
     health,maxHealth,grounded:false,hitAt:-100,lastSafe:null,guardAvailable:false,
     updateGrounded(){
       const p=body.translation(),v=body.linvel();
-      actor.grounded=v.y<.8 && [-.15,0,.15].some(dx=>{
+      // Crater steps can support the outer rim of the capsule. Center-only
+      // probes miss that contact and leave a stationary chicken unable to jump.
+      actor.grounded=v.y<.8 && [-.29,-.15,0,.15,.29].some(dx=>{
         const ray=new R.Ray({x:p.x+dx,y:p.y,z:0},{x:0,y:-1,z:0});
         const hit=world.castRayAndGetNormal(ray,.63,true,undefined,(group<<16)|1,collider,body);
         return hit && hit.normal.y>.4;

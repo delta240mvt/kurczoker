@@ -1,6 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {testBattle,stepFor,fixtureMap} from './helpers/brandBattle.js';
+import {createBattleSimulation} from '../src/engine/tactical/simulation.js';
+import {createQuickBattle} from '../src/game/quickBattle.js';
+
+test('kurczak na brzegu rzeczywistego krateru może wyskoczyć',async()=>{
+ const sim=await createBattleSimulation(createQuickBattle('yard',1));
+ try{stepFor(sim,1);sim.dispatch({type:'aim',angleDeg:40,power:9});sim.dispatch({type:'attack'});stepFor(sim,30);
+  assert.equal(sim.turn,2);assert.ok(sim.terrain.revision>0);const before=sim.player.body.translation().y;
+  assert.equal(sim.dispatch({type:'jump'}).accepted,true);stepFor(sim,.1);assert.ok(sim.player.body.translation().y>before+.2);
+ }finally{sim.dispose()}
+});
 
 test('ruch, skok i pauza wynikają z dynamicznego ciała',async()=>{
   const s=await testBattle();

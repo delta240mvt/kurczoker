@@ -20,6 +20,10 @@ const paths = (await walk("dist"))
   .map((p) => "/" + relative("dist", p).replaceAll("\\", "/"))
   .filter((p) => p !== "/_headers");
 const results = [];
+const release = JSON.parse(await readFile('dist/release-report.json', 'utf8'));
+const deployedRelease = await fetch(new URL('/release-report.json', base)).then(r => r.json());
+if (JSON.stringify(deployedRelease) !== JSON.stringify(release))
+  throw new Error('Deployed release report differs from the tested build.');
 for (let offset = 0; offset < paths.length; offset += 8) {
   results.push(
     ...(await Promise.all(
@@ -37,7 +41,13 @@ for (let offset = 0; offset < paths.length; offset += 8) {
           !cache?.includes("immutable")
         )
           throw new Error(`Cache missing: ${path}`);
-        return { path, status: r.status, type, cache };
+        const expected = release.files.find(f => '/'+f.path === path);
+        if (expected) {
+          const remote = Buffer.from(await fetch(new URL(path, base)).then(r => r.arrayBuffer()));
+          if (createHash('sha256').update(remote).digest('hex') !== expected.sha256)
+            throw new Error(`Deployed file differs from tested build: ${path}`);
+        }
+        return { path, status: r.status, type, cache, hashMatches: !!expected };
       }),
     )),
   );
@@ -54,6 +64,8 @@ const report = {
   base: base.href,
   checkedFiles: results.length,
   modelsMatch: true,
+  sourceCommit: release.sourceCommit,
+  releaseMatches: true,
   results,
 };
 await writeFile(
@@ -61,5 +73,5 @@ await writeFile(
   JSON.stringify(report, null, 2),
 );
 console.log(
-  `${results.length} deployed files: HTTP 200, JavaScript/GLB MIME and immutable cache PASS; all model hashes match.`,
+  `${results.length} deployed files: HTTP 200, JavaScript/GLB MIME and immutable cache PASS; release report and all served file hashes match.`,
 );

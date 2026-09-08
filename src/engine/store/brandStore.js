@@ -36,7 +36,7 @@ export function createBrandStore(seed=1,{storage}={}){
    startQuick(mapId,quickSeed=seed){const options=createQuickBattle(mapId,quickSeed);set({mode:'quick',quick:options,request:{serial:++serial,options,restore:null}})},
    menu(){set({mode:'menu',request:null})},
    async inspectSave(){set({loadingSave:true});try{const copies=await (await disk()).read();let valid=false;
-     for(const text of [copies.latest,copies.previous])if(text&&(await decodeCheckpoint(text)).ok){valid=true;break}set({savedAvailable:valid});
+     for(const text of [copies.latest,copies.previous]){if(!text)continue;const decoded=await decodeCheckpoint(text);if(decoded.ok){valid=decoded.value.game.status==='active';break}}set({savedAvailable:valid});
     }catch{set({saveError:'Zapis jest niedostępny. Możesz rozpocząć grę w tej karcie.'})}finally{set({loadingSave:false})}},
    async resume(){await queue;set({loadingSave:true});try{
      const copies=await (await disk()).read();for(const [index,text] of [copies.latest,copies.previous].entries()){
