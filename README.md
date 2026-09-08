@@ -1,112 +1,58 @@
 # KURCZOKER
 
-KURCZOKER is a static browser game and landing page built with Astro, vanilla JavaScript modules, Canvas 2D, CSS, and Node's built-in test runner.
+Taktyczny roguelite w przeglądarce: mapa → potyczki → nagrody i sklep → Jajokról → finał. Modele i otoczenie są przestrzenne. Walka odbywa się na czytelnej płaszczyźnie z kamerą obejmującą całą arenę.
 
-The game direction is a small roguelite loop: choose a route on the map, enter active-turn battles, collect rewards, improve the run, and push toward the boss. The project has no login, no backend, no database, and no required external runtime API.
+## Uruchomienie
 
-## Commands
+Node 22+ i npm. `npm ci`, następnie `npm run dev` i `/gra`.
 
-| Action | Command |
-| --- | --- |
-| Install dependencies | `npm install` |
-| Start local dev server | `npm run dev` |
-| Run tests | `npm test` |
-| Build static site | `npm run build` |
-| Preview built site | `npm run preview` |
-| Deploy `dist/` to Cloudflare Pages | `npm run deploy` |
+| Polecenie | Wynik |
+|---|---|
+| `npm test` | Testy domeny, rzeczywistej fizyki Rapier, checkpointów i modeli |
+| `npm run assets:build` | Animacje i kompresja autorskich modeli, manifest z haszami |
+| `npm run build` | Statyczne `dist`, usunięcie materiałów roboczych, kontrola budżetu |
+| `npm run preview` | Lokalny podgląd gotowego wydania |
+| `npm run test:visual` | Playwright: sam uruchamia serwer `dist`, desktop i dotyk, pełna wyprawa |
+| `npm run deploy` | Build i Cloudflare Pages preview bieżącej gałęzi |
 
-Astro owns the production build. `npm run build` writes the static output to `dist/`, and `npm run deploy` publishes that folder with Wrangler Pages.
+Przed pierwszym testem przeglądarkowym: `npx playwright install chromium`. W CI dodatkowo `--with-deps`.
 
-## Gameplay Loop
+## Sterowanie i zasady
 
-1. Start a run with the default `egg-bomb` ability.
-2. Pick an available node on the route map.
-3. Resolve the node: battle, elite, treasure, shop-style reward, or boss.
-4. In battle, take the player turn, aim, fire an ability, then survive the enemy response.
-5. Choose rewards such as artifacts, abilities, healing, or gold.
-6. Continue through the map until the boss is defeated or the run is lost.
-7. Restart creates a fresh run state.
+Masz 20 sekund na ruch, skok i jedną akcję. A/D lub strzałki poruszają bohaterem, W/↑ skacze. Mysz wskazuje kierunek i kąt, suwaki ustawiają kąt oraz moc. Strzałka obok suwaków odwraca kierunek rzutu. Spacja/Enter albo przycisk wykonuje wybraną zdolność. Escape zatrzymuje grę. Telefon ma osobne przyciski ruchu, skoku i akcji; można również celować dotykiem.
 
-The implementation is split into modules under `src/game/` so state, map, run, battle, abilities, physics, input, rendering, audio, and bootstrap code can be tested independently.
+Jajobomba zadaje 2 obrażenia, jajo chaosu dodaje 1. Wysoki skok i strażnik dają osłonę, magiczne ziarno leczy i wzmacnia następny rzut. Skorupa blokuje pierwsze trafienie każdego starcia. Pozostałe artefakty zwiększają zdrowie, szybkość, ziarna lub wybór nagród. Potyczka daje 4 ziarna, elita 6. Zakup kończy wizytę w sklepie. Boss ma 8 HP: warto wcześniej zbudować odpowiedni zestaw wzmocnień.
 
-## Controls
+Pauza i utrata fokusu zatrzymują czas oraz ruch. Checkpoint w `localStorage` powstaje na mapie, po zwycięstwie i w sklepie. Odświeżenie podczas walki wraca do ostatniego bezpiecznego miejsca. Zapis jest sprawdzany przed wznowieniem; porażka lub finał go usuwa. Dźwięk jest opcjonalny, początkowo wyciszony, inicjowany dopiero po kliknięciu.
 
-| Action | Input |
-| --- | --- |
-| Move | `A` / `D` or `ArrowLeft` / `ArrowRight` |
-| Jump | `W`, `Space`, or `ArrowUp` |
-| Aim | Mouse, pointer drag, or touch drag |
-| Fire selected ability | `Space`, `Enter`, pointer press, or touch press |
-| Start or restart | Start / restart control |
-| Mute toggle | Mute control |
+## Architektura
 
-Audio is muted by default. Web Audio is created only after an interaction, such as unmuting from the UI.
+- `src/engine/tactical/simulation.js`: jedna instancja Rapier, krok 1/60 s, kolizje obu stron i wynik. Tor podglądu jest liczony identyczną symulacją, a nie impulsem udającym prędkość.
+- `arena.js`: wspólna definicja widocznego terenu i colliderów.
+- `World.jsx`, `Chicken.jsx`, `Effects.jsx`: R3F/Three WebGL2, proceduralna diorama, animowane GLB, efekty trafienia.
+- `KurczokerCanvas.jsx` i `Controls.jsx`: kampania, interfejs, cykl życia areny, klawiatura/dotyk. React otrzymuje HUD około 10 razy na sekundę; fizyka działa niezależnie.
+- `src/game/run.js`, `abilities.js`, `map.js`: reguły wyprawy. Dawny silnik 2D pozostał jako materiał migracyjny i testy domeny, ale aktywny ekran nie wywołuje jego pętli walki.
+- `tools/build-game-assets.mjs`: trzy autorskie modele, klipy Idle/Walk/Attack, meshopt. Kolory materiałów zastępują ciężkie tekstury, nie wymagają transkodera KTX2. Pochodzenie i rozmiary: `releaseManifest.json`.
 
-## Tests
+Profil Wysoka używa cieni i DPR do 1,5; Oszczędna wyłącza cienie i ogranicza DPR do 1. Auto zaczyna oszczędnie na małych urządzeniach i obniża jakość przy słabym klatkażu. Stopka pokazuje FPS; atrybut `data-performance` zawiera także p95 czasu klatki, draw calls i trójkąty.
 
-Run all available tests:
+## Cloudflare
 
-```bash
-npm test
-```
+Statyczne Astro nie potrzebuje Workera, bazy danych ani R2 do działania gry. `tools/pages.config.json` wskazuje projekt **kurczoker-makeover**, gałąź produkcyjna `main`. Skrypt wdrożeniowy odczytuje lokalny `.env` albo zmienne środowiska (`CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, opcjonalnie `CF_PAGES_PROJECT`). Sekrety nigdy nie trafiają do klienta.
 
-The tests use `node --test` and focus on pure game behavior where possible: state, map generation, run transitions, physics, battle state, abilities, audio, and a full run progression check.
+`node tools/deploy-pages.mjs --branch baza080926-makeover` publikuje gotowe `dist` jako preview. Publikacja `main` wymaga jawnego `--production`. Przed nią uruchom testy przeciwko preview, ustawiając `KURCZOKER_VISUAL_BASE_URL` na jego adres HTTPS.
 
-## Build And Deploy
+Budżet: maksimum 10 MiB nieskompresowanego kodu/zasobów gry oraz 25 MiB na dowolny plik Pages. `dist/release-report.json` zapisuje rzeczywiste rozmiary. Haszowane GLB i pliki `_astro` mają cache immutable, HTML rewaliduje się. Źródłowe generacje pozostają w repo, są usuwane z `dist` po buildzie.
 
-Build the static Astro site:
+Opcjonalna analityka Umami wymaga `PUBLIC_UMAMI_SCRIPT_URL` (HTTPS) i `PUBLIC_UMAMI_WEBSITE_ID` podczas builda. Stary, zapisany w kodzie adres Vercel zwracał 404, dlatego bez konfiguracji skrypt nie jest ładowany. Zasady analityki opisuje `/polityka-prywatnosci`. Gra nie ma kont, rankingu ani zapisu w chmurze.
 
-```bash
-npm run build
-```
+## Audyt i odbiór
 
-Preview the built output:
+- [Audyt repo i research techniczny](docs/research/2026-09-08-kurczoker-audyt-i-plan-naprawczy.md)
+- [Zatwierdzony projekt](docs/superpowers/specs/2026-09-08-kurczoker-makeover-design.md)
+- [Plan i TODO](docs/superpowers/plans/2026-09-08-kurczoker-makeover.md)
+- [Wyniki odbioru i Cloudflare preview](docs/research/2026-09-08-makeover-odbior.md)
 
-```bash
-npm run preview
-```
+Testy Playwright zapisują obrazy i pomiary do `.superpowers/makeover-qa/`. Emulacja telefonu potwierdza interfejs i dotyk; pomiary Chromium ze SwiftShader nie są wynikiem fizycznego telefonu ani dedykowanego GPU.
 
-Deploy to Cloudflare Pages:
-
-```bash
-npm run deploy
-```
-
-Wrangler may require local Cloudflare authentication before deployment:
-
-```bash
-npx wrangler login
-```
-
-## Runtime Shape
-
-- Astro is the app shell and static build system.
-- Game code lives in vanilla JavaScript modules under `src/game/`.
-- Canvas 2D handles rendering.
-- Web Audio handles short optional effects and remains muted until the player enables it.
-- There is no server-side gameplay state.
-- There are no accounts, login flows, analytics, cookies, or database calls in this codebase.
-
-## Current Audio Effects
-
-`src/game/audio.js` exposes:
-
-- `createAudioController(options)`
-- `setMuted(audio, muted)`
-- `playEffect(audio, effectId)`
-
-Supported effect ids:
-
-- `shoot`
-- `hit`
-- `treasure`
-- `defeat`
-- `victory`
-
-## Contributing
-
-Keep changes scoped to the relevant module, avoid reverting other agents' work, and run the narrowest useful tests before handing off. Do not commit generated output such as `dist/`.
-
-## License
-
-MIT - see [`LICENSE`](LICENSE).
+Pomiar sprzętowego Direct3D11 na Windows: `node test/visual/profile.mjs`. Licencja projektu: [MIT](LICENSE).

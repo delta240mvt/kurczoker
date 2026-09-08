@@ -26,6 +26,7 @@ function createEngineBattleState(game) {
   const enemyType = boss ? "boss" : elite ? "elite" : "grunt";
 
   return createBattleState({
+    nodeId: battle.nodeId,
     encounterId: battle.encounterId,
     type: battle.type,
     actors: [
@@ -38,6 +39,7 @@ function createEngineBattleState(game) {
       })
     ],
     artifacts: game.run.artifacts,
+    playerSpeed: 0.22 + (game.run.stats?.moveSpeedBonus ?? 0),
     eggBombDamageBonus: game.run.stats?.eggBombDamageBonus ?? 0,
     damageReduction: game.run.stats?.damageReduction ?? 0
   });
@@ -72,6 +74,23 @@ export function createEngineStateInitializer(seed = 1) {
     input: { aim: { x: 0, y: 0 }, moveX: 0, jump: false, firing: false },
     selectNode(nodeId) {
       set({ game: hydrateEngineBattle(selectMapNode(get().game, nodeId)) });
+    },
+    finishEncounter({ encounterId, won, health }) {
+      const game = get().game;
+      if (game.scene !== SCENES.BATTLE || game.battle?.encounterId !== encounterId || !Number.isFinite(health)) return;
+      const run = { ...game.run, health: Math.max(0, Math.min(game.run.maxHealth, health)),
+        gold: game.run.gold + (won ? game.battle.type === 'elite' ? 6 : 4 : 0),
+        temporarySummons: (game.run.temporarySummons ?? []).map(s => ({ ...s, ttl: s.ttl - 1 })).filter(s => s.ttl > 0) };
+      const next = { ...game, run, battle: null };
+      set({ game: won && run.health > 0 ? completeCurrentNode(next) : markRunDefeated(next) });
+    },
+    selectAbility(id) {
+      const game = get().game;
+      if (!game.run.abilities.includes(id)) return;
+      set({ game: { ...game, ui: { ...game.ui, selectedAbilityId: id } } });
+    },
+    restore(game) {
+      set({ game, input: { aim: { x: 0, y: 0 }, moveX: 0, jump: false, firing: false } });
     },
     chooseReward(rewardId) {
       const game = get().game;
@@ -125,7 +144,7 @@ export function createEngineStateInitializer(seed = 1) {
       set({ game: toggleMuteState(get().game) });
     },
     reset() {
-      set({ game: setUiMessage(resetRun(get().game), "Nowa wyprawa gotowa.") });
+      set({ game: setUiMessage(resetRun(get().game), "Nowa wyprawa gotowa."), input: { aim: { x: 0, y: 0 }, moveX: 0, jump: false, firing: false } });
     }
   });
 }

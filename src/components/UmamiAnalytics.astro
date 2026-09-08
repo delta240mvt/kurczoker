@@ -1,6 +1,8 @@
-<script
-  is:inline
-  defer
-  src="https://umami-blue-ten-84.vercel.app/script.js"
-  data-website-id="6bada284-fbbd-40ae-ac28-40ee0caab045"
-></script>
+---
+// The previous hard-coded Vercel deployment returns 404. Enable tracking only
+// when an operator supplies a working endpoint and its matching website ID.
+const scriptUrl = import.meta.env.PUBLIC_UMAMI_SCRIPT_URL;
+const websiteId = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID;
+const enabled = typeof scriptUrl === 'string' && scriptUrl.startsWith('https://') && typeof websiteId === 'string' && websiteId.length > 0;
+---
+{enabled && <script is:inline defer src={scriptUrl} data-website-id={websiteId}></script>}

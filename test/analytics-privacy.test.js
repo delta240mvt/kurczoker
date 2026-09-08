@@ -2,18 +2,18 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-const UMAMI_SCRIPT_URL = "https://umami-blue-ten-84.vercel.app/script.js";
-const UMAMI_WEBSITE_ID = "6bada284-fbbd-40ae-ac28-40ee0caab045";
-
 function withoutDiacritics(value) {
   return value.normalize("NFD").replace(/\p{Diacritic}/gu, "").replaceAll("ł", "l").replaceAll("Ł", "L");
 }
 
-test("Umami analytics script is defined once in a reusable head component", async () => {
+test("Umami analytics is optional and requires a configured HTTPS endpoint and website", async () => {
   const analyticsComponent = await readFile("src/components/UmamiAnalytics.astro", "utf8");
 
-  assert.match(analyticsComponent, new RegExp(`src="${UMAMI_SCRIPT_URL.replaceAll(".", "\\.")}"`));
-  assert.match(analyticsComponent, new RegExp(`data-website-id="${UMAMI_WEBSITE_ID}"`));
+  assert.match(analyticsComponent, /PUBLIC_UMAMI_SCRIPT_URL/);
+  assert.match(analyticsComponent, /PUBLIC_UMAMI_WEBSITE_ID/);
+  assert.match(analyticsComponent, /enabled && <script/);
+  assert.match(analyticsComponent, /src=\{scriptUrl\}/);
+  assert.match(analyticsComponent, /data-website-id=\{websiteId\}/);
   assert.match(analyticsComponent, /\bdefer\b/);
   assert.match(analyticsComponent, /\bis:inline\b/);
 });

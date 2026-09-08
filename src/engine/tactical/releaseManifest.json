@@ -1,0 +1,35 @@
+{
+  "hero-chicken": {
+    "url": "/game/release/hero-chicken.1fba7d2e222f.glb",
+    "bytes": 72152,
+    "animations": [
+      "Idle",
+      "Walk",
+      "Attack"
+    ],
+    "source": "Original procedural mesh: tools/generate-true-3d-chicken-actors.mjs",
+    "compression": "EXT_meshopt_compression; material colors, no raster textures"
+  },
+  "enemy-rooster": {
+    "url": "/game/release/enemy-rooster.37f86fa86010.glb",
+    "bytes": 69508,
+    "animations": [
+      "Idle",
+      "Walk",
+      "Attack"
+    ],
+    "source": "Original procedural mesh: tools/generate-true-3d-chicken-actors.mjs",
+    "compression": "EXT_meshopt_compression; material colors, no raster textures"
+  },
+  "boss-rooster": {
+    "url": "/game/release/boss-rooster.951482c5886a.glb",
+    "bytes": 70156,
+    "animations": [
+      "Idle",
+      "Walk",
+      "Attack"
+    ],
+    "source": "Original procedural mesh: tools/generate-true-3d-chicken-actors.mjs",
+    "compression": "EXT_meshopt_compression; material colors, no raster textures"
+  }
+}

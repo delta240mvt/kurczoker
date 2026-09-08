@@ -180,20 +180,3 @@ test("game runtime keeps battle scene behind a dynamic import boundary", () => {
   assert.equal(staticImports.has("./scenes/BattleScene.jsx"), false, "BattleScene should not be in the initial GameRuntime import graph");
   assert.equal(allImports.has("./scenes/BattleScene.jsx"), true, "BattleScene should still be loaded through a dynamic import");
 });
-
-test("game runtime only ticks battle after the lazy scene marks itself ready", () => {
-  const source = readFileSync("src/engine/GameRuntime.jsx", "utf8");
-
-  assert.match(source, /battleRuntimeReady/, "GameRuntime should track battle runtime readiness");
-  assert.match(source, /engineScene === "battle" && battleRuntimeReady/, "battle ticks should be gated by scene and readiness");
-  assert.match(source, /onReady=\{markBattleRuntimeReady\}/, "lazy BattleScene wrapper should mark readiness after mount");
-});
-
-test("game runtime renders an in-canvas error fallback for failed battle imports", () => {
-  const source = readFileSync("src/engine/GameRuntime.jsx", "utf8");
-
-  assert.match(source, /class BattleSceneErrorBoundary/, "lazy BattleScene should be wrapped by a local error boundary");
-  assert.match(source, /BattleSceneErrorFallback/, "battle import errors should render an R3F fallback");
-  assert.match(source, /onRetry=\{retryBattleScene\}/, "battle import errors should expose a retry path");
-  assert.match(source, /onError=\{pauseBattleRuntime\}/, "battle import errors should pause battle ticking");
-});

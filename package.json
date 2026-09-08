@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro build && node tools/prepare-release.mjs",
+    "assets:build": "node tools/build-game-assets.mjs",
     "preview": "astro preview",
     "test": "node --test test/*.test.js",
     "test:visual": "node --test test/visual/*.test.js",
@@ -14,6 +15,7 @@
   },
   "dependencies": {
     "@astrojs/react": "^5.0.4",
+    "@dimforge/rapier3d-compat": "^0.20.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
     "@react-three/rapier": "^2.2.0",
@@ -26,6 +28,10 @@
   "devDependencies": {
     "@babel/parser": "^7.29.3",
     "@cloudflare/mcp-server-cloudflare": "^0.1.2",
+    "@gltf-transform/core": "^4.5.0",
+    "@gltf-transform/extensions": "^4.5.0",
+    "@gltf-transform/functions": "^4.5.0",
+    "meshoptimizer": "^1.2.0",
     "playwright": "^1.59.1",
     "pngjs": "^7.0.0",
     "threejs-devtools-mcp": "^0.4.1",
