@@ -145,3 +145,12 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - GREEN:23/23 testów ekonomii, wyprawy i arsenału; parser JSX RewardPanel/ShopPanel PASS. Cztery pełne przejścia domenowe, odrzucanie duplikatów i brak zmiany wejściowego stanu sprawdzone.
 - Ekrany łupu/sklepu są gotowe do podłączenia w task21; nie są jeszcze aktywnym trybem aplikacji. Test całej wyprawy przez UI, czas10–15min i odświeżenie pozostają task21/25.
 - Artefakty: .superpowers/brand-expedition-red.log, brand-economy-runtime-red.log, brand-upgrades-red.log, brand-economy-final-tests.log. Task17–18 zapisane razem, ponieważ wynik walki generuje bezpośrednio ofertę nagrody.
+
+## Task 19 — Jajokról
+
+- RED: brak intencji bossa. GREEN:14/14 testów bossa, tur i ekonomii; parser trzech komponentów JSX PASS.
+- Zamiar jest ustalany przed ruchem gracza. Salwa ma2 granaty, poniżej połowy HP3; cel pozostaje ten sam mimo przemieszczenia gracza i jest oznaczony w świecie.
+- Szarża porusza dynamiczną kapsułę, respektuje collider i podłoże, ma maksymalnie8 jednostek oraz jedno trafienie20HP. Wycięcie podłoża po zapowiedzi zatrzymuje ją bez zastąpienia ukrytą salwą.
+- Testy przeprowadzają salwy obu faz, przejście do następnej zapowiedzi, szarżę przez rzeczywistą fizykę i jej zatrzymanie. Fixture500HP izoluje zachowanie szarży od wcześniejszej porażki; nie stanowi dowodu balansu wyprawy. Odbiór bossa przez UI z produkcyjnym100HP i końcami wyprawy należy do task21/25.
+- ResultPanel ma oba zakończenia i wejścia do nowej wyprawy/potyczki. Pełne połączenie ekranów w task21.
+- Artefakty: .superpowers/brand-boss-red.log, brand-boss-tests.log, brand-boss-final-tests-2.log.

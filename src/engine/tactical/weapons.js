@@ -87,7 +87,7 @@ export function useTool(command,battle) {
   return {accepted:true};
 }
 
-function damageActor(actor,damage,impulse,battle) {
+export function damageActor(actor,damage,impulse,battle) {
  if(damage>0&&actor.guardAvailable){damage=Math.ceil(damage/2);actor.guardAvailable=false;}
  const actual=Math.min(actor.health,damage);actor.health-=actual;actor.hitAt=battle.time;
  if(actor.health<=0)actor.body.setEnabled(false);else actor.body.applyImpulse(impulse,true);

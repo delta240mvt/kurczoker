@@ -3,7 +3,7 @@ import {useRef,useState} from 'react';
 import {World} from '../tactical/World.jsx';
 import {BrandWorld} from '../tactical/BrandWorld.jsx';
 import {TerrainView} from '../tactical/TerrainView.jsx';
-import {RopeVisual,ToolVisual} from '../tactical/TacticalOverlays.jsx';
+import {RopeVisual,ToolVisual,BossTargetVisual} from '../tactical/TacticalOverlays.jsx';
 import {Chicken} from '../tactical/Chicken.jsx';
 import {ShotVisual,ImpactVisual,MineVisual,ConeVisual} from '../tactical/Effects.jsx';
 export function BattleScene({sim,quality,onSnapshot,onEvent,onOutcome,onReady,onAim,view={mode:'move'},toolId='pickaxe',onCommand,onView}) {
@@ -38,6 +38,7 @@ export function BattleScene({sim,quality,onSnapshot,onEvent,onOutcome,onReady,on
   {terrain?<><BrandWorld arena={sim.arena}/><TerrainView terrainSnapshot={terrain}/><RopeVisual sim={sim}/><ToolVisual sim={sim} toolId={toolId} visible={view.mode==='tool'}/></>:<World arena={sim.arena} quality={quality}/>}
   {sim.actors.map(a=><Chicken key={a.id} sim={sim} actorId={a.id} side={a.team} boss={a.role==='boss'||sim.options.type==='boss'&&a.team==='enemy'}/>)}
   <ShotVisual sim={sim} showAim={!terrain||view.mode==='aim'}/>
+  <BossTargetVisual sim={sim}/>
   {impacts.map(impact=><ImpactVisual key={impact.id} event={impact} sim={sim}/>)}
   <MineVisual sim={sim}/>{cone&&<ConeVisual key={cone.id} event={cone} sim={sim}/>}
   <mesh position={terrain?[sim.arena.width/2,sim.arena.height/2,3]:[0,3,0]}

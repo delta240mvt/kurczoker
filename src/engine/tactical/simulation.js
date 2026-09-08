@@ -15,6 +15,7 @@ import {WEAPONS,projectileDefinition,nextRandom} from './config.js';
 import {explode,useTool,executeWeapon,coneRays,performKick} from './weapons.js';
 import {nextPhase as resolveTurn} from './turns.js';
 import {planEnemyAction} from './enemyAI.js';
+import {announceBoss,startBossAction,stepBossCharge,resolveBossChargeHit} from './boss.js';
 
 let initialization;
 export async function createBattleSimulation(options = {}) {
@@ -80,6 +81,7 @@ class BattleSimulation {
     this.trajectoryCache = null;
     this.world.step(this.queue);
     this.actors.forEach(a=>a.updateGrounded());
+    this.boss=this.terrain?announceBoss(this):null;
   }
   dispatch(command) {
     if(!command || typeof command!=='object') return {accepted:false,reason:'invalid'};
@@ -210,12 +212,13 @@ class BattleSimulation {
   }
   startNextEnemy() {
     if(this.finishResult())return;
+    if(this.boss&&this.activeEnemyId===this.boss.actorId&&this.phase==='enemy-resolve')this.boss.actionIndex++;
     const result=resolveTurn({actors:this.actors,phase:'enemy-resolve',enemyQueue:this.enemyQueue,turn:this.turn,toolUsed:this.toolUsed});
     this.enemyQueue=result.enemyQueue;
     this.activeEnemyId=this.enemyQueue.shift()??null;
     if(!this.activeEnemyId){this.nextPhase('settle');return;}
     const actor=this.actors.find(a=>a.id===this.activeEnemyId);
-    this.enemyPlan=planEnemyAction({actor:actor.snapshot(),snapshot:this.snapshot({includeTerrain:false}),terrain:this.terrain,castSegment:this.castSegment});
+    this.enemyPlan=actor.role==='boss'&&this.boss?{moveDirection:0,moveSeconds:0,weaponId:'granajko',label:this.boss.intent.label}:planEnemyAction({actor:actor.snapshot(),snapshot:this.snapshot({includeTerrain:false}),terrain:this.terrain,castSegment:this.castSegment});
     this.events.push({id:'tell-'+this.turn+'-'+actor.id,type:'telegraph',time:this.time,payload:{actorId:actor.id}});
     this.nextPhase('enemy-tell');
   }
@@ -248,10 +251,12 @@ class BattleSimulation {
         : 0,
     );
     this.enemies.forEach(a=>this.stepActor(a,this.phase==='enemy-move'&&a.id===this.activeEnemyId?(this.enemyPlan?.moveDirection??0)*3:0));
+    if(this.phase==='enemy-charge')stepBossCharge(this,STEP);
     this.rope.step(STEP);
     this.world.step(this.queue);
     this.actors.forEach(a=>a.updateGrounded());
     this.resolveFalls();
+    if(this.phase==='enemy-charge')resolveBossChargeHit(this);
     const mineTick=tickMines(this.mines,this.actors.map(a=>a.snapshot()),STEP,this.terrain);
     this.mines=mineTick.mines;
     for(const mine of mineTick.explosions)explode({id:mine.id,point:mine,radius:WEAPONS.mine.radius,maxDamage:WEAPONS.mine.damage,ownerId:mine.ownerId},this);
@@ -270,6 +275,7 @@ class BattleSimulation {
       if(this.enemyPlan?.jump)active.jump();
     } else if(this.phase==='enemy-move' && this.phaseTime>=Math.min(1.5,this.enemyPlan?.moveSeconds??0)) {
       if(!active || active.health<=0){this.startNextEnemy();return;}
+      if(active.role==='boss'&&this.boss){startBossAction(this,active);return;}
       const plan=planEnemyAction({actor:active.snapshot(),snapshot:this.snapshot({includeTerrain:false}),terrain:this.terrain,castSegment:this.castSegment,allowMove:false});
       if(!plan){this.startNextEnemy();return;}
       if(plan.weaponId==='kick'){performKick(active,Math.cos(plan.angleDeg*Math.PI/180)>=0?1:-1,this);this.nextPhase('enemy-resolve');return;}
@@ -280,6 +286,7 @@ class BattleSimulation {
     } else if(this.phase==='settle' && this.phaseTime>=.65) {
       this.turn++;this.toolUsed=false;this.activeEnemyId=null;this.enemyPlan=null;
       this.nextPhase('player');
+      if(this.boss)this.boss=announceBoss(this);
     }
   }
   stepActor(actor, vx) {
@@ -358,6 +365,7 @@ class BattleSimulation {
     });
     return {
       schemaVersion:2,
+      boss:this.boss?structuredClone(this.boss):null,
       actors:this.actors.map(a=>a.snapshot()),
       terrain:includeTerrain?(this.terrain?.snapshot()??null):null,
       rope:this.rope.snapshot(),

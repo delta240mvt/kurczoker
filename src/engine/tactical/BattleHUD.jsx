@@ -1,7 +1,7 @@
 import {useEffect,useMemo,useRef} from 'react';
 import {WEAPONS} from './config.js';
 import {createInputRouter,bindInput} from './input.js';
-const PHASE={player:'Twój ruch. Bez pośpiechu.','player-shot':'Jajko w drodze…','enemy-tell':'Kogut szykuje atak','enemy-move':'Kogut zmienia pozycję','enemy-shot':'Uwaga, leci jajko!','enemy-resolve':'Opadają pióra…',settle:'Za chwilę Twój ruch',finished:'Potyczka rozstrzygnięta'};
+const PHASE={player:'Twój ruch. Bez pośpiechu.','player-shot':'Jajko w drodze…','enemy-tell':'Kogut szykuje atak','enemy-move':'Kogut zmienia pozycję','enemy-charge':'Jajokról szarżuje!','enemy-shot':'Uwaga, leci jajko!','enemy-resolve':'Opadają pióra…',settle:'Za chwilę Twój ruch',finished:'Potyczka rozstrzygnięta'};
 export function BattleHUD({sim,snapshot,onCommand,onPause,view,onView,toolId,onTool,notice}) {
  const current=useRef({onPause,onView,view,onCommand});current.current={onPause,onView,view,onCommand};
  const router=useMemo(()=>createInputRouter(command=>current.current.onCommand(command)),[]);
@@ -28,7 +28,7 @@ export function BattleHUD({sim,snapshot,onCommand,onPause,view,onView,toolId,onT
  return <div className="brand-hud">
   <header className="brand-battle-top"><div><small>KURCZOKER · TURA {snapshot.turn}</small><strong>♥ {hero.health}<span> / {hero.maxHealth}</span></strong></div>
    <button aria-label="Pauza" onClick={onPause}>Ⅱ <span>Pauza</span></button></header>
-  {!overview&&<div className="brand-phase" role="status">{snapshot.phase==='enemy-tell'&&snapshot.enemyPlan?({grenadier:'Grenadier szykuje granat',rusher:'Szturmowiec rusza do ataku',shooter:'Strzelec mierzy'})[snapshot.actors.find(a=>a.id===snapshot.activeEnemyId)?.role]??PHASE[snapshot.phase]:PHASE[snapshot.phase]}</div>}
+  {!overview&&<div className="brand-phase" role="status">{snapshot.phase==='player'&&snapshot.boss?snapshot.boss.intent.label:snapshot.phase==='enemy-tell'&&snapshot.enemyPlan?({grenadier:'Grenadier szykuje granat',rusher:'Szturmowiec rusza do ataku',shooter:'Strzelec mierzy'})[snapshot.actors.find(a=>a.id===snapshot.activeEnemyId)?.role]??snapshot.enemyPlan.label??PHASE[snapshot.phase]:PHASE[snapshot.phase]}</div>}
   <div className="brand-map-tools"><button aria-label={view.mode==='overview'?'Do kurczaka':'Mapa'} onClick={()=>mode(view.mode==='overview'?'move':'overview')}>{view.mode==='overview'?'↩ Do kurczaka':'▦ Mapa'}</button>
    {overview&&<><button aria-label="Przybliż mapę" onClick={()=>onView({...view,overviewCenter:{...view.overviewCenter,zoom:Math.min(4,(view.overviewCenter?.zoom??1)*1.4)}})}>＋</button><button aria-label="Oddal mapę" onClick={()=>onView({...view,overviewCenter:{...view.overviewCenter,zoom:Math.max(1,(view.overviewCenter?.zoom??1)/1.4)}})}>−</button></>}
   </div>

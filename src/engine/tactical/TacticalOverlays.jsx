@@ -23,3 +23,11 @@ export function ToolVisual({sim,toolId,visible}) {
  });
  return <mesh ref={ref}><planeGeometry/><meshBasicMaterial color="#F2E500" transparent opacity={.4} depthWrite={false}/></mesh>;
 }
+export function BossTargetVisual({sim}){
+ const group=useRef();useFrame(()=>{
+  if(!group.current||sim.disposed)return;const intent=sim.boss?.intent;
+  group.current.visible=!!intent&&intent.type==='salvo'&&sim.phase==='player'&&!sim.outcome;
+  if(intent)group.current.position.set(intent.target.x,intent.target.y,1.6);
+ });
+ return <group ref={group} visible={false}><mesh><ringGeometry args={[.85,1,32]}/><meshBasicMaterial color="#E34959" transparent opacity={.8} depthWrite={false}/></mesh>{[0,1].map(i=><mesh key={i} rotation={[0,0,i*Math.PI/2]}><planeGeometry args={[2.4,.06]}/><meshBasicMaterial color="#E34959" transparent opacity={.8} depthWrite={false}/></mesh>)}</group>;
+}

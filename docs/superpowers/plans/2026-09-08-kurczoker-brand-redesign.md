@@ -799,7 +799,7 @@ const paid={...game,grain:game.grain-offer.price,
 
 **Interfaces:** `bossIntent({health,maxHealth,actionIndex,canCharge}):{type:'salvo'|'charge',shots:number,label:string}`; snapshot dodaje `boss:{actionIndex,intent}|null`. Intencję ustalaj przed player phase i zachowuj; zablokowana później szarża kończy się na przeszkodzie i ogłasza kolejny zamiar, nie podmienia się skrycie na salwę.
 
-- [ ] Test:
+- [x] Test:
 
 ```js
 import test from 'node:test';
@@ -813,8 +813,8 @@ test('druga faza ma mocniejszą salwę, blokada nie tworzy teleportu',()=>{
 });
 ```
 
-- [ ] `node --test test/brand-boss.test.js` → RED.
-- [ ] Wzorzec parzysta akcja salwa2, nieparzysta szarża; low HP salwa3. Szarża ma max8jednostek, shape casts, jedno trafienie na cel. Faza niskiego HP nie leczy i nie wyłącza kolizji. Implementuj intencję:
+- [x] `node --test test/brand-boss.test.js` → RED.
+- [x] Wzorzec parzysta akcja salwa2, nieparzysta szarża; low HP salwa3. Szarża ma max8jednostek, shape casts, jedno trafienie na cel. Faza niskiego HP nie leczy i nie wyłącza kolizji. Implementuj intencję:
 
 ```js
 const charge=actionIndex%2===1 && canCharge;
@@ -822,8 +822,8 @@ return charge?{type:'charge',shots:0,label:'Jajokról szykuje szarżę'}:
  {type:'salvo',shots:health<maxHealth/2?3:2,label:'Jajokról szykuje salwę'};
 ```
 
-- [ ] Rozegraj obie fazy; wynik „Korona spadła” lub „Tym razem kurnik górą”, przyciski nowa wyprawa/szybka potyczka. Testuj szarżę w ścianę zmienioną po zapowiedzi i finał przy jednoczesnej śmierci.
-- [ ] Test boss/turns PASS; commit `feat: add readable boss patterns and expedition endings`.
+- [x] Rozegraj obie fazy; wynik „Korona spadła” lub „Tym razem kurnik górą”, przyciski nowa wyprawa/szybka potyczka. Testuj szarżę w ścianę zmienioną po zapowiedzi i finał przy jednoczesnej śmierci.
+- [x] Test boss/turns PASS; commit `feat: add readable boss patterns and expedition endings`.
 
 ## Task 20 (M3): Checkpoint v2, IndexedDB i druga szansa
 
