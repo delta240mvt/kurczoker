@@ -429,7 +429,7 @@ state.inventory.tools[toolId]--; state.toolUsed=true;
 
 **Interfaces:** `nextPhase(state):state` w turns.js; `planEnemyAction({actor,snapshot,terrain}):{moveDirection,moveSeconds,weaponId,angleDeg,power}|null` w enemyAI.js. Na tym etapie shooter wybiera balistyczny strzał i krótki ruch; task15 rozwija role.
 
-- [ ] Test:
+- [x] Test:
 
 ```js
 import test from 'node:test';
@@ -448,8 +448,8 @@ test('namysł nie kończy tury, pass daje widoczny atak wroga i nową turę',asy
 });
 ```
 
-- [ ] `node --test test/brand-turns.test.js` → RED.
-- [ ] Kolejka jest snapshotem ID żywych wrogów po ataku gracza. Pomijaj zmarłego wroga. Reguła wyniku ma pierwszeństwo przed nową turą:
+- [x] `node --test test/brand-turns.test.js` → RED.
+- [x] Kolejka jest snapshotem ID żywych wrogów po ataku gracza. Pomijaj zmarłego wroga. Reguła wyniku ma pierwszeństwo przed nową turą:
 
 ```js
 const player=state.actors.find(a=>a.team==='player');
@@ -458,8 +458,8 @@ state.outcome=player.health<=0?'lost':!enemiesAlive?'won':null;
 if(state.outcome) state.phase='finished';
 ```
 
-- [ ] Dodaj telegraph .7s, ruch max1.5s, jeden attack; projectile TTL8s, resolve nie czeka na bezruch liny/dym. Pause zatrzymuje wszystkie te czasy. Testuj podwójny wynik, jednoczesną śmierć, trup w kolejce i wiszącego gracza.
-- [ ] Testy tur i pocisków PASS; commit `feat: resolve untimed player turns and enemy responses`.
+- [x] Dodaj telegraph .7s, ruch max1.5s, jeden attack; projectile TTL8s, resolve nie czeka na bezruch liny/dym. Pause zatrzymuje wszystkie te czasy. Testuj podwójny wynik, jednoczesną śmierć, trup w kolejce i wiszącego gracza.
+- [x] Testy tur i pocisków PASS; commit `feat: resolve untimed player turns and enemy responses`.
 
 ## Task 10 (M1): Arbitraż dotyku i klawiatury bez przypadkowych strzałów
 

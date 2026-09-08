@@ -67,3 +67,10 @@ Gałąź `baza080926-makeover`, istniejący checkout. Plan: `docs/superpowers/pl
 - GREEN: 8 testów narzędzi i balistyki PASS.
 - Podgląd nie mutuje świata, puste narzędzie i fundament nie kosztują ładunku, udany wykop zużywa jedną akcję narzędzia i zostawia atak.
 - Rzeczywisty ruch przez tunel wykrył próg siatki. Po diagnozie wyrównano dolną krawędź kilofa do pobliskiego podłoża; ciało przechodzi teraz cały wykop, bez przenoszenia pozycji.
+
+## Task 09 — tury i wynik
+
+- RED: pass i kolejka przeciwników nie istniały.
+- GREEN: 9 testów tur i balistyki PASS; 6 istniejących testów tactical-simulation również PASS po integracji.
+- Dowolny czas namysłu, telegraph 0.7 s, ograniczony ruch, jeden fizyczny atak każdego żywego przeciwnika i nowa tura.
+- Sprawdzone pomijanie trupa w kolejce, pauza telegraphu, odnowienie narzędzia, tura wiszącego na lassie bohatera i jeden wynik lost przy jednoczesnej śmierci.

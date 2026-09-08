@@ -12,6 +12,8 @@ import {syncTerrainColliders} from './terrain/collisions.js';
 import {createRope} from './rope.js';
 import {createSegmentCaster,stepProjectile,predictTrajectory} from './projectiles.js';
 import {explode,useTool} from './weapons.js';
+import {nextPhase as resolveTurn} from './turns.js';
+import {planEnemyAction} from './enemyAI.js';
 
 let initialization;
 export async function createBattleSimulation(options = {}) {
@@ -50,6 +52,9 @@ class BattleSimulation {
     this.toolUsed=false;
     this.castSegment=createSegmentCaster(this.world,this.actors);
     this.phase = "player";
+    this.enemyQueue=[];
+    this.activeEnemyId=null;
+    this.enemyPlan=null;
     this.turn = 1;
     this.time = 0;
     this.remaining = null;
@@ -82,6 +87,7 @@ class BattleSimulation {
       this.angle=clamp(command.angleDeg,-180,180);this.power=clamp(command.power,2,18);
       this.facing=Math.cos(this.angle*Math.PI/180)>=0?1:-1;return {accepted:true};
     }
+    if(command.type==='pass'){this.direction=0;this.beginEnemyResponses();return {accepted:true};}
     if(command.type==='tool') return useTool(command,this);
     if(command.type==='attack') return {accepted:this.fire()};
     if(command.type==='jump') return {accepted:this.jump()};
@@ -132,11 +138,11 @@ class BattleSimulation {
       this.player.grounded = false;
       this.guard = Math.max(this.guard, 1);
       this.events.push({ type: "ability", ability });
-      this.nextPhase("enemy-tell");
+      this.beginEnemyResponses();
     } else if (ability === "guard-chick") {
       this.guard = 1;
       this.events.push({ type: "ability", ability });
-      this.nextPhase("enemy-tell");
+      this.beginEnemyResponses();
     } else if (ability === "mana-grain") {
       this.player.health = Math.min(
         this.player.maxHealth,
@@ -144,7 +150,7 @@ class BattleSimulation {
       );
       this.boost = 1;
       this.events.push({ type: "ability", ability });
-      this.nextPhase("enemy-tell");
+      this.beginEnemyResponses();
     } else {
       this.spawnProjectile(
         "player",
@@ -155,12 +161,39 @@ class BattleSimulation {
     }
     return true;
   }
-  spawnProjectile(team, origin, velocity) {
-    const owner=team==='player'?this.player:this.enemy;
+  spawnProjectile(team, origin, velocity, actor) {
+    const owner=actor??(team==='player'?this.player:this.enemy);
     const shot={id:++this.shotId,ownerId:owner.id,weaponId:'jajooka',team,
       x:origin.x,y:origin.y,z:0,vx:velocity.x,vy:velocity.y,age:0,fuse:null,bounces:0};
     this.projectiles.push(shot);this.projectile=this.projectiles[0];
     this.events.push({id:'shoot-'+shot.id,type:'shoot',team,time:this.time,payload:{ownerId:owner.id}});
+  }
+  finishResult() {
+    if(this.outcome)return true;
+    const result=resolveTurn({actors:this.actors,phase:'check'});
+    if(!result.outcome)return false;
+    this.outcome=result.outcome;this.direction=0;this.rope.reel(0);
+    this.nextPhase('finished');this.events.push({id:'result',type:this.outcome,time:this.time});
+    this.actors.filter(a=>a.health<=0).forEach(a=>a.body.setEnabled(false));
+    return true;
+  }
+  beginEnemyResponses() {
+    this.direction=0;this.rope.reel(0);
+    if(this.finishResult())return;
+    const result=resolveTurn({actors:this.actors,phase:'player-resolve'});
+    this.enemyQueue=result.enemyQueue;
+    this.startNextEnemy();
+  }
+  startNextEnemy() {
+    if(this.finishResult())return;
+    const result=resolveTurn({actors:this.actors,phase:'enemy-resolve',enemyQueue:this.enemyQueue,turn:this.turn,toolUsed:this.toolUsed});
+    this.enemyQueue=result.enemyQueue;
+    this.activeEnemyId=this.enemyQueue.shift()??null;
+    if(!this.activeEnemyId){this.nextPhase('settle');return;}
+    const actor=this.actors.find(a=>a.id===this.activeEnemyId);
+    this.enemyPlan=planEnemyAction({actor:actor.snapshot(),snapshot:this.snapshot(),terrain:this.terrain});
+    this.events.push({id:'tell-'+this.turn+'-'+actor.id,type:'telegraph',time:this.time,payload:{actorId:actor.id}});
+    this.nextPhase('enemy-tell');
   }
   nextPhase(phase) {
     this.phase = phase;
@@ -190,7 +223,7 @@ class BattleSimulation {
         ? this.direction * (4 + (this.options.stats?.moveSpeedBonus ?? 0) * 12)
         : 0,
     );
-    this.enemies.forEach(a=>this.stepActor(a,0));
+    this.enemies.forEach(a=>this.stepActor(a,this.phase==='enemy-move'&&a.id===this.activeEnemyId?(this.enemyPlan?.moveDirection??0)*3:0));
     this.rope.step(STEP);
     this.world.step(this.queue);
     this.actors.forEach(a=>a.updateGrounded());
@@ -203,21 +236,21 @@ class BattleSimulation {
     }
     this.projectile=this.projectiles[0]??null;
     if (this.outcome) return;
-    if (this.phase === "enemy-tell" && this.phaseTime >= 1.3) {
-      const from = this.origin(this.enemy),
-        target = this.player.body.translation();
-      const flight = 1.18;
-      // A visible, physically simulated attack aimed at the player's current position.
-      this.spawnProjectile("enemy", from, {
-        x: (target.x - from.x) / flight,
-        y: (target.y - from.y - 0.5 * GRAVITY * flight ** 2) / flight,
-        z: 0,
-      });
-      this.nextPhase("enemy-shot");
-    } else if (this.phase === "settle" && this.phaseTime >= 0.65) {
-      this.turn++;
-      this.toolUsed=false;
-      this.nextPhase("player");
+    const active=this.enemies.find(a=>a.id===this.activeEnemyId);
+    if(this.phase==='enemy-tell' && this.phaseTime>=.7) {
+      if(!active || active.health<=0){this.startNextEnemy();return;}
+      this.nextPhase('enemy-move');
+    } else if(this.phase==='enemy-move' && this.phaseTime>=Math.min(1.5,this.enemyPlan?.moveSeconds??0)) {
+      if(!active || active.health<=0){this.startNextEnemy();return;}
+      const plan=planEnemyAction({actor:active.snapshot(),snapshot:this.snapshot(),terrain:this.terrain});
+      if(!plan){this.startNextEnemy();return;}
+      this.spawnProjectile('enemy',this.origin(active,plan.angleDeg),launchVelocity(plan.angleDeg,plan.power),active);
+      this.nextPhase('enemy-shot');
+    } else if(this.phase==='enemy-resolve' && this.phaseTime>=.3) {
+      this.startNextEnemy();
+    } else if(this.phase==='settle' && this.phaseTime>=.65) {
+      this.turn++;this.toolUsed=false;this.activeEnemyId=null;this.enemyPlan=null;
+      this.nextPhase('player');
     }
   }
   stepActor(actor, vx) {
@@ -244,21 +277,22 @@ class BattleSimulation {
       } else actor.body.setEnabled(false);
       if(actor===this.player) {this.direction=0;this.rope?.release();}
     }
-    const outcome=this.player.health<=0?'lost':this.enemies.every(a=>a.health<=0)?'won':null;
-    if(outcome && !this.outcome) {
-      this.outcome=outcome;this.nextPhase('finished');this.events.push({type:outcome});
-    }
+    this.finishResult();
   }
+
   impact(shot = this.projectile) {
     if(!shot || this.resolvedExplosions.has(shot.id))return;
     explode({id:shot.id,point:{x:shot.x,y:shot.y},radius:1.8,maxDamage:30,ownerId:shot.ownerId},this);
     this.projectiles=this.projectiles.filter(p=>p.id!==shot.id);
     this.projectile=this.projectiles[0]??null;
     if(shot.team==='player')this.boost=0;
-    const outcome=this.player.health<=0?'lost':this.enemies.every(a=>a.health<=0)?'won':null;
-    if(outcome){this.outcome=outcome;this.nextPhase('finished');this.events.push({type:outcome});}
-    else if(!this.projectiles.length)this.nextPhase(shot.team==='player'?'enemy-tell':'settle');
+    if(this.finishResult())return;
+    if(!this.projectiles.length) {
+      if(shot.team==='player')this.beginEnemyResponses();
+      else this.nextPhase('enemy-resolve');
+    }
   }
+
   trajectory() {
     if(this.disposed)return [];
     const origin=this.origin();
@@ -299,6 +333,7 @@ class BattleSimulation {
       inventory:structuredClone(this.inventory),
       selectedWeaponId:this.selectedWeaponId,
       toolUsed:this.toolUsed,
+      activeEnemyId:this.activeEnemyId,
       aim:{angleDeg:this.angle,power:this.power},
       outcome: this.outcome,
     };
