@@ -29,3 +29,15 @@ Data: 2026-09-09. Domena: **https://kurczoker.com/**. Gra: https://kurczoker.com
 - [ ] Powtórzyć interaktywny test na własnej domenie po udostępnieniu jej przez lokalny resolver przeglądarki Codexa.
 
 Konfiguracja własnej domeny jest aktywna. Powyższe ograniczenie dotyczy lokalnego testu przeglądarkowego; test HTTPS z publicznym DNS przeszedł.
+
+## Zgłoszenie NXDOMAIN — diagnoza 2026-09-09, 08:30 UTC
+
+- Użytkownik potwierdził, że `kurczakar.com` była literówką. Prawidłowa domena pozostaje `kurczoker.com`.
+- RDAP rejestru .com potwierdził rejestrację i delegację na `darl.ns.cloudflare.com` / `harlee.ns.cloudflare.com`; są zgodne z aktywną strefą Cloudflare.
+- Google i Cloudflare DNS over HTTPS oraz bezpośrednie `Resolve-DnsName -Type A -Server 8.8.8.8` / `-Server 1.1.1.1` zwracają poprawnie `104.21.35.27` i `172.67.212.72`.
+- Domyślny resolver tej maszyny zwracał dla A wyłącznie starszy SOA (serial `2413174027`, brak adresu), z malejącym TTL: 1247 → 1210 → 1147 sekund. Aktualna publiczna odpowiedź SOA przed dodaniem www miała serial `2414427698`. Zapytanie AAAA już zwracało adresy. To wskazuje na utrzymaną negatywną odpowiedź A w pamięci resolvera obsługującego połączenie.
+- `Clear-DnsClientCache` zakończyło się poprawnie, ale odpowiedź domyślnego resolvera pozostała stara. Nie zmieniano konfiguracji serwerów DNS w systemie. Pozostały TTL około 20 minut oznacza oczekiwane wygaśnięcie tej odpowiedzi około 10:50 czasu warszawskiego; nie jest gwarancją czasu odświeżenia wszystkich przeglądarek i sieci.
+- Osobny, potwierdzony brak: `www.kurczoker.com` zwracało NXDOMAIN w obu publicznych resolverach i nie miało rekordu ani powiązania Pages. Dodano je w Pages i utworzono proxied CNAME na `kurczoker-makeover.pages.dev` o 08:29:53 UTC. O 08:30:25 UTC oba publiczne resolvery zwracały już adresy; Pages miało weryfikację DNS active, aktywację całości/HTTPS jeszcze pending.
+- Wcześniejszy komunikat o gotowym wdrożeniu był zbyt szeroki: poprawny HTTPS i identyczny artefakt nie dowodzą dostępności przez domyślny resolver użytkownika. Ograniczenie to pozostaje jawne do pomyślnego zwykłego wejścia w przeglądarce.
+- Artefakt diagnozy: `.superpowers/makeover-qa/public-dns-diagnosis.json`; utworzenie www: `www-domain-created.json`.
+- Końcowa kontrola około 08:31 UTC: obie domeny mają `status=active`, `verification=active`, `validation=active`. `curl --resolve` na publiczny adres DNS dla `https://www.kurczoker.com/` zwrócił HTTP 200 z pełną weryfikacją certyfikatu. Zwykły curl nadal nie rozpoznawał nazwy przez domyślny resolver; nie zaliczono zwykłego wejścia jako działającego.
