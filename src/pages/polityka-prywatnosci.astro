@@ -1,89 +1,49 @@
 ---
-import UmamiAnalytics from "../components/UmamiAnalytics.astro";
-import "../styles/kurczoker-brand.css";
-const analyticsEnabled=typeof import.meta.env.PUBLIC_UMAMI_SCRIPT_URL==='string' && import.meta.env.PUBLIC_UMAMI_SCRIPT_URL.startsWith('https://') && typeof import.meta.env.PUBLIC_UMAMI_WEBSITE_ID==='string' && import.meta.env.PUBLIC_UMAMI_WEBSITE_ID.length>0;
+import { Content } from '../content/polityka-prywatnosci.md';
+import '../styles/kurczoker-brand.css';
 ---
-
 <!doctype html>
 <html lang="pl">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Polityka prywatności serwisu KURCZOKER, w tym informacje o bezciasteczkowej analityce Umami." />
+    <meta name="description" content="Prywatność w KURCZOKER: administrator, kontakt, lokalny zapis gry, Cloudflare, poczta Gmail i Twoje prawa." />
+    <link rel="canonical" href="https://kurczoker.com/polityka-prywatnosci/" />
     <title>Polityka prywatności — KURCZOKER</title>
-    <UmamiAnalytics />
   </head>
   <body>
+    <a class="skip-link" href="#polityka">Przejdź do treści polityki</a>
     <nav class="privacy-nav" aria-label="Nawigacja">
       <a href="/" class="privacy-nav__brand">KURCZOKER</a>
-      <div class="privacy-nav__links">
-        <a href="/">Strona główna</a>
-        <a href="/gra">Gra</a>
-      </div>
+      <div class="privacy-nav__links"><a href="/">Strona główna</a><a href="/gra/">Gra</a></div>
     </nav>
-
-    <main class="privacy-page">
-      <article class="privacy-document">
-        <p class="privacy-kicker">Ostatnia aktualizacja: 8 września 2026</p>
-        <h1>Polityka prywatności</h1>
-        <p class="privacy-lead">
-          KURCZOKER jest przeglądarkową grą, która nie wymaga zakładania konta,
-          logowania ani podawania danych osobowych. Sama rozgrywka działa lokalnie
-          w przeglądarce użytkownika.
-        </p>
-
-        <section>
-          <h2>Jakie dane przetwarzamy</h2>
-          <p>
-            Nie zbieramy danych podawanych w formularzach, bo serwis nie posiada
-            rejestracji, panelu użytkownika ani formularza kontaktowego. Możemy
-            przetwarzać standardowe dane techniczne niezbędne do wyświetlenia
-            strony, takie jak żądany adres URL, data i godzina połączenia oraz
-            informacje techniczne przekazywane przez przeglądarkę.
-          </p>
-        </section>
-
-        <section>
-          <h2>Analityka Umami</h2>
-          <p>
-            Analityka Umami jest opcjonalna. W tym wydaniu jest
-            <strong>{analyticsEnabled ? 'włączona' : 'wyłączona'}</strong>.
-            Gdy jest włączona, służy do podstawowych statystyk ruchu na stronie.
-          </p>
-          <p>
-            Umami działa bez plików cookie. Po włączeniu, według dokumentacji, narzędzie
-            zbiera anonimowe statystyki, takie jak liczba odsłon, adresu strony
-            odsyłającej lub referrer, typ przeglądarki, systemu operacyjnego,
-            typu urządzenia oraz kraju pochodzenia ruchu. Te informacje służą do
-            zrozumienia, które części serwisu są odwiedzane i czy strona działa
-            poprawnie na popularnych urządzeniach.
-          </p>
-          <p>
-            Więcej informacji o sposobie działania Umami znajduje się w oficjalnym
-            FAQ:
-            <a href="https://umami.is/docs/faq" rel="noopener noreferrer">https://umami.is/docs/faq</a>.
-          </p>
-        </section>
-
-        <section>
-          <h2>Pliki cookie i pamięć lokalna</h2>
-          <p>
-            Skrypt Umami używany na tej stronie nie zapisuje plików cookie. Wyprawa i poprzednia kopia zapisu są przechowywane lokalnie w IndexedDB (kurczoker-v2). Ustawienia głośności, grafiki, sterowania i wskazówek są zapisywane w localStorage. Postęp nie jest synchronizowany z innymi urządzeniami ani przesyłany na serwer gry. Wyczyszczenie danych witryny usuwa te informacje. Szybkie potyczki nie nadpisują wyprawy.
-          </p>
-        </section>
-
-        <section>
-          <h2>Zmiany polityki</h2>
-          <p>
-            Jeżeli zakres analityki lub sposób działania serwisu zmieni się w
-            przyszłości, ta polityka prywatności zostanie zaktualizowana.
-          </p>
-        </section>
-      </article>
-    </main>
+    <main id="polityka" class="privacy-page"><article class="privacy-document"><Content /></article></main>
+    <footer class="privacy-footer"><a href="/">Wróć na stronę gry</a><span>KURCZOKER · DELTA240MVT</span></footer>
   </body>
 </html>
-
 <style>
-.privacy-nav{display:flex;justify-content:space-between;gap:24px;padding:24px;max-width:1000px;margin:auto;border-bottom:1px solid #02030440}.privacy-nav__brand{font-size:24px;font-weight:900;text-decoration:none}.privacy-nav__links{display:flex;gap:20px}.privacy-kicker{font:12px 'IBM Plex Mono',monospace}.privacy-document code{overflow-wrap:anywhere;font-size:14px}.privacy-document a{overflow-wrap:anywhere}@media(max-width:560px){.privacy-nav{flex-direction:column}}
+  .privacy-nav,.privacy-footer{display:flex;justify-content:space-between;gap:24px;padding:24px;max-width:1000px;margin:auto;border-bottom:1px solid #02030440}
+  .privacy-nav__brand{font-size:24px;font-weight:900;text-decoration:none}.privacy-nav__links{display:flex;gap:20px;align-items:center}
+  .privacy-nav a,.privacy-footer a{display:inline-flex;align-items:center;min-height:44px}
+  .privacy-footer{border-bottom:0;border-top:1px solid #02030440;font-size:14px;align-items:center}
+  .privacy-document :global(code){overflow-wrap:anywhere;font-size:.86em}
+  .privacy-document :global(a){overflow-wrap:anywhere;text-decoration-thickness:1px;text-underline-offset:3px}
+  .privacy-document :global(h2){scroll-margin-top:24px}
+  .privacy-document :global(h3){font-size:21px;line-height:1.4;margin:28px 0 12px}
+  .privacy-document :global(ul){padding-left:24px;font-size:18px;line-height:1.8}
+  .privacy-document :global(li){margin:12px 0}
+  .privacy-document :global(table){width:100%;table-layout:fixed;border-collapse:collapse;margin:24px 0;font-size:15px;line-height:1.6}
+  .privacy-document :global(th),.privacy-document :global(td){border:1px solid #02030440;padding:12px;text-align:left;vertical-align:top;overflow-wrap:anywhere}
+  .privacy-document :global(th){background:var(--teal);font-weight:750}
+  @media(max-width:560px){
+    .privacy-nav,.privacy-footer{flex-direction:column;gap:12px}
+    .privacy-document :global(table),.privacy-document :global(tbody),.privacy-document :global(tr),.privacy-document :global(td){display:block;width:100%}
+    .privacy-document :global(thead){position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+    .privacy-document :global(tr){margin-bottom:20px;border:1px solid #02030440}
+    .privacy-document :global(td){border:0;padding:12px;font-size:16px}
+    .privacy-document :global(td:first-child){background:var(--teal);font-weight:700}
+    .privacy-document :global(td:nth-child(2)::before){content:'Zawartość i cel: ';font-weight:700}
+    .privacy-document :global(td:nth-child(3)::before){content:'Okres działania: ';font-weight:700}
+  }
+  @media print{.privacy-nav,.privacy-footer,.skip-link{display:none}.privacy-document{max-width:none;margin:0}.privacy-document :global(h1){font-size:28px}.privacy-document :global(p),.privacy-document :global(ul){font-size:11pt;line-height:1.5}}
 </style>

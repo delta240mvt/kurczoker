@@ -18,11 +18,10 @@ test("Umami analytics is optional and requires a configured HTTPS endpoint and w
   assert.match(analyticsComponent, /\bis:inline\b/);
 });
 
-test("public pages include the shared Umami analytics component", async () => {
+test("landing and game retain the optional analytics component", async () => {
   const pagePaths = [
     "src/pages/index.astro",
-    "src/pages/gra.astro",
-    "src/pages/polityka-prywatnosci.astro"
+    "src/pages/gra.astro"
   ];
 
   for (const pagePath of pagePaths) {
@@ -33,25 +32,16 @@ test("public pages include the shared Umami analytics component", async () => {
   }
 });
 
-test("privacy policy discloses Umami analytics data practices", async () => {
-  const privacyPolicy = await readFile("src/pages/polityka-prywatnosci.astro", "utf8");
-  const normalizedPolicy = withoutDiacritics(privacyPolicy);
-
-  assert.match(normalizedPolicy, /Umami/);
-  assert.match(normalizedPolicy, /bez plikow cookie/i);
-  assert.match(normalizedPolicy, /odslon/i);
-  assert.match(normalizedPolicy, /adresu strony odsylajacej|referrer/i);
-  assert.match(normalizedPolicy, /przegladark/i);
-  assert.match(normalizedPolicy, /systemu operacyjnego/i);
-  assert.match(normalizedPolicy, /typu urzadzenia/i);
-  assert.match(normalizedPolicy, /kraju/i);
-  assert.match(normalizedPolicy, /umami\.is\/docs\/faq/);
+test("privacy policy identifies the controller, actual providers and local save retention", async () => {
+  const policy = await readFile("src/content/polityka-prywatnosci.md", "utf8");
+  for (const value of ["Przemysław Filipiak", "Maków Polnych 12a", "61-606 Poznań", "hello@frinter.app", "12 miesięcy", "Cloudflare", "Gmail", "kurczoker-v2", "kurczoker.settings.v2", "kurczoker.help.v2", "Prezesa Urzędu Ochrony Danych Osobowych"]) assert.ok(policy.includes(value), value);
+  assert.doesNotMatch(policy, /\[(?:TBD|TODO|UZUPEŁNIJ)\]|CREATIVA LEGAL/);
 });
 
 test("landing footer links to the privacy policy route", async () => {
   const landingPage = await readFile("src/components/KurczokerLanding.astro", "utf8");
   const normalizedLanding = withoutDiacritics(landingPage);
 
-  assert.match(normalizedLanding, /href="\/polityka-prywatnosci"/);
-  assert.match(normalizedLanding, />Prywatnosc i zapis</);
+  assert.match(normalizedLanding, /href="\/polityka-prywatnosci\/"/);
+  assert.match(normalizedLanding, />Polityka prywatnosci</);
 });

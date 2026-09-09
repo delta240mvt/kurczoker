@@ -10,6 +10,7 @@ import {ResultPanel} from './ui/ResultPanel.jsx';
 import {listMaps} from './tactical/arena.js';
 import {normalizeSettings,readSettings,writeSettings} from './tactical/settings.js';
 import {GameDialog} from './ui/GameDialog.jsx';
+import {PrivacyLink} from './ui/PrivacyLink.jsx';
 import {SettingsPanel} from './ui/SettingsPanel.jsx';
 import {createAudioController,disposeAudio,pauseAudio,setVolumes} from '../game/audio.js';
 import '../styles/brand-game.css';
@@ -43,7 +44,7 @@ export function ExpeditionApp(){
    {game.scene==='battle'&&!request&&<p role="status">Przygotowujemy drugą szansę…</p>}
    <button className="brand-menu-link" onClick={menu}>Wróć do menu</button>
   </main>;
- }else content=<div className="brand-entry"><nav aria-label="Tryb gry"><button aria-pressed={page==='quick'} onClick={()=>setPage('quick')}>Szybka potyczka</button><button aria-pressed={page==='expedition'} onClick={()=>setPage('expedition')}>Wyprawa</button>{state.savedAvailable&&<button disabled={state.loadingSave} onClick={state.resume}>Wznów wyprawę</button>}<button onClick={()=>setSettingsOpen(true)}>Ustawienia</button><a href="/">Strona gry</a></nav>
+ }else content=<div className="brand-entry"><nav aria-label="Tryb gry"><button aria-pressed={page==='quick'} onClick={()=>setPage('quick')}>Szybka potyczka</button><button aria-pressed={page==='expedition'} onClick={()=>setPage('expedition')}>Wyprawa</button>{state.savedAvailable&&<button disabled={state.loadingSave} onClick={state.resume}>Wznów wyprawę</button>}<button onClick={()=>setSettingsOpen(true)}>Ustawienia</button><a href="/">Strona gry</a><PrivacyLink/></nav>
   {page==='quick'?<QuickSelect maps={listMaps()} selectedMapId={mapId} onSelect={setMapId} onStart={()=>state.startQuick(mapId,newSeed())}/>:<main className="brand-flow"><section className="brand-panel"><span className="brand-kicker">KURCZOKER / DELTA240MVT</span><h1>Piętnaście minut dla siebie.</h1><p>Trzy podwórza i Jajokról. Wybieraj trasę, zbieraj sprzęt i wróć z koroną. Grasz we własnym tempie.</p><button className="brand-primary" disabled={state.loadingSave} onClick={start}>Rozpocznij wyprawę</button>{legacy&&<p>Masz zapis starszej wersji. Zachowaliśmy go jako kopię; nowa gra zaczyna osobną wyprawę.</p>}</section></main>}
  </div>;
  return <>{content}{state.mode==='expedition'&&<div className={'brand-save-status'+(state.saveError?' is-error':'')} role={state.saveError?'alert':'status'}>{saveMessage}</div>}
