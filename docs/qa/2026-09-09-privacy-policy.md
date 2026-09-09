@@ -39,3 +39,10 @@ Zweryfikowane źródła:
 - Końcowy odbiór lokalnego buildu w przeglądarce Codexa: 360×800 oraz 1440×900, wszystkie 10 sekcji dostępne, brak poziomego overflow. Na telefonie tabela ma czytelne karty (16 px), na desktopie trzy kolumny. Odnośniki do obu domen używają HTTPS.
 - Kliknięcie linku w stopce prowadzi do polityki. Menu i pauza zawierają wspólny link z target="_blank" i rel="noopener noreferrer"; kliknięcie nie opuszcza gry, pauza pozostaje aktywna. Narzędzie Codexa nie pokazało nowej karty po kliknięciu target="_blank", więc otwarcia dodatkowej karty nie zaliczono jako potwierdzonego testu. Bezpośrednia nawigacja do celu działa. Na ekranie 360×800 link mieści się w panelu pauzy.
 - Konsola areny: brak błędów; istniejące ostrzeżenie Three.js o przestarzałym THREE.Clock. `git diff --check` bez błędów.
+
+## Publikacja i kontrola infrastruktury
+
+- Pierwsza wersja: commit `fa1fa19`, preview `034f3e19.kurczoker-makeover.pages.dev` — 64/64 pliki zgodne z buildem; produkcja `689d0836.kurczoker-makeover.pages.dev`.
+- Na domenie własnej test integralności wykrył zmianę HTML polityki: Cloudflare Email Address Obfuscation zastępowało adresy e-mail i dodawało `email-decode.min.js`. To rzeczywiście aktywna funkcja strefy; nie jest analityką. Pozostałe ustawienia ochrony/Zaraz nadal nie są w pełni zweryfikowane.
+- Dodano `Cache-Control: no-transform` wyłącznie dla polityki, aby publiczny kontakt był dostępny także bez JavaScript i treść dostarczana pozostawała zgodna z przetestowanym dokumentem. [Dokumentacja Cloudflare](https://developers.cloudflare.com/waf/tools/scrape-shield/email-address-obfuscation/) potwierdza respektowanie tego nagłówka. Nie zmieniano globalnych ustawień strefy.
+- Wznowienie po sprawdzeniu pauzy zachowuje turę 1 oraz 100/100 HP. Zwykły systemowy DNS poprawnie rozwiązuje domenę; nie jest już potrzebne obejście wcześniejszego negatywnego cache.
