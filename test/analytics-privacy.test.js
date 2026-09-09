@@ -40,7 +40,8 @@ test("privacy policy identifies the controller, actual providers and local save 
 
 test("landing footer links to the privacy policy route", async () => {
   const landingPage = await readFile("src/components/KurczokerLanding.astro", "utf8");
-  const normalizedLanding = withoutDiacritics(landingPage);
+  assert.match(landingPage, /<SiteFooter\s*\/>/);
+  const normalizedLanding = withoutDiacritics(await readFile("src/components/SiteFooter.astro", "utf8"));
 
   assert.match(normalizedLanding, /href="\/polityka-prywatnosci\/"/);
   assert.match(normalizedLanding, />Polityka prywatnosci</);

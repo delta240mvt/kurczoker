@@ -1,6 +1,7 @@
 ---
 import { Content } from '../content/polityka-prywatnosci.md';
 import '../styles/kurczoker-brand.css';
+import SiteFooter from '../components/SiteFooter.astro';
 ---
 <!doctype html>
 <html lang="pl">
@@ -18,7 +19,7 @@ import '../styles/kurczoker-brand.css';
       <div class="privacy-nav__links"><a href="/">Strona główna</a><a href="/gra/">Gra</a></div>
     </nav>
     <main id="polityka" class="privacy-page"><article class="privacy-document"><Content /></article></main>
-    <footer class="privacy-footer"><a href="/">Wróć na stronę gry</a><span>KURCZOKER · DELTA240MVT</span></footer>
+    <SiteFooter />
   </body>
 </html>
 <style>

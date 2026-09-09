@@ -1,6 +1,7 @@
 ---
 import {listMaps} from '../engine/tactical/arena.js';
 import manifest from '../engine/tactical/releaseManifest.json';
+import SiteFooter from './SiteFooter.astro';
 const maps=listMaps(),poster=manifest.assets.find(a=>a.id==='demo-poster'),demo=manifest.assets.find(a=>a.id==='demo');
 const colors={1:'#9672BF',2:'#D9A348',3:'#486361'};
 ---
@@ -18,7 +19,7 @@ const colors={1:'#9672BF',2:'#D9A348',3:'#486361'};
  <section class="faq-section wrap"><div><p class="eyebrow">ZANIM RZUCISZ JAJKIEM</p><h2>Kilka prostych<br/>odpowiedzi.</h2></div><div class="faq-list"><details><summary>Czy gra jest bezpłatna?</summary><p>Tak. Grasz bez konta, płatności i instalowania aplikacji.</p></details><details><summary>Czy zagram na telefonie w pionie?</summary><p>Tak. Walka zajmuje ekran, a sterowanie działa dotykiem w pionie i poziomie. W ustawieniach powiększysz przyciski i włączysz układ leworęczny. Przeglądarka musi obsługiwać WebGL.</p></details><details><summary>Czy muszę się spieszyć?</summary><p>Nie ma zegara decyzji. W swojej turze możesz chodzić, skakać i korzystać z liny. Atak kończy twój ruch. Wyprawa jest pomyślana jako przerwa na 10–15 minut; dokładny czas zależy od twojego tempa.</p></details><details><summary>Co zostaje po zamknięciu gry?</summary><p>Wyprawa zapisuje się w tej przeglądarce, na tym urządzeniu. Przed zamknięciem włącz pauzę i poczekaj na komunikat o zapisanym postępie. Szybka potyczka zaczyna się od nowa. Wyczyszczenie danych witryny usuwa zapis.</p></details><details><summary>Jak działają lasso i narzędzia?</summary><p>Wybierz Lasso, znajdź zaczep i dotknij terenu. Zwijaj lub wydłużaj linę, rozhuśtaj kurczaka i puść w dobrym momencie. Kilof i wiertło mają ograniczony zapas: jedno użycie narzędzia na turę, a potem nadal możesz zaatakować.</p></details><details><summary>Czy mogę wyłączyć dźwięk i efekty?</summary><p>Tak. W ustawieniach osobno zmienisz muzykę i efekty, wyłączysz wstrząsy kamery oraz ograniczysz ruch. Głośność można ustawić na zero.</p></details></div></section>
  <section class="last-call wrap"><h2>No to co?<br/><span>Mała rozróba?</span></h2><div class="landing-actions"><a class="action primary" href="/gra?mode=quick">Szybka potyczka</a><a class="action" href="/gra?mode=expedition">Wyprawa · 10–15 min</a></div></section>
 </main>
-<footer class="landing-footer wrap"><a class="wordmark" href="https://delta240mvt.com">DELTA240MVT</a><span>KURCZOKER · 2026</span><a href="/polityka-prywatnosci/">Polityka prywatności</a></footer>
+<SiteFooter />
 <script>
  import {createSaveStorage} from '../engine/tactical/saveStorage.js';
  import {decodeCheckpoint} from '../engine/tactical/checkpoint.js';
