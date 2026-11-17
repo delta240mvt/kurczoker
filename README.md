@@ -56,3 +56,7 @@ Opcjonalna analityka Umami wymaga `PUBLIC_UMAMI_SCRIPT_URL` (HTTPS) i `PUBLIC_UM
 Testy Playwright zapisują obrazy i pomiary do `.superpowers/makeover-qa/`. Emulacja telefonu potwierdza interfejs i dotyk; pomiary Chromium ze SwiftShader nie są wynikiem fizycznego telefonu ani dedykowanego GPU.
 
 Pomiar sprzętowego Direct3D11 na Windows: `node test/visual/profile.mjs`. Licencja projektu: [MIT](LICENSE).
+
+## Autor
+
+Projekt zbudowałem ja, Przemysław Filipiak. Historię projektu, decyzje i wnioski opisuję na moim portalu: [KURCZOKER w portfolio delta240mvt](https://delta240mvt.com/portfolio/kurczoker/). Na [delta240mvt.com](https://delta240mvt.com/) piszę dla twórców AI: testy narzędzi i modeli, poradniki do Claude Code, Codexa i modeli lokalnych oraz codzienne AI News.
